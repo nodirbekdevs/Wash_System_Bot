@@ -1,2 +1,2 @@
 # Wash_System_Bot
-Telegram bot washers for automating
+Telegram bot for car washers to automating
