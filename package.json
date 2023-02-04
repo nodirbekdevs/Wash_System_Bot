@@ -21,6 +21,7 @@
     "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
+    "moment-interval": "^0.2.1",
     "mongoose": "^6.8.3",
     "node-geocoder": "^4.2.0",
     "node-telegram-bot-api": "^0.61.0",

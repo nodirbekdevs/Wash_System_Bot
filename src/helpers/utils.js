@@ -1,4 +1,7 @@
 const kb = require('./keyboard-buttons')
+const {getEmployee} = require('./../controllers/employeeController')
+const moment = require('moment')
+const moment_interval = require('moment-interval')
 
 // const getNumDayOfWeek = (date) => {
 //   const day = date.getDay();
@@ -120,11 +123,17 @@ const kb = require('./keyboard-buttons')
 //   return time_buttons
 // }
 //
+
 const branch_manager_keyboard = (data, lang) => {
-  let kbb = [], arr = []
+  let kbb = [], arr = [], text
 
   for (let i = 0; i < data.length; i++) {
-    const item = data[i], obj = {text: item.name}
+    const item = data[i]
+
+    text = item.name ? item.name : item.type
+
+    const obj = {text}
+
     arr.push(obj)
 
     if (arr.length % 2 === 0) {
@@ -133,8 +142,10 @@ const branch_manager_keyboard = (data, lang) => {
     }
   }
 
+  text = data[data.length - 1].name ? data[data.length - 1].name : data[data.length - 1].type
+
   if (data.length % 2 === 1) {
-    kbb.push([{text: data[data.length - 1].name}])
+    kbb.push([{text}])
   }
 
   if (lang === kb.language.uz) kbb.push([kb.options.back.uz])
@@ -143,8 +154,15 @@ const branch_manager_keyboard = (data, lang) => {
   return kbb
 }
 
-const information_feedback = (data, lang) => {
+const car_type = (data, lang) => {
 
+}
+
+const date = (day) => {
+  const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(), minutes = day.getMinutes(),
+    given_date = `${year}-${month}-${date}. ${hour}:${minutes}`
+
+  return given_date
 }
 //
 // const order_edit_keyboard = async (data, lang) => {
@@ -307,6 +325,55 @@ const bio = (data, kw, lang) => {
     }
   }
 
+  if (kw === "WASH") {
+    if (lang === kb.language.uz) {
+      message += `Xodim - ${data.employee}\n`
+      message += `Filial - ${data.branch}\n`
+      message += `Mashina - ${data.car}\n`
+      message += `Mashina raqami - ${data.car_number}\n`
+      message += `Narxi - ${data.price}\n`
+      message += `Kassa - ${data.cash}\n`
+      message += `Sof foyda - ${data.benefit}\n`
+      message += `Boshlangan vaqt - ${data.washing_time_started}\n`
+      message += `Tugallangan vaqt - ${data.washing_time_ended}`
+    } else if (lang === kb.language.ru) {
+      message += `Сотрудник - ${data.employee}\n`
+      message += `Филиал - ${data.branch}\n`
+      message += `Автомобиль - ${data.car}\n`
+      message += `Номер автомобиля - ${data.car_number}\n`
+      message += `Цена - ${data.price}\n`
+      message += `Касса - ${data.cash}\n`
+      message += `Чистый доход - ${data.benefit}\n`
+      message += `Время начала - ${data.washing_time_started}\n`
+      message += `Законченное время - ${data.washing_time_ended}`
+    }
+  }
+
+  if (kw === 'WASH_MAKING') {
+    if (lang === kb.language.uz) {
+      message += `Menejer - ${data.manager}\n`
+      message += `Xodim - ${data.employee}\n`
+      message += `Filial - ${data.branch}\n`
+      message += `Mashina turi - ${data.car_type}\n`
+      message += `Mashina - ${data.car}\n`
+      message += `Mashina raqami - ${data.car_number}\n`
+      message += `Narxi - ${data.price}\n`
+      message += `Kassa - ${data.cash}\n`
+      message += `Sof foyda - ${data.benefit}\n`
+      message += `Boshlangan vaqt - ${data.started_at}\n`
+    } else if (lang === kb.language.ru) {
+      message += `Менеджер - ${data.manager}\n`
+      message += `Сотрудник - ${data.employee}\n`
+      message += `Филиал - ${data.branch}\n`
+      message += `Тип автомобиля - ${data.car_type}\n`
+      message += `Автомобиль - ${data.car}\n`
+      message += `Номер автомобиля - ${data.car_number}\n`
+      message += `Цена - ${data.price}\n`
+      message += `Касса - ${data.cash}\n`
+      message += `Чистый доход - ${data.benefit}\n`
+      message += `Время начала - ${data.started_at}\n`
+    }
+  }
 
 
   // else if (kw === 'EMPLOYEE') {
@@ -761,7 +828,46 @@ const bio = (data, kw, lang) => {
 //   }
 // }
 
+const pagination = async (page, limit, washes, lang) => {
+  let offset = limit * (page - 1), text
+
+  text = (lang === kb.language.uz)
+    ? `<b>Hozirgi: ${offset + 1}-${washes.length + offset}, Jami:${washes.length}</b>\n\n`
+    : `<b>Текущий: ${offset + 1}-${washes.length + offset}, Общий:${washes.length}</b>\n\n`
+
+  let kbb = [], arr = []
+
+  for (let i = 0; i < washes.length; i++) {
+    const wash = washes[i], employee = await getEmployee({telegram_id: wash.employee})
+
+    const obj = (wash.status === 'washed')
+      ? {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'washed', id: wash._id})}
+      : {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'washing', id: wash._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 5 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+
+    text += `<b>${i + 1}.</b> ${employee.name} - ${wash.car} - ${wash.car_number}\n`
+  }
+
+  kbb.push(arr)
+
+  const inline_keyboard = [
+    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#wash#${page - 1}` : 'none', id: ''})},
+    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+    {text: ` ➡️`, callback_data: JSON.stringify({phrase: washes.length + offset !== washes.length ? `right#wash#${page + 1}` : 'none', id: ''})}
+  ]
+
+  kbb.push(inline_keyboard)
+
+  return {text, kbb}
+}
+
 module.exports = {
   branch_manager_keyboard,
-  bio
+  bio, date, pagination
 }

@@ -116,16 +116,16 @@ const managerSettings = async (bot, manager, text, lang) => {
 
       if (text === kb.manager.settings.uz.language || text === kb.manager.settings.ru.language) await mss5(bot, manager.telegram_id, lang)
       type = text
-    } else if (owner.step === 7) {
-      if (text === kb.owner.settings.uz.name || text === kb.owner.settings.ru.name) await osst2(bot, owner.telegram_id, text, lang)
+    } else if (manager.step === 7) {
+      if (text === kb.manager.settings.uz.name || text === kb.manager.settings.ru.name) await mss2(bot, manager.telegram_id, text, lang)
 
-      if (text === kb.owner.settings.uz.number || text === kb.owner.settings.ru.number) await osst4(bot, owner.telegram_id, text, lang)
+      if (text === kb.manager.settings.uz.number || text === kb.manager.settings.ru.number) await mss4(bot, manager.telegram_id, text, lang)
 
-      if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await osst6(bot, owner.telegram_id, text, lang)
+      if (text === kb.manager.settings.uz.language || text === kb.manager.settings.ru.language) await mss6(bot, manager.telegram_id, text, lang)
     }
   } catch (e) {
     console.log(e)
   }
 }
 
-module.exports = {ownerSettings}
+module.exports = {managerSettings}

@@ -105,7 +105,7 @@ const osst6 = async (bot, chat_id, text, lang) => {
 
 const ownerSettings = async (bot, owner, text, lang) => {
   try {
-    if (text === kb.admin.pages.settings) await osst0(bot, owner, lang)
+    if (text === kb.owner.pages.uz.settings || text === kb.owner.pages.ru.settings) await osst0(bot, owner, lang)
 
     if (owner.step === 6 && text === kb.main.uz) await updateOwner({telegram_id: owner.telegram_id}, {step: 5})
 

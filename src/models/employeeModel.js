@@ -4,7 +4,7 @@ const {v4} = require('uuid')
 const Employee = model('Employee', new Schema({
   _id: {type: String, default: v4},
   telegram_id: {type: Number, unique: true},
-  manager: {type: String, ref: 'Manager', required: true},
+  manager: {type: Number, ref: 'Manager', required: true},
   branch: {type: String, ref: 'Branch', default: ''},
   name: {type: String, default: ''},
   username: {type: String, default: ''},

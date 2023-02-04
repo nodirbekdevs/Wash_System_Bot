@@ -164,11 +164,13 @@ module.exports = {
     washes: {
       uz: {
         add: "Yangi mashina yuvish",
-        today: "Bugun yuvilgan mashinalar"
+        today: "Bugun yuvilgan mashinalar",
+        washing: 'Yuvishlarni tugatish'
       },
       ru: {
         add: "Новая автомойка",
-        today: "Сегодняшние автомойки"
+        today: "Сегодняшние автомойки",
+        washing: "Завершить мойку автомобиля"
       }
     },
 
@@ -278,6 +280,11 @@ module.exports = {
     skipping: {
       uz: "O'tkazib yuborish",
       ru: "Пропустить"
+    },
+
+    washed: {
+      uz: "Mashina yuvildi",
+      ru: "Автомобиль был вымыт"
     },
 
     owner: {
