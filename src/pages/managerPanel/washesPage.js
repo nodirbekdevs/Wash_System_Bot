@@ -345,7 +345,6 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
     await bot.sendMessage(chat_id, message)
   }
 
-
   const washes = await getWashes({
     manager: manager.telegram_id, branch: manager.branch, status: 'washing',
     created_at: {
@@ -359,8 +358,6 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
   await bot.editMessageText(report.text, {
     chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
   })
-
-
 }
 
 const managerWashes = async (bot, chat_id, message_id, text, lang) => {

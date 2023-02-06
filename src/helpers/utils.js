@@ -399,6 +399,33 @@ const bio = (data, kw, lang) => {
     }
   }
 
+  if (kw === 'CAR') {
+    if (lang === kb.language.uz) {
+      message += `Xo'jayin - ${data.owner}\n`
+      message += `Menejer - ${data.manager}\n`
+      message += `Filial - ${data.branch}\n`
+      message += `Turi - ${data.type}\n`
+      message += `Tavsifi - ${data.description}\n`
+      message += `Mashinalar - \n`
+      for (let i = 0; i < data.cars.length; i++) message += `${i + 1}. ${data.cars[i]}\n`
+      message += `Yuvish kassasi - ${data.cash}\n`
+      message += `Yuvish narxi - ${data.price}\n`
+      message += `Yuvish foydasi - ${data.price - data.cash}\n`
+      message += `Ish boshlagan vaqti - ${data.created_at}\n`
+    } else if (lang === kb.language.ru) {
+      message += `Босс - ${data.owner}\n`
+      message += `Менеджер - ${data.manager}\n`
+      message += `Филиал - ${data.branch}\n`
+      message += `Тип - ${data.type}\n`
+      message += `Описание - ${data.description}\n`
+      message += `Автомобили - \n`
+      for (let i = 0; i < data.cars.length; i++) message += `${i + 1}. ${data.cars[i]}\n`
+      message += `Yuvish kassasi - ${data.cash}\n`
+      message += `Цена автомойки - ${data.price}\n`
+      message += `Чистая прибыль от автомойки - ${data.price - data.cash}\n`
+      message += `Время начать работу - ${data.created_at}\n`
+    }
+  }
 
   // else if (kw === 'EMPLOYEE') {
   //   message += `Ma'lumotlaringiz: \n`
@@ -934,6 +961,43 @@ const employee_pagination = async (page, limit, employees, lang) => {
   return {text, kbb}
 }
 
+const car_pagination = (page, limit, cars, lang) => {
+  let offset = limit * (page - 1), text, clause
+
+  text = (lang === kb.language.uz)
+    ? `<b>Hozirgi: ${offset + 1}-${cars.length + offset}, Jami:${cars.length}</b>\n\n`
+    : `<b>Текущий: ${offset + 1}-${cars.length + offset}, Общий:${cars.length}</b>\n\n`
+
+  let kbb = [], arr = []
+
+  for (let i = 0; i < cars.length; i++) {
+    const car = cars[i]
+
+    const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'car', id: car._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 3 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+
+    text += `<b>${i + 1}.</b> ${car.branch} - ${car.type} \n`
+  }
+
+  kbb.push(arr)
+
+  const inline_keyboard = [
+    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#car#${page - 1}` : 'none', id: ''})},
+    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+    {text: ` ➡️`, callback_data: JSON.stringify({phrase: car.length + offset !== car.length ? `right#employee#${page + 1}` : 'none', id: ''})}
+  ]
+
+  kbb.push(inline_keyboard)
+
+  return {text, kbb}
+}
+
 const employee_attendance = (employees, lang) => {
   let kbb = [], arr = []
 
@@ -960,6 +1024,6 @@ const employee_attendance = (employees, lang) => {
 }
 
 module.exports = {
-  branch_manager_keyboard, employee_attendance,
+  branch_manager_keyboard, employee_attendance, car_pagination,
   bio, date, pagination, employee_pagination
 }
