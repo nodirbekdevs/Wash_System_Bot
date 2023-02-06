@@ -237,7 +237,7 @@ module.exports = {
 
     washes: {
       uz: {
-        
+
       },
       ru: {}
     },
@@ -295,6 +295,18 @@ module.exports = {
     dismissal: {
       uz: "Bo'shatish",
       ru: "Увольнять"
+    },
+
+    feedback: {
+      uz: {
+        good: "Yaxshi 👍",
+        bad: "Yomon 👎"
+      },
+
+      ru: {
+        good: "Отлично 👍",
+        bad: "Плохо 👎"
+      }
     },
 
     owner: {
@@ -399,17 +411,7 @@ module.exports = {
       }
     },
 
-    feedback: {
-      uz: {
-        good: "Yaxshi 👍",
-        bad: "Yomon 👎"
-      },
 
-      ru: {
-        good: "Отлично 👍",
-        bad: "Плохо 👎"
-      }
-    },
 
     situation: {
       uz: {

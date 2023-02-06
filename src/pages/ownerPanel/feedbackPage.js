@@ -149,7 +149,7 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
 
   if (text === 'done') {
     if (feedback.status === 'seen') {
-      await updateFeedback({_id: feedback._id}, {status: 'seen'})
+      await updateFeedback({_id: feedback._id}, {status: 'done'})
 
       message = bio(data, 'FEEDBACK_DONE', author.lang)
     }
