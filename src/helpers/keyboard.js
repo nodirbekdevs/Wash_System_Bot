@@ -144,22 +144,26 @@ module.exports = {
 
     washes: {
       uz: [
-        [kb.manager.washes.uz.today, kb.manager.washes.uz.add],
+        [kb.manager.washes.uz.today, kb.manager.washes.uz.washing],
+        [kb.manager.washes.uz.add],
         [kb.main.uz]
       ],
       ru: [
-        [kb.manager.washes.ru.today, kb.manager.washes.ru.add],
+        [kb.manager.washes.ru.today, kb.manager.washes.ru.washing],
+        [kb.manager.washes.ru.add],
         [kb.main.ru]
       ]
     },
 
     employees: {
       uz: [
-        [kb.manager.employees.uz.all, kb.manager.employees.uz.add],
+        [kb.manager.employees.uz.all, kb.manager.employees.uz.attendance],
+        [kb.manager.employees.uz.add],
         [kb.main.uz]
       ],
       ru: [
-        [kb.manager.employees.ru.all, kb.manager.employees.ru.add],
+        [kb.manager.employees.ru.all, kb.manager.employees.ru.attendance],
+        [kb.manager.employees.ru.add],
         [kb.main.ru]
       ]
     },

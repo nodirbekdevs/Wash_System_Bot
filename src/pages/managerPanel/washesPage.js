@@ -7,6 +7,7 @@ const {getCars, getCar} = require('./../../controllers/carController')
 const {getClient} = require('./../../controllers/clientController')
 const {getBranch} = require('./../../controllers/branchController')
 const {bio, pagination, branch_manager_keyboard, date} = require('./../../helpers/utils')
+const {mmp} = require('./mainPage')
 
 let wash_id
 
@@ -110,7 +111,7 @@ const mws3 = async (bot, chat_id, query_id, message_id, data, lang) => {
   if (data === 'delete') {
     await bot.deleteMessage(chat_id, message_id)
 
-    await mws0(bot, chat_id, lang)
+    await mmp(bot, chat_id, lang)
   }
 }
 
@@ -302,14 +303,14 @@ const mws11 = async (bot, chat_id, message_id, data, _id, lang) => {
     reply_markup: {
       inline_keyboard: [
         [{text: clause, callback_data: JSON.stringify({phrase: "washed", id: wash._id})}],
-        [{text: back, callback_data: JSON.stringify({phrase: "back", id: ''})}],
+        [{text: back, callback_data: JSON.stringify({phrase: "w_back", id: ''})}],
       ]
     }
   })
 }
 
 const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
-  let client
+  let client, message
 
   const manager = await getManager({telegram_id: chat_id}), wash = await getWash({_id}),
     employee = await getEmployee({name: wash.employee}),
@@ -326,6 +327,7 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
     await wash.save()
 
     employee.total_washes += 1
+    employee.is_idler = false
     await employee.save()
 
     branch.total_washes += 1
@@ -335,11 +337,14 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
       client.total_washes += 1
       await client.save()
     }
+
+    message = (lang === kb.language.uz)
+      ? `${employee.name} - ${wash.car} - ${wash.car_type} - ${wash.car_number}. Mashinani yuvish yakunlandi`
+      : `${employee.name} - ${wash.car} - ${wash.car_type} - ${wash.car_number}. Автомойка завершена`
+
+    await bot.sendMessage(chat_id, message)
   }
 
-  const message = (lang === kb.language.uz)
-    ? `${employee.name} - ${wash.car} - ${wash.car_type} - ${wash.car_number}. Mashinani yuvish yakunlandi`
-    : `${employee.name} - ${wash.car} - ${wash.car_type} - ${wash.car_number}. Автомойка завершена`
 
   const washes = await getWashes({
     manager: manager.telegram_id, branch: manager.branch, status: 'washing',
@@ -351,8 +356,6 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
 
   const report = await pagination(1, 10, washes, lang)
 
-  await bot.sendMessage(chat_id, message)
-
   await bot.editMessageText(report.text, {
     chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
   })
@@ -363,7 +366,7 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
 const managerWashes = async (bot, chat_id, message_id, text, lang) => {
   const manager = await getManager({telegram_id: chat_id})
 
-  const wash = await getWash({_id: wash_id, manager: manager._id, branch: manager.branch, status: 'process'})
+  const wash = await getWash({_id: wash_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
     ? await getWash({_id: wash_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
     : (await getWashes({manager: manager.telegram_id, branch: manager.branch, status: 'process'}))[0]
 

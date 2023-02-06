@@ -375,6 +375,30 @@ const bio = (data, kw, lang) => {
     }
   }
 
+  if (kw === 'EMPLOYEE') {
+    if (lang === kb.language.uz) {
+      message += `Menejer - ${data.manager}\n`
+      message += `Filial - ${data.branch}\n`
+      message += `Ismi - ${data.name}\n`
+      message += `Telefon raqami - ${data.number}\n`
+      message += `Yuvgan avtomobillari - ${data.total_washes}\n`
+      message += `Vaziyati - ${data.is_idler ? 'Ishlayapti' : 'Ishlamayapti'}\n`
+      message += `Tanlaan tili - ${data.lang}\n`
+      message += `Holati - ${data.status}\n`
+      message += `Ish boshlagan vaqti - ${data.created_at}\n`
+    } else if (lang === kb.language.ru) {
+      message += `Менеджер - ${data.manager}\n`
+      message += `Филиал - ${data.branch}\n`
+      message += `Имя - ${data.name}\n`
+      message += `Номер телефона - ${data.number}\n`
+      message += `Мытые автомобили - ${data.total_washes}\n`
+      message += `Ситуация - ${data.is_idler ? 'Ishlayapti' : 'Ishlamayapti'}\n`
+      message += `Выбранный язык - ${data.lang}\n`
+      message += `Статус - ${data.status}\n`
+      message += `Время начать работу - ${data.created_at}\n`
+    }
+  }
+
 
   // else if (kw === 'EMPLOYEE') {
   //   message += `Ma'lumotlaringiz: \n`
@@ -867,7 +891,75 @@ const pagination = async (page, limit, washes, lang) => {
   return {text, kbb}
 }
 
+const employee_pagination = async (page, limit, employees, lang) => {
+  let offset = limit * (page - 1), text, clause
+
+  text = (lang === kb.language.uz)
+    ? `<b>Hozirgi: ${offset + 1}-${employees.length + offset}, Jami:${employees.length}</b>\n\n`
+    : `<b>Текущий: ${offset + 1}-${employees.length + offset}, Общий:${employees.length}</b>\n\n`
+
+  let kbb = [], arr = []
+
+  for (let i = 0; i < employees.length; i++) {
+    const employee = employees[i]
+
+    const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'employee', id: employee._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 5 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+
+    if (employees.is_idler) {
+      clause = (lang === kb.language.uz) ? "Ishlayapti" : "Работает"
+    } else if (!employee.is_idler) {
+      clause = (lang === kb.language.uz) ? "Ishlamayapti" : "Не работает"
+    }
+
+    text += `<b>${i + 1}.</b> ${employee.name} - ${employee.number} - ${employee.total_washes} - ${clause}\n`
+  }
+
+  kbb.push(arr)
+
+  const inline_keyboard = [
+    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#employee#${page - 1}` : 'none', id: ''})},
+    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+    {text: ` ➡️`, callback_data: JSON.stringify({phrase: employees.length + offset !== employees.length ? `right#employee#${page + 1}` : 'none', id: ''})}
+  ]
+
+  kbb.push(inline_keyboard)
+
+  return {text, kbb}
+}
+
+const employee_attendance = (employees, lang) => {
+  let kbb = [], arr = []
+
+  const text = (lang === kb.language.uz)
+    ? `<b>Jami: ${employees.length} ta ishchi mavjud.</b>`
+    : `<b>Всего: ${employees.length} сотрудника.</b>`
+
+  for (let i = 0; i < employees.length; i++) {
+    const employee = employees[i], flag = employee.status === 'active' ? '✅' : '➖'
+
+    const obj = {text: `${flag} ${employee.name}`, callback_data: JSON.stringify({phrase: 'e_edit', id: employee._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 2 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+  }
+
+  kbb.push([{text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})}])
+
+  return {kbb, text}
+}
+
 module.exports = {
-  branch_manager_keyboard,
-  bio, date, pagination
+  branch_manager_keyboard, employee_attendance,
+  bio, date, pagination, employee_pagination
 }

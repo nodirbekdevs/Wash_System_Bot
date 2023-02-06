@@ -15,7 +15,8 @@ const Employee = model('Employee', new Schema({
   is_idler: {type: Boolean, default: false},
   lang: {type: String, default: ''},
   step: {type: Number, default: 0},
-  status: {type: String, enum: ['process', 'inactive', 'active'], default: 'process'},
+  status: {type: String, enum: ['process', 'inactive', 'active', 'unemployed'], default: 'process'},
+  dismissal_at: {type: Date},
   created_at: {type: Date, default: Date.now}
 }))
 

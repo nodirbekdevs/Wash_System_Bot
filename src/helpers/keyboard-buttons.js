@@ -177,11 +177,13 @@ module.exports = {
     employees: {
       uz: {
         all: "Barcha xodimlar",
-        add: "Xodim qo'shish"
+        add: "Xodim qo'shish",
+        attendance: "Davomat"
       },
       ru: {
         all: "Все работники",
-        add: "Добавить сотрудника"
+        add: "Добавить сотрудника",
+        attendance: "Посещаемость"
       }
     },
 
@@ -285,6 +287,11 @@ module.exports = {
     washed: {
       uz: "Mashina yuvildi",
       ru: "Автомобиль был вымыт"
+    },
+
+    dismissal: {
+      uz: "Bo'shatish",
+      ru: "Увольнять"
     },
 
     owner: {
