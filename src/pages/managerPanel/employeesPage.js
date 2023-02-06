@@ -315,7 +315,7 @@ const mes11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   })
 }
 
-const managerEmployee = async (bot, chat_id, message_id, text, lang) => {
+const managerEmployee = async (bot, chat_id, text, lang) => {
   const manager = await getManager({telegram_id: chat_id})
 
   const employee = await getEmployee({_id: employee_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})

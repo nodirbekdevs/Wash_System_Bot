@@ -73,9 +73,9 @@ const mcs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   }
 }
 
-const managerCars = async (bot, chat_id, message_id, text, lang) => {
+const managerCars = async (bot, chat_id, text, lang) => {
   if (text === kb.manager.pages.uz.washes || text === kb.manager.pages.ru.washes) await mcs0(bot, chat_id, lang)
-  if (text === kb.manager.cars.uz.all || text === kb.manager.cars.ru.all) await mcs1(bot, chat_id, message_id, lang)
+  if (text === kb.manager.cars.uz.all || text === kb.manager.cars.ru.all) await mcs1(bot, chat_id, lang)
 }
 
 module.exports = {managerCars, mcs2}

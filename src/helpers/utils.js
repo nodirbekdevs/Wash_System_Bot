@@ -265,6 +265,33 @@ const bio = (data, kw, lang) => {
     }
   }
 
+  if (kw === 'MANAGER_BRANCH') {
+    if (lang === kb.language.uz) {
+      message += "Filial ma'lumotlari: \n"
+      message += `Xo'jayin: ${data.owner}\n`
+      message += `Menejer: ${data.manager}\n`
+      message += `Nomi - ${data.name} \n`
+      message += `Manzili - ${data.location} \n`
+      message += `Barcha xodimlar - ${data.total_employees} \n`
+      message += `Barcha yuvishlar - ${data.total_washes} \n`
+      message += `Ish boshlagan vaqt - ${data.created_at} \n`
+    } else if (lang === kb.language.ru) {
+      message += `Босс: ${data.owner}\n`
+      message += `Менеджер: ${data.manager}\n`
+      message += `Название - ${data.name} \n`
+      message += `Адрес - ${data.location} \n`
+      message += `Все сотрудники - ${data.total_employees} \n`
+      message += `Все мойки - ${data.total_washes} \n`
+      message += `Время начала - ${data.created_at} \n`
+
+
+      message += "Информация о филиале: \n"
+      message += `Название - ${data.name} \n`
+      message += `Менеджер - ${data.manager} \n`
+      message += `Адрес - ${data.location.name} \n`
+    }
+  }
+
   if (kw === 'FEEDBACK_ALL') {
     if (lang === kb.language.uz) {
       message += `Umumiy izohlar soni - ${data.number}\n`

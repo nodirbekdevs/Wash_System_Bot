@@ -25,7 +25,7 @@ const mws0 = async (bot, chat_id, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const mws1 = async (bot, chat_id, message_id, lang) => {
+const mws1 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     washes = await getWashes({
       manager: manager.telegram_id,
@@ -41,7 +41,6 @@ const mws1 = async (bot, chat_id, message_id, lang) => {
 
   await bot.sendMessage(chat_id, report.text, {
     parse_mode: 'HTML',
-    reply_to_message_id: message_id,
     reply_markup: {inline_keyboard: report.kbb}
   })
 }
@@ -360,7 +359,7 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
   })
 }
 
-const managerWashes = async (bot, chat_id, message_id, text, lang) => {
+const managerWashes = async (bot, chat_id, text, lang) => {
   const manager = await getManager({telegram_id: chat_id})
 
   const wash = await getWash({_id: wash_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
@@ -368,7 +367,7 @@ const managerWashes = async (bot, chat_id, message_id, text, lang) => {
     : (await getWashes({manager: manager.telegram_id, branch: manager.branch, status: 'process'}))[0]
 
   if (text === kb.manager.pages.uz.washes || text === kb.manager.pages.ru.washes) await mws0(bot, chat_id, lang)
-  if (text === kb.manager.washes.uz.today || text === kb.manager.washes.ru.today) await mws1(bot, chat_id, message_id, lang)
+  if (text === kb.manager.washes.uz.today || text === kb.manager.washes.ru.today) await mws1(bot, chat_id, lang)
   if (text === kb.manager.washes.uz.add || text === kb.manager.washes.ru.add) await mws4(bot, chat_id, lang)
   if (text === kb.manager.washes.uz.washing || text === kb.manager.washes.ru.washing) await mws10(bot, chat_id, lang)
 
