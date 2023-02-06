@@ -25,7 +25,6 @@ const managerPanel = async (bot, message, manager) => {
     await managerWashes(bot, chat_id, text, lang)
     await managerCars(bot, chat_id, text, lang)
     await managerBranch(bot, chat_id, text, lang)
-
   } catch (e) {
     console.log(e)
   }

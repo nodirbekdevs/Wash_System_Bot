@@ -159,7 +159,8 @@ const car_type = (data, lang) => {
 }
 
 const date = (day) => {
-  const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(), minutes = day.getMinutes(),
+  const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(),
+    minutes = day.getMinutes(),
     given_date = `${year}-${month}-${date}. ${hour}:${minutes}`
 
   return given_date
@@ -228,7 +229,7 @@ const bio = (data, kw, lang) => {
       message += `Telefon raqamingiz - ${data.number}.\n`
       message += `Tanlangan til - ${data.lang}.\n`
     } else if (lang === kb.language.ru) {
-      message += `Ma'lumotlaringiz:\n`
+      message += `Информация о босса:\n`
       message += `Ваше имя - ${data.name}.\n`
       message += `Ваш номер телефона - +${data.number}.\n`
       message += `Выбранный вами язык - ${data.lang}\n`
@@ -423,6 +424,22 @@ const bio = (data, kw, lang) => {
       message += `Выбранный язык - ${data.lang}\n`
       message += `Статус - ${data.status}\n`
       message += `Время начать работу - ${data.created_at}\n`
+    }
+  }
+
+  if (kw === 'EMPLOYEE_SETTINGS') {
+    if (lang === kb.language.uz) {
+      message += `Ma'lumotlaringiz: \n`
+      message += `Ismingiz - ${data.name}.\n`
+      message += `Telefon raqamingiz - ${data.number}\n`
+      message += `Username - ${data.username}.\n`
+      message += `Tanlangan til - ${data.lang}.\n`
+    } else if (lang === kb.language.ru) {
+      message += `Информация о сотрудника:\n`
+      message += `Ваше имя - ${data.name}.\n`
+      message += `Ваш номер телефона - +${data.number}.\n`
+      message += `Username - ${data.username}.\n`
+      message += `Выбранный вами язык - ${data.lang}\n`
     }
   }
 
@@ -937,7 +954,13 @@ const pagination = async (page, limit, washes, lang) => {
   const inline_keyboard = [
     {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#wash#${page - 1}` : 'none', id: ''})},
     {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
-    {text: ` ➡️`, callback_data: JSON.stringify({phrase: washes.length + offset !== washes.length ? `right#wash#${page + 1}` : 'none', id: ''})}
+    {
+      text: ` ➡️`,
+      callback_data: JSON.stringify({
+        phrase: washes.length + offset !== washes.length ? `right#wash#${page + 1}` : 'none',
+        id: ''
+      })
+    }
   ]
 
   kbb.push(inline_keyboard)
@@ -980,7 +1003,13 @@ const employee_pagination = async (page, limit, employees, lang) => {
   const inline_keyboard = [
     {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#employee#${page - 1}` : 'none', id: ''})},
     {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
-    {text: ` ➡️`, callback_data: JSON.stringify({phrase: employees.length + offset !== employees.length ? `right#employee#${page + 1}` : 'none', id: ''})}
+    {
+      text: ` ➡️`,
+      callback_data: JSON.stringify({
+        phrase: employees.length + offset !== employees.length ? `right#employee#${page + 1}` : 'none',
+        id: ''
+      })
+    }
   ]
 
   kbb.push(inline_keyboard)
@@ -1017,7 +1046,13 @@ const car_pagination = (page, limit, cars, lang) => {
   const inline_keyboard = [
     {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#car#${page - 1}` : 'none', id: ''})},
     {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
-    {text: ` ➡️`, callback_data: JSON.stringify({phrase: car.length + offset !== car.length ? `right#employee#${page + 1}` : 'none', id: ''})}
+    {
+      text: ` ➡️`,
+      callback_data: JSON.stringify({
+        phrase: car.length + offset !== car.length ? `right#employee#${page + 1}` : 'none',
+        id: ''
+      })
+    }
   ]
 
   kbb.push(inline_keyboard)

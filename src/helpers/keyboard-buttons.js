@@ -226,23 +226,26 @@ module.exports = {
       uz: {
         name: "Ismni o'zgartirish",
         number: "Telefon raqamni o'zgartirish",
-        username: "Username ni o'zgartirish",
         language: "Tilni o'zgartirish",
       },
       ru: {
         name: "Изменение имени",
         number: "Изменить номер телефона",
-        username: "Изменение имени пользователя",
         language: "Изменить язык",
       }
     },
 
-    washes: {},
+    washes: {
+      uz: {
+        
+      },
+      ru: {}
+    },
 
     feedback: {
       uz: {
-        my_feedback: '📃 Mening fikrlarim',
-        add: '📝 Fikr qoldirish'
+        my_feedback: '📃 Mening izohlarim',
+        add: '📝 Izoh qoldirish'
       },
       ru: {
         my_feedback: '📃 Мои коментарии',

@@ -170,17 +170,75 @@ module.exports = {
 
     cars: {
       uz: [
-        [kb.manager.cars.uz.today, kb.manager.washes.uz.add],
+        [kb.manager.cars.uz.all, kb.manager.cars.uz.add],
         [kb.main.uz]
       ],
       ru: [
-        [kb.manager.washes.ru.today, kb.manager.washes.ru.add],
+        [kb.manager.cars.ru.all, kb.manager.cars.ru.add],
         [kb.main.ru]
       ]
     }
   },
 
-  employee: {},
+  employee: {
+    pages: {
+      uz: [
+        [kb.employee.pages.uz.settings, kb.employee.pages.uz.washes],
+        [kb.employee.pages.uz.feedback, kb.employee.pages.uz.cars],
+        [kb.employee.pages.uz.branch]
+      ],
+      ru: [
+        [kb.employee.pages.ru.settings, kb.employee.pages.ru.washes],
+        [kb.employee.pages.ru.feedback, kb.employee.pages.ru.cars],
+        [kb.employee.pages.ru.branch]
+      ]
+    },
+
+    settings: {
+      uz: [
+        [kb.employee.settings.uz.name, kb.employee.settings.uz.number, kb.employee.settings.uz.language],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.employee.settings.ru.name, kb.employee.settings.ru.number, kb.employee.settings.ru.language],
+        [kb.main.ru]
+      ]
+    },
+
+    washes: {
+      uz: [
+        [kb.manager.washes.uz.today, kb.manager.washes.uz.washing],
+        [kb.manager.washes.uz.add],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.manager.washes.ru.today, kb.manager.washes.ru.washing],
+        [kb.manager.washes.ru.add],
+        [kb.main.ru]
+      ]
+    },
+
+    feedback: {
+      uz: [
+        [kb.employee.feedback.uz.add, kb.employee.feedback.uz.my_feedback],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.employee.feedback.ru.add, kb.employee.feedback.ru.my_feedback],
+        [kb.main.ru]
+      ]
+    },
+
+    cars: {
+      uz: [
+        [kb.employee.cars.uz.all],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.employee.cars.ru.all],
+        [kb.main.ru]
+      ]
+    }},
 
   client: {},
 
