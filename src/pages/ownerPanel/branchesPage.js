@@ -86,7 +86,7 @@ const obs4 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
   const exits_branch = await getBranch({_id}),
-    old_path =  join(__dirname, `./../../../uploads/reports/branches/${exits_branch.name}`)
+    old_path = join(__dirname, `./../../../uploads/reports/branches/${exits_branch.name}`)
 
   await updateBranch({_id}, {name: text, step: 6})
 
@@ -161,7 +161,7 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
     }
 
     if (manager.branch) {
-      await updateBranch({name: manager.branch}, {manager: ''})
+      await updateBranch({name: manager.branch}, {manager: 0})
     }
 
     if (branch.total_employees > 0) {
@@ -172,7 +172,11 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
       await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: ''})
     }
 
-    await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees, status: 'occupied'})
+    await updateManager({_id: manager._id}, {
+      branch: branch.name,
+      total_employees: branch.total_employees,
+      status: 'occupied'
+    })
   }
 
   branch.manager = manager.telegram_id
@@ -181,6 +185,8 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
   if (branch.status !== 'provided') branch.status = 'provided'
 
   await branch.save()
+
+  const message = bio(branch, 'BRANCH', lang)
 
   if (lang === kb.language.uz) {
     clause = "Filial menejeri muvaffaqiyatli o'zgartirildi"
@@ -308,7 +314,23 @@ const obs14 = async (bot, chat_id, _id, text, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const obs15 = async (bot, chat_id, branch, text, lang) => {
+const obs15 = async (bot, chat_id, _id, lang) => {
+  let message, kbb
+
+  await updateBranch({_id}, {step: 3})
+
+  if (lang === kb.language.uz) {
+    message = "Filialni manzilini jo'nating"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = 'Отправить локацию филиала'
+    kbb = keyboard.options.back.ru
+  }
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+}
+
+const obs16 = async (bot, chat_id, branch, text, lang) => {
   let message, kbb, place_name = ''
 
   if (text.latitude && text.longitude) {
@@ -349,7 +371,7 @@ const obs15 = async (bot, chat_id, branch, text, lang) => {
   }
 }
 
-const obs16 = async (bot, chat_id, _id, text, lang) => {
+const obs17 = async (bot, chat_id, _id, text, lang) => {
   let message, data
 
   const branch = await getBranch({_id}), manager = await getManager({telegram_id: branch.manager}),
@@ -366,7 +388,11 @@ const obs16 = async (bot, chat_id, _id, text, lang) => {
         await updateBranch({owner: manager.owner, name: manager.branch}, {manager: 0})
       }
 
-      await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees, status: 'occupied'})
+      await updateManager({_id: manager._id}, {
+        branch: branch.name,
+        total_employees: branch.total_employees,
+        status: 'occupied'
+      })
 
       data = {step: 5, status: 'provided'}
     }
@@ -413,11 +439,11 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
         if (branch.step === 0) await obs12(bot, chat_id, branch._id, text, lang)
         if (branch.step === 1) await obs13(bot, chat_id, branch._id, text, lang)
         if (branch.step === 2) {
-          if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await updateBranch({_id: branch._id}, {step: 3})
           if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await obs14(bot, chat_id, branch._id, text, lang)
+          if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await obs15(bot, chat_id, branch._id, lang)
         }
-        if (branch.step === 3) await obs15(bot, chat_id, branch, text, lang)
-        if (branch.step === 4) await obs16(bot, chat_id, branch._id, text, lang)
+        if (branch.step === 3) await obs16(bot, chat_id, branch, lang)
+        if (branch.step === 4) await obs17(bot, chat_id, branch._id, text, lang)
       }
     }
 

@@ -77,11 +77,17 @@ const oms3 = async (bot, chat_id, _id, lang) => {
 }
 
 const oms4 = async (bot, chat_id, _id, text, lang) => {
-  let clause, kbb
+  let clause, kbb, manager
 
-  await updateManager({_id}, {name: text, step: 8})
+  manager = await getManager({_id})
 
-  const manager = await getManager({_id}), message = bio(manager, 'MANAGER', lang)
+  const username = `${text}_m_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
+
+  await updateManager({_id}, {name: text, username, password, step: 8})
+
+  manager = await getManager({_id})
+
+  const message = bio(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     clause = "Menejer nomi muvaffaqiyatli o'zgartirildi"
@@ -168,41 +174,39 @@ const oms9 = async (bot, chat_id, _id, lang) => {
 }
 
 const oms10 = async (bot, chat_id, _id, text, lang) => {
-  let clause, kbb, employees, manager
+  let clause, kbb
 
-  manager = await getManager({_id})
-
-  const branch = await getBranch({name: text})
+  const manager = await getManager({_id}), branch = await getBranch({owner: manager.owner, name: text})
 
   if (branch) {
-    employees = await getEmployees({manager: branch.manager, branch: branch.name})
-
-    if (employees.length > 0) await updateManyEmployees({
-      manager: branch.manager,
-      branch: branch.name
-    }, {manager: manager.name})
-
-    if (branch.manager) await updateManager({branch: branch.name}, {branch: '', total_employees: 0, status: 'active'})
-
-    await updateBranch({_id: branch._id}, {manager: manager.name})
-
-    employees = await getEmployees({manager: manager.name, branch: manager.branch})
-
-    if (manager.branch) {
-      await updateBranch({name: manager.branch}, {manager: ''})
-
-      if (employees.length > 0) await updateManyEmployees({
-        manager: manager.name,
-        branch: manager.branch
-      }, {manager: ''})
-
+    if (branch.total_employees > 0) {
+      await updateManyEmployees({manager: branch.manager, branch: branch.name}, {manager: manager.telegram_id})
     }
 
+    if (branch.manager) {
+      await updateManager({telegram_id: branch.manager, owner: branch.owner}, {branch: ''})
+    }
+
+    if (manager.total_employees > 0) {
+      await updateManyEmployees({manager: manager.telegram_id, branch: manager.branch}, {manager: 0})
+    }
+
+    if (manager.branch) {
+      await updateBranch({owner: manager.owner, manager: manager.telegram_id, name: manager.branch}, {manager: 0})
+    }
+
+    await updateBranch({_id: branch._id}, {manager: manager.telegram_id, status: 'provided'})
   }
 
   await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees})
 
-  manager = await getManager({_id})
+  manager.branch = branch.name
+  manager.total_employees = branch.total_employees
+  manager.step = 8
+
+  if (manager.status !== 'occupied') manager.status = 'occupied'
+
+  await manager.save()
 
   const message = bio(manager, 'MANAGER', lang)
 
@@ -314,21 +318,9 @@ const oms15 = async (bot, chat_id, _id, lang) => {
 const oms16 = async (bot, chat_id, _id, text, lang) => {
   let message, kbb
 
-  const branch = await getBranch({name: text}), manager = await getManager({_id}),
-    employees = await getEmployees({manager: '', branch: branch.name})
+  const manager = await getManager({_id})
 
-  manager.branch = text
-  manager.step = 4
-
-  if (branch.total_employees > 0) {
-    manager.total_employees = branch.total_employees
-  }
-
-  await manager.save()
-
-  if (employees.length > 0) {
-    await updateManyEmployees({manager: '', branch: branch.name}, {manager: manager.name})
-  }
+  await updateManager({_id}, {branch: text, step: 4})
 
   message = bio(manager, 'MANAGER', lang)
 
@@ -345,19 +337,32 @@ const oms16 = async (bot, chat_id, _id, text, lang) => {
 const oms17 = async (bot, chat_id, _id, text, lang) => {
   let message, data
 
-  const manager = await getManager({_id}),
+  const manager = await getManager({_id}), branch = await getBranch({owner: manager.owner, name: manager.branch}),
     kbb = (lang === kb.language.uz) ? keyboard.owner.managers.uz : keyboard.owner.managers.ru
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
-    const username = `${manager.name}_${manager.number}`, salt = await genSalt(),
-      password = await hash(username, salt)
+    const username = `${manager.name}_m_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
 
     if (manager.branch) {
       await updateBranch({name: manager.branch}, {manager: manager.name, status: 'provided'})
       data = {username, password, step: 5, status: 'occupied'}
     }
 
-    data = {username, password, step: 5, status: 'active'}
+    if (branch) {
+      if (branch.total_employees > 0) {
+        await updateManyEmployees({manager: branch.manager, branch: branch.name}, {manager: 0})
+      }
+
+      if (branch.manager) {
+        await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: ''})
+      }
+
+      await updateBranch({_id: branch._id}, {manager: manager.telegram_id, status: 'provided'})
+
+      data = {username, password, total_employees: branch.total_employees, step: 5, status: 'occupied'}
+    }
+
+    data = {branch: '', username, password, step: 5, status: 'active'}
 
     await updateManager({_id: manager._id}, data)
 
@@ -398,8 +403,8 @@ const ownerManager = async (bot, chat_id, text, lang) => {
         if (manager.step === 1) await oms13(bot, chat_id, manager._id, text, lang)
         if (manager.step === 2) await oms14(bot, chat_id, manager._id, text, lang)
         if (manager.step === 3) {
-          if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await oms15(bot, chat_id, manager._id, lang)
-          if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await oms16(bot, chat_id, manager._id, text, lang)
+          if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await oms16(bot, chat_id, manager._id, lang)
+          if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await oms15(bot, chat_id, manager._id, text, lang)
         }
         if (manager.step === 4) await oms17(bot, chat_id, manager._id, text, lang)
       }
@@ -430,7 +435,7 @@ const ownerManager = async (bot, chat_id, text, lang) => {
             type = text
           } else if (manager.step === 9) {
             if (type === kb.options.owner.manager.settings.uz.name || type === kb.options.owner.manager.settings.ru.name)
-              await oms4(bot, chat_id, manager._id, text, lang)
+              await oms4(bot, manager, text, lang)
             if (type === kb.options.owner.manager.settings.uz.manager || type === kb.options.owner.manager.settings.ru.manager)
               await oms6(bot, chat_id, manager._id, text, lang)
             if (type === kb.options.owner.manager.settings.uz.image || type === kb.options.owner.manager.settings.ru.image)
