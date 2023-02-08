@@ -3,8 +3,8 @@ const {v4} = require('uuid')
 
 const Branch = model('Branch', new Schema({
   _id: {type: String, default: v4},
-  owner: {type: String, ref: 'Owner', default: ''},
-  manager: {type: String, ref: 'Manager', default: ''},
+  owner: {type: Number, ref: 'Owner', default: 0},
+  manager: {type: Number, ref: 'Manager', default: 0},
   name: {type: String, default: ''},
   image: {type: String, default: ''},
   location: {

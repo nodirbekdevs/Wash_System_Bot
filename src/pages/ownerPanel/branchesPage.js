@@ -1,4 +1,6 @@
 const Geo = require('node-geocoder')
+const {mkdir, rename} = require('fs/promises')
+const {join} = require("path")
 const config = require('./../../helpers/config')
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
@@ -7,6 +9,7 @@ const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManagers, getManager, updateManager} = require('./../../controllers/managerController')
 const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
 const {branch_manager_keyboard, bio} = require('./../../helpers/utils')
+const {} = require('./../../../uploads/reports/branches')
 
 let type, branch_id
 
@@ -82,9 +85,16 @@ const obs3 = async (bot, chat_id, _id, lang) => {
 const obs4 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
+  const exits_branch = await getBranch({_id}),
+    old_path =  join(__dirname, `./../../../uploads/reports/branches/${exits_branch.name}`)
+
   await updateBranch({_id}, {name: text, step: 6})
 
   const branch = await getBranch({_id}), message = bio(branch, 'BRANCH', lang)
+
+  const new_path = join(__dirname, `./../../../uploads/reports/branches/${branch.name}`)
+
+  await rename(old_path, new_path)
 
   if (lang === kb.language.uz) {
     clause = "Filial nomi muvaffaqiyatli o'zgartirildi"
@@ -141,45 +151,36 @@ const obs7 = async (bot, chat_id, _id, lang) => {
 }
 
 const obs8 = async (bot, chat_id, _id, text, lang) => {
-  let clause, kbb, employees
+  let clause, kbb
 
   const manager = await getManager({name: text}), branch = await getBranch({_id})
 
   if (manager) {
-    employees = await getEmployees({branch: branch.name, manager: branch.manager})
-
-    if (employees.length > 0) {
-      await updateManyEmployees({branch: branch.name, manager: branch.manager}, {manager: manager.name})
+    if (manager.total_employees > 0) {
+      await updateManyEmployees({manager: manager.telegram_id, branch: manager.branch}, {manager: 0})
     }
 
+    if (manager.branch) {
+      await updateBranch({name: manager.branch}, {manager: ''})
+    }
+
+    if (branch.total_employees > 0) {
+      await updateManyEmployees({branch: branch.name, manager: branch.manager}, {manager: manager.telegram_id})
+    }
+
+    if (branch.manager) {
+      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: ''})
+    }
+
+    await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees, status: 'occupied'})
   }
 
-  // if (old_branch && manager) {
-  //   const employees = await getEmployees({manager: old_branch.manager, branch: old_branch.name})
-  //
-  //   await updateManager({name: old_branch.manager}, {branch: '', total_employees: -employees.length})
-  //
-  //   await updateManyEmployees({manager: old_branch.manager}, {manager: ''})
-  // }
-  //
-  // await updateBranch({_id}, {manager: manager.name, step: 7})
-  //
-  // const branch = await getBranch({_id}), message = bio(branch, 'BRANCH', lang)
-  //
-  // if (branch && manager) {
-  //   const employees = await getEmployees({branch: branch.name}),
-  //     manager_employees = await getEmployees({manager: manager.name})
-  //
-  //   if (manager.branch) {
-  //     await updateBranch({name: manager.branch}, {manager: ''})
-  //     await updateManager({_id: manager._id}, {total_employees: -manager_employees})
-  //     await updateManyEmployees({manager: manager.name}, {manager: ''})
-  //   }
-  //
-  //   await updateManager({_id: manager._id}, {branch: branch.name, total_employees: +employees.length})
-  //
-  //   await updateManyEmployees({branch: branch.name}, {manager: manager.name})
-  // }
+  branch.manager = manager.telegram_id
+  branch.step = 6
+
+  if (branch.status !== 'provided') branch.status = 'provided'
+
+  await branch.save()
 
   if (lang === kb.language.uz) {
     clause = "Filial menejeri muvaffaqiyatli o'zgartirildi"
@@ -274,7 +275,7 @@ const obs13 = async (bot, chat_id, _id, text, lang) => {
 
   await updateBranch({_id}, {image: text, step: 2})
 
-  const managers = await getManagers({owner: chat_id, branch: '', status: 'active'})
+  const managers = await getManagers({owner: chat_id, status: 'active'})
 
   kbb = branch_manager_keyboard(managers, lang)
 
@@ -351,27 +352,34 @@ const obs15 = async (bot, chat_id, branch, text, lang) => {
 const obs16 = async (bot, chat_id, _id, text, lang) => {
   let message, data
 
-  const branch = await getBranch({_id}),
+  const branch = await getBranch({_id}), manager = await getManager({telegram_id: branch.manager}),
     kbb = (lang === kb.language.uz) ? keyboard.owner.branches.uz : keyboard.owner.branches.ru
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
 
-    if (branch.manager) {
-      await updateManager(
-        {name: branch.manager},
-        {branch: branch.name, total_employees: branch.total_employees, status: 'occupied'}
-      )
+    if (manager) {
+      if (manager.total_employees > 0) {
+        await updateManyEmployees({manager: manager.telegram_id, branch: manager.branch}, {manager: 0})
+      }
 
-      data = {step: 5, status: 'occupied'}
+      if (manager.branch) {
+        await updateBranch({owner: manager.owner, name: manager.branch}, {manager: 0})
+      }
+
+      await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees, status: 'occupied'})
+
+      data = {step: 5, status: 'provided'}
     }
 
-    data = {step: 5, status: 'provided'}
+    data = {step: 5, status: 'active'}
+
+    await mkdir(join(__dirname, './../../../uploads/reports/branches', `/${branch.name}`))
 
     await updateBranch({_id: branch._id}, data)
 
     message = (lang === kb.language.uz)
-      ? "Filial muvaffaqqiyatli qo'shildi. Menejer biriktirildi."
-      : "Филиал успешно добавлен. Менеджер прилагается."
+      ? `Filial muvaffaqqiyatli qo'shildi. ${branch.manager ? "Menejer biriktirildi." : "Menejer birikirilmadi."}`
+      : `"Филиал успешно добавлен. ${branch.manager ? "Менеджер прилагается." : "Менеджер не прилагается."}"`
 
   } else if (text === kb.options.not_to_confirmation.uz || text === kb.options.not_to_confirmation.ru) {
     await deleteBranch({_id: branch._id})
@@ -423,7 +431,10 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
 
         if (text === kb.options.back.uz || text === kb.options.back.ru) {
           await updateOwner({telegram_id: chat_id}, {step: 8})
-          await updateBranch({owner: owner.telegram_id, step: 5, status: 'process'}, {status: 'active'})
+
+          const data = branch.manager ? {status: 'provided'} : {status: 'active'}
+
+          await updateBranch({owner: owner.telegram_id, step: 5, status: 'process'}, data)
         } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
           if (branch.step === 6) {
             if (text === kb.options.owner.branch.settings.uz.name || text === kb.options.owner.branch.settings.ru.name)

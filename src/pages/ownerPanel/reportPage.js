@@ -1,0 +1,6 @@
+const kb = require('./../../helpers/keyboard-buttons')
+const keyboard = require('./../../helpers/keyboard')
+const fs = require('fs/promises')
+const path = require('path')
+const xlsx = require('xlsx')
+const {getWashes, getWash, makeWash, updateWash, deleteWash, countWashes} = require('./../../controllers/washController')
