@@ -18,7 +18,7 @@ const getAdvertising = async (query) => {
 
 const makeAdvertising = async (data) => {
   try {
-    return  await Advertising.create(data)
+    return  await Advertising.create({author: data})
   } catch (e) {
     console.log(e)
   }

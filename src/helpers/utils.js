@@ -1,130 +1,7 @@
 const kb = require('./keyboard-buttons')
 const {getEmployee} = require('./../controllers/employeeController')
-const moment = require('moment')
-const moment_interval = require('moment-interval')
 
-// const getNumDayOfWeek = (date) => {
-//   const day = date.getDay();
-//   return (day === 0) ? 6 : day - 1;
-// }
-//
-// const getDays = (year, month) => {
-//   let d = new Date(year, month);
-//   let days = [];
-//   days[days.length] = [];
-//   for (let i = 0; i < getNumDayOfWeek(d); i++) {
-//     days[days.length - 1].push("-");
-//   }
-//   while (d.getMonth() === +month) {
-//     days[days.length - 1].push(d.getDate());
-//     if (getNumDayOfWeek(d) % 7 === 6) {
-//       days[days.length] = [];
-//     }
-//     d.setDate(d.getDate() + 1);
-//   }
-//
-//   if (getNumDayOfWeek(d) !== 0) {
-//     for (let i = getNumDayOfWeek(d); i < 7; i++) {
-//       days[days.length - 1].push("-");
-//     }
-//   }
-//   return days;
-// }
-//
-// const setBeforeZero = (num) => {
-//   return ("0" + (num)).slice(-2);
-// }
-//
-// const calendar_keyboard = (dayLines, current_info, current_date) => {
-//   let buttons = [], cd
-//
-//   buttons.push([
-//     {
-//       text: current_info,
-//       callback_data: "info_" + current_info
-//     }
-//   ]);
-//
-//   dayLines.map(line => {
-//     buttons[buttons.length] = [];
-//     line.map(day => {
-//
-//       cd = (day !== current_date && day > current_date) ? day : '-'
-//
-//       buttons[buttons.length - 1].push({
-//         text: cd,
-//         callback_data: cd > 0
-//           ? JSON.stringify({phrase: kb.options.day.uz, id: setBeforeZero(cd) + "-" + current_info})
-//           : JSON.stringify({phrase: "inline", id: "none"})
-//       });
-//     });
-//   });
-//
-//   return buttons
-// }
-//
-// const inline_calendar = (year, month, current_date) => {
-//   let new_year, new_month, dayLines, currentMonthDate, current_info, buttons
-//
-//   dayLines = getDays(year, month)
-//   currentMonthDate = new Date(+year, +month)
-//   current_info = setBeforeZero(currentMonthDate.getMonth() + 1) + "-" + currentMonthDate.getFullYear();
-//
-//   buttons = calendar_keyboard(dayLines, current_info, current_date)
-//
-//   console.log(buttons)
-//
-//   const last_line = buttons[buttons.length - 1]
-//
-//   console.log(last_line)
-//
-//   if (
-//     last_line[0].text === "-" && last_line[1].text === "-" && last_line[2].text === "-" && last_line[3].text === "-" &&
-//     last_line[4].text === "-" && last_line[5].text === "-" && last_line[6].text === "-"
-//   ) {
-//     new_year = year
-//     new_month = month + 1
-//
-//     if (month === 12) {
-//       new_year = year + 1
-//       new_month = 1
-//     }
-//     console.log(new_year, new_month)
-//
-//
-//     currentMonthDate = new Date(new_year, new_month)
-//
-//     new_year = currentMonthDate.getFullYear()
-//     new_month = currentMonthDate.getMonth()
-//
-//     dayLines = getDays(new_year, new_month)
-//     current_info = setBeforeZero(currentMonthDate.getMonth() + 1) + "-" + currentMonthDate.getFullYear();
-//
-//     buttons = calendar_keyboard(dayLines, current_info, current_date)
-//   }
-//
-//   return buttons
-// }
-//
-// const time_button = (object) => {
-//   const time = object, current_time = new Date().getTime()
-//   let time_buttons = [[], [], []]
-//   for (let i in time) {
-//     const btn = parseInt(i)
-//     if (btn >= 6 && btn <= 9) {
-//       time_buttons[0].push(time[i])
-//     } else if (btn >= 10 && btn <= 13) {
-//       time_buttons[1].push(time[i])
-//     } else if (btn >= 14 && btn <= 17) {
-//       time_buttons[2].push(time[i])
-//     }
-//   }
-//
-//   return time_buttons
-// }
-//
-
-const branch_manager_keyboard = (data, lang) => {
+const keyboard = (data, lang) => {
   let kbb = [], arr = [], text
 
   for (let i = 0; i < data.length; i++) {
@@ -160,55 +37,12 @@ const car_type = (data, lang) => {
 
 const date = (day) => {
   const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(),
-    minutes = day.getMinutes(),
-    given_date = `${year}-${month}-${date}. ${hour}:${minutes}`
+    minutes = day.getMinutes(), given_date = `${year}-${month}-${date}. ${hour}:${minutes}`
 
   return given_date
 }
-//
-// const order_edit_keyboard = async (data, lang) => {
-//   let kbb = [], arr = []
-//
-//   const items = data.items
-//
-//   for (let i = 0; i < items.length; i++) {
-//     const item = await getItem({_id: items[i]})
-//
-//     const obj = {text: `${item.product}-${item.quantity}`}
-//     arr.push(obj)
-//
-//     if (arr.length % 2 === 0) {
-//       kbb.push(arr)
-//       arr = []
-//     }
-//   }
-//
-//   if (arr.length % 2 === 1) {
-//     kbb.push(arr)
-//   }
-//
-//   (lang === kb.language.uz) ? kbb.push([kb.options.back.uz]) : kbb.push([kb.options.back.ru])
-//
-//   return kbb
-// }
-//
-// const determine_the_rating = (product) => {
-//   let rating = 0
-//
-//   if (product.rating.length > 0) {
-//     let total_rating = 0
-//
-//     for (let i = 0; i < product.rating; i++) {
-//       total_rating += product.rating[i]
-//     }
-//
-//     rating = total_rating / product.rating.length
-//   }
-//
-//   return rating
-// }
 
-const bio = (data, kw, lang) => {
+const report = (data, kw, lang) => {
   let message = ''
 
   message = ''
@@ -218,8 +52,21 @@ const bio = (data, kw, lang) => {
     message += `Ismingiz - ${data.name}.\n`
     message += `Telefon raqamingiz - ${data.number}.\n`
     message += `Username - ${data.username}.\n`
-    message += `Tanlangan til - ${data.lang}.\n`
     message += `\nNimani o'zgartirmoqchisiz`
+  }
+
+  if (kw === 'ADMIN_OWNER') {
+    message += "Xo'jayin ma'lumotlari: \n"
+    message += `Ismi - ${data.name}.\n`
+    message += `Username - ${data.username}.\n`
+    message += `Telefon raqami - ${data.number}.\n`
+    message += `Filiallar soni - ${data.total_branches}.\n`
+    message += `Menejerlar soni - ${data.total_managers}.\n`
+    message += `Ishlatish holati - ${data.is_paid ? "To'langan" : "To'lanmagan"}.\n`
+    message += `Hisobi - ${data.balance}.\n`
+    message += `Tanlangan til - ${data.lang}.\n`
+    message += `Holati - ${data.status}.\n`
+    message += `Qo'shilgan vaqti - ${data.created_at}.\n`
   }
 
   if (kw === 'OWNER') {
@@ -353,6 +200,11 @@ const bio = (data, kw, lang) => {
     }
   }
 
+  if (kw === "ADVERTISING") {
+    message += `<b>${data.title}</b>\n`
+    message += `\n<pre>${data.description}</pre>`
+  }
+
   if (kw === "WASH") {
     if (lang === kb.language.uz) {
       message += `Xodim - ${data.employee}\n`
@@ -443,7 +295,7 @@ const bio = (data, kw, lang) => {
     }
   }
 
-  if (kw === 'CAR') {
+  if (kw === 'FEE') {
     if (lang === kb.language.uz) {
       message += `Xo'jayin - ${data.owner}\n`
       message += `Menejer - ${data.manager}\n`
@@ -471,459 +323,24 @@ const bio = (data, kw, lang) => {
     }
   }
 
-  // else if (kw === 'EMPLOYEE') {
-  //   message += `Ma'lumotlaringiz: \n`
-  //   message += `Ismingiz - ${data.name}.\n`
-  //   message += `Telefon raqamingiz - ${data.number}\n`
-  //   message += `Username - ${data.username}.\n`
-  //   message += `Tanlangan til - ${data.lang}.\n`
-  //   message += `\n Nimani o'zgartirmoqchisiz`
-  // } else if (kw === 'USER') {
-  //   if (lang === kb.language.uz) {
-  //     message += `Ma'lumotlaringiz:\n`
-  //     message += `Ismingiz - ${data.name}.\n`
-  //     message += `Telefon raqamingiz - +${data.number}.\n`
-  //     message += 'Tanlagan tilingiz - UZ\n'
-  //     message += '\nNimani o\'zgartirmoqchisiz'
-  //   } else if (lang === kb.language.ru) {
-  //     message += `Ma'lumotlaringiz:\n`
-  //     message += `Ваше имя - ${data.name}.\n`
-  //     message += `Ваш номер телефона - +${data.number}.\n`
-  //     message += 'Выбранный вами язык - RU\n'
-  //     message += '\nЧто вы хотите изменить'
-  //   }
-  // }
+  if (kw === 'CAR') {
+    if (lang === kb.language.uz) {
+      message += `Nomi - ${data.name}\n`
+      message += `Tavsifi - ${data.description}\n`
+      message += `Turi - ${data.type}\n`
+      message += `Qo'shilgan vaqti - ${data.created_at}\n`
+    } else if (lang === kb.language.ru) {
+      message += `Название - ${data.name}\n`
+      message += `Описание - ${data.description}\n`
+      message += `Тип - ${data.type}\n`
+      message += `Добавлено время - ${data.created_at}\n`
+    }
+  }
 
   return message
 }
 
-// const get_report = async (data, lang, kw, options = null) => {
-//   let report = "", information = '', bot, chat_id, kbb, text, clause = '', items, total_sum = 0
-//
-//   if (typeof data === 'object') items = data.items
-//
-//   if (data.status === 'process' && data.items.length > 0) {
-//     report = (lang === kb.language.uz) ? "Buyurtma qilmoqchi bo'lgan mahsulotlaringiz\n" : "Продукты, которые вы хотите заказать\n"
-//   }
-//
-//   if (options) {
-//     bot = options.bot ? options.bot : null
-//     chat_id = options.chat_id ? options.chat_id : null
-//     kbb = options.kbb ? options.kbb : null
-//     text = options.text ? options.text : null
-//   }
-//
-//   if (kw === 'FULL') {
-//     for (let i = 0; i < data.length; i++) {
-//       const order = data[i]
-//
-//       if (order.status !== 'inactive' && order.status !== 'process') {
-//         const items = order.items
-//
-//         for (let i = 0; i < items.length; i++) {
-//           const item = await getItem({_id: items[i]})
-//
-//           if (lang === kb.language.uz) {
-//             clause += `\nMahsulot nomi: ${item.product}\n`
-//             clause += `Miqdori: ${item.quantity}\n`
-//             clause += `Narxi: ${item.price}\n`
-//           } else {
-//             clause += `\nТовар: ${item.product}\n`
-//             clause += `Число: ${item.quantity}\n`
-//             clause += `Цена: ${item.price}\n`
-//           }
-//
-//           report += clause
-//
-//           clause = ""
-//         }
-//
-//         if (order.should_deliver) {
-//           if (lang === kb.language.uz) {
-//             information += `\nMahsulot turi: ${order.total_items}\n`
-//             information += `Yetkazib berish: Mavjud\n`
-//             information += `Yetkazib berish manzili: ${order.location.place_name}\n`
-//             information += `Kuni: ${order.date}\n`
-//             information += `Vaqti: ${order.time}\n`
-//             information += `Narxi: ${order.price}\n`
-//             information += `Holati: ${order.status}`
-//           } else if (lang === kb.language.ru) {
-//             information += `\nТип продукта: ${order.total_items}\n`
-//             information += `Доставка: Есть\n`
-//             information += `Адреса доставки: ${order.location.place_name}\n`
-//             information += `День: ${order.date}\n`
-//             information += `Время: ${order.time}\n`
-//             information += `Цена: ${order.price}\n`
-//             information += `Статус: ${order.status}`
-//           }
-//         } else if (!order.should_deliver) {
-//           if (lang === kb.language.uz) {
-//             information += `\nMahsulot turi: ${order.total_items}\n`
-//             information += `Yetkazib berish: Mavjud emas\n`
-//             information += `Kuni: ${order.date}\n`
-//             information += `Vaqti: ${order.time}\n`
-//             information += `Narxi: ${order.price}\n`
-//             information += `Holati: ${order.status}`
-//           } else if (lang === kb.language.ru) {
-//             information += `\nТип продукта: ${order.total_items}\n`
-//             information += `Доставка: Недоступно\n`
-//             information += `День: ${order.date}\n`
-//             information += `Время: ${order.time}\n`
-//             information += `Цена: ${order.price}\n`
-//             information += `Статус: ${order.status}`
-//           }
-//         }
-//
-//         report += information
-//
-//         information = ''
-//
-//         await bot.sendMessage(chat_id, report, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-//
-//         report = ""
-//       }
-//     }
-//   }
-//
-//   if (kw === 'ONE') {
-//     for (let i = 0; i < items.length; i++) {
-//       const item = await getItem({_id: items[i]})
-//
-//       if (lang === kb.language.uz) {
-//         clause += `\nMahsulot nomi: ${item.product}\n`
-//         clause += `Miqdori: ${item.quantity}\n`
-//         clause += `Narxi: ${item.price}\n`
-//       } else {
-//         clause += `\nТовар: ${item.product}\n`
-//         clause += `Число: ${item.quantity}\n`
-//         clause += `Цена: ${item.price}\n`
-//       }
-//
-//       report += clause
-//
-//       clause = ""
-//     }
-//
-//     if (data.should_deliver) {
-//       if (lang === kb.language.uz) {
-//         information += `\nMahsulot turi: ${data.total_items}\n`
-//         information += `Yetkazib berish: Mavjud\n`
-//         information += `Yetkazib berish manzili: ${data.location.place_name}\n`
-//         information += `Kuni: ${data.date}\n`
-//         information += `Vaqti: ${data.time}\n`
-//         information += `Narxi: ${data.price}\n`
-//         information += `Holati: ${data.status}`
-//       } else if (lang === kb.language.ru) {
-//         information += `\nТип продукта: ${data.total_items}\n`
-//         information += `Доставка: Есть\n`
-//         information += `Адреса доставки: ${data.location.place_name}\n`
-//         information += `День: ${data.date}\n`
-//         information += `Время: ${data.time}\n`
-//         information += `Цена: ${data.price}\n`
-//         information += `Статус: ${data.status}`
-//       }
-//     } else if (!data.should_deliver) {
-//       if (lang === kb.language.uz) {
-//         information += `\nMahsulot turi: ${data.total_items}\n`
-//         information += `Yetkazib berish: Mavjud emas\n`
-//         information += `Kuni: ${data.date}\n`
-//         information += `Vaqti: ${data.time}\n`
-//         information += `Narxi: ${data.price}\n`
-//         information += `Holati: ${data.status}`
-//       } else if (lang === kb.language.ru) {
-//         information += `\nТип продукта: ${data.total_items}\n`
-//         information += `Доставка: Недоступно\n`
-//         information += `День: ${data.date}\n`
-//         information += `Время: ${data.time}\n`
-//         information += `Цена: ${data.price}\n`
-//         information += `Статус: ${data.status}`
-//       }
-//     }
-//     report += information
-//
-//     information = null
-//
-//     return report
-//   }
-//
-//   if (kw === 'ONE_RC') {
-//     for (let i = 0; i < data.length; i++) {
-//       const order = data[i], items = order.items
-//
-//       for (let i = 0; i < items.length; i++) {
-//         const item = await getItem({_id: items[i]})
-//
-//         if (lang === kb.language.uz) {
-//           clause += `\nMahsulot nomi: ${item.product}\n`
-//           clause += `Miqdori: ${item.quantity}\n`
-//           clause += `Narxi: ${item.price}\n`
-//         } else {
-//           clause += `\nТовар: ${item.product}\n`
-//           clause += `Число: ${item.quantity}\n`
-//           clause += `Цена: ${item.price}\n`
-//         }
-//
-//         report += clause
-//
-//         clause = ""
-//       }
-//
-//       if (lang === kb.language.uz) {
-//         information += `\nMahsulot turi: ${order.total_items}\n`
-//         information += `Yetkazib berish: Mavjud emas\n`
-//         information += `Kuni: ${order.date}\n`
-//         information += `Vaqti: ${order.time}\n`
-//         information += `Narxi: ${order.price}\n`
-//         information += `Holati: ${order.status}`
-//       } else if (lang === kb.language.ru) {
-//         information += `\nТип продукта: ${order.total_items}\n`
-//         information += `Доставка: Недоступно\n`
-//         information += `День: ${order.date}\n`
-//         information += `Время: ${order.time}\n`
-//         information += `Цена: ${order.price}\n`
-//         information += `Статус: ${order.status}`
-//       }
-//
-//       report += information
-//
-//       information = ''
-//
-//       const send_text = (lang === kb.language.uz) ? kb.options.accepted.uz : kb.options.accepted.ru
-//
-//       await bot.sendMessage(chat_id, report, {
-//         reply_markup: {
-//           inline_keyboard: [[{text: send_text, callback_data: JSON.stringify({phrase: text, id: data[i]._id})}]]
-//         }
-//       })
-//
-//       report = ''
-//     }
-//   }
-//
-//   if (kw === 'SHD') {
-//     for (let i = 0; i < items.length; i++) {
-//       const item = await getItem({_id: items[i]})
-//
-//       if (lang === kb.language.uz) {
-//         clause += `\nMahsulot nomi: ${item.product}\n`
-//         clause += `Miqdori: ${item.quantity}\n`
-//         clause += `Narxi: ${item.price}\n`
-//       } else {
-//         clause += `\nТовар: ${item.product}\n`
-//         clause += `Число: ${item.quantity}\n`
-//         clause += `Цена: ${item.price}\n`
-//       }
-//       report += clause
-//
-//       clause = ""
-//     }
-//
-//     if (lang === kb.language.uz) {
-//       information += `\nMahsulot turi: ${data.total_items}\n`
-//       information += `Yetkazib berish: Mavjud\n`
-//       information += `Kuni: ${data.date}\n`
-//       information += `Vaqti: ${data.time}\n`
-//       information += `Narxi: ${data.price}\n`
-//       information += `Holati: ${data.status}`
-//     } else if (lang === kb.language.ru) {
-//       information += `\nТип продукта: ${data.total_items}\n`
-//       information += `Доставка: Есть\n`
-//       information += `День: ${data.date}\n`
-//       information += `Время: ${data.time}\n`
-//       information += `Цена: ${data.price}\n`
-//       information += `Статус: ${data.status}`
-//     }
-//
-//     report += information
-//
-//     information = null
-//
-//     return report
-//   }
-//
-//   if (kw === 'ONE_SHND') {
-//     for (let i = 0; i < items.length; i++) {
-//       const item = await getItem({_id: items[i]})
-//
-//       if (lang === kb.language.uz) {
-//         clause += `\nMahsulot nomi: ${item.product}\n`
-//         clause += `Miqdori: ${item.quantity}\n`
-//         clause += `Narxi: ${item.price}\n`
-//       } else {
-//         clause += `\nТовар: ${item.product}\n`
-//         clause += `Число: ${item.quantity}\n`
-//         clause += `Цена: ${item.price}\n`
-//       }
-//
-//       report += clause
-//
-//       clause = ""
-//     }
-//
-//     if (lang === kb.language.uz) {
-//       information += `\nMahsulot turi: ${data.total_items}\n`
-//       information += `Yetkazib berish: Mavjud emas\n`
-//       information += `Kuni: ${data.date}\n`
-//       information += `Vaqti: ${data.time}\n`
-//       information += `Narxi: ${data.price}\n`
-//       information += `Holati: ${data.status}`
-//     } else if (lang === kb.language.ru) {
-//       information += `\nТип продукта: ${data.total_items}\n`
-//       information += `Доставка: Недоступно\n`
-//       information += `День: ${data.date}\n`
-//       information += `Время: ${data.time}\n`
-//       information += `Цена: ${data.price}\n`
-//       information += `Статус: ${data.status}`
-//     }
-//
-//     report += information
-//
-//     information = null
-//
-//     return report
-//   }
-//
-//   if (kw === 'BK') {
-//     for (let i = 0; i < items.length; i++) {
-//       const item = await getItem({_id: items[i]})
-//
-//       if (lang === kb.language.uz) {
-//         clause += `\nMahsulot nomi: ${item.product}\n`
-//         clause += `Miqdori: ${item.quantity}\n`
-//         clause += `Narxi: ${item.price}\n`
-//       } else if (lang === kb.language.ru) {
-//         clause += `\nТовар: ${item.product}\n`
-//         clause += `Число: ${item.quantity}\n`
-//         clause += `Цена: ${item.price}\n`
-//       }
-//
-//       report += clause
-//
-//       clause = ""
-//     }
-//
-//     report += (lang === kb.language.uz) ? `\nUmumiy narx - ${data.price} so'm` : `\nОбщая стоимость ${data.price} сум`
-//
-//     return report
-//   }
-//
-//   if (kw === 'ADMIN') {
-//     for (let i = 0; i < data.length; i++) {
-//       const order = data[i], items = order.items
-//
-//       for (let i = 0; i < items.length; i++) {
-//         const item = await getItem({_id: items[i]})
-//
-//         clause = `${item.product} - ${item.quantity} - ${item.price}\n`
-//
-//         report += clause
-//
-//         clause = ''
-//       }
-//
-//       await bot.sendMessage(chat_id, report, {
-//         reply_markup: {
-//           inline_keyboard: [[
-//             {text: 'Yetkazib berish', callback_data: JSON.stringify({phrase: 'DELIVER', id: order._id})}
-//           ]]
-//         }
-//       })
-//
-//       report = ''
-//     }
-//   }
-//
-//   if (kw === "EMPLOYEE_DELIVER") {
-//     for (let i = 0; i < data.length; i++) {
-//       const order = data[i], items = order.items
-//
-//       for (let i = 0; i < items.length; i++) {
-//         const item = await getItem({_id: items[i]})
-//
-//         clause = `${item.product} - ${item.quantity}\n`
-//
-//         report += clause
-//
-//         clause = ""
-//       }
-//
-//       await bot.sendMessage(chat_id, report, {
-//         reply_markup: {
-//           inline_keyboard: [[{
-//             text: "Yetkazib berish", callback_data: JSON.stringify({phrase: 'deliver', id: order._id})
-//           }]]
-//         }
-//       })
-//
-//       report = ""
-//     }
-//   }
-//
-//   if (kw === "EMPLOYEE_OUT_OF_DELIVER") {
-//     for (let i = 0; i < items.length; i++) {
-//       const item = await getItem({_id: items[i]})
-//
-//       clause += `\nMahsulot nomi: ${item.product}\n`
-//       clause += `Miqdori: ${item.quantity}\n`
-//       clause += `Narxi: ${item.price}\n`
-//
-//       item.step = 5
-//       item.status = 'out_of_delivery'
-//       await item.save()
-//
-//       report += clause
-//
-//       clause = ""
-//     }
-//
-//     information += `\nMahsulot turi: ${data.total_items}\n`
-//     information += `Yetkazib berish: Mavjud\n`
-//     information += `Yetkazib berish manzili: ${data.location.place_name}\n`
-//     information += `Kuni: ${data.date}\n`
-//     information += `Vaqti: ${data.time}\n`
-//     information += `Narxi: ${data.price}\n`
-//
-//     report += information
-//
-//     return report
-//   }
-//
-//   if (kw === "EMPLOYEE_ALL") {
-//     for (let i = 0; i < data.length; i++) {
-//       const order = data[i], items = order.items
-//
-//       for (let i = 0; i < items.length; i++) {
-//         const item = await getItem({_id: items[i]})
-//
-//         clause += `\nMahsulot nomi: ${item.product}\n`
-//         clause += `Miqdori: ${item.quantity}\n`
-//         clause += `Narxi: ${item.price}\n`
-//
-//         report += clause
-//
-//         clause = ''
-//       }
-//
-//       information += `\nMahsulot turi: ${order.total_items}\n`
-//       information += `Yetkazib berish: Mavjud\n`
-//       information += `Yetkazib berish manzili: ${order.location.place_name}\n`
-//       information += `Kuni: ${order.date}\n`
-//       information += `Vaqti: ${order.time}\n`
-//       information += `Narxi: ${order.price}\n`
-//       information += `Holati: Yetkazib berilgan`
-//
-//       report += information
-//
-//       information = ""
-//
-//       await bot.sendMessage(chat_id, report, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-//
-//       report = ""
-//     }
-//   }
-// }
-
-const pagination = async (page, limit, washes, lang) => {
+const wash_pagination = async (page, limit, washes, lang) => {
   let offset = limit * (page - 1), text
 
   text = (lang === kb.language.uz)
@@ -1017,7 +434,7 @@ const employee_pagination = async (page, limit, employees, lang) => {
   return {text, kbb}
 }
 
-const car_pagination = (page, limit, cars, lang) => {
+const fee_pagination = (page, limit, cars, lang) => {
   let offset = limit * (page - 1), text, clause
 
   text = (lang === kb.language.uz)
@@ -1060,6 +477,82 @@ const car_pagination = (page, limit, cars, lang) => {
   return {text, kbb}
 }
 
+const car_pagination = (page, limit, cars) => {
+  let offset = limit * (page - 1), text, kbb = [], arr = []
+
+  text = `<b>Hozirgi: ${offset + 1}-${cars.length + offset}, Jami:${cars.length}</b>\n\n`
+
+  for (let i = 0; i < cars.length; i++) {
+    const car = cars[i]
+
+    const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'car', id: car._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 6 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+
+    text += `<b>${i + 1}.</b> ${car.name} - ${car.type} \n`
+  }
+
+  kbb.push(arr)
+
+  const inline_keyboard = [
+    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#car#${page - 1}` : 'none', id: ''})},
+    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+    {
+      text: ` ➡️`,
+      callback_data: JSON.stringify({
+        phrase: cars.length + offset !== cars.length ? `right#car#${page + 1}` : 'none', id: ''
+      })
+    }
+  ]
+
+  kbb.push(inline_keyboard)
+
+  return {text, kbb}
+}
+
+const owner_pagination = (page, limit, owners) => {
+  let offset = limit * (page - 1), text, kbb = [], arr = []
+
+  text = `<b>Hozirgi: ${offset + 1}-${owners.length + offset}, Jami:${owners.length}</b>\n\n`
+
+  for (let i = 0; i < owners.length; i++) {
+    const owner = owners[i]
+
+    const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'owner', id: owner._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 6 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+
+    text += `<b>${i + 1}.</b> ${owner.name} - ${owner.number} - ${owner.is_paid ? "To'langan" : "To'lanmagan"} - ${owner.balance} \n`
+  }
+
+  kbb.push(arr)
+
+  const inline_keyboard = [
+    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#owner#${page - 1}` : 'none', id: ''})},
+    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+    {
+      text: ` ➡️`,
+      callback_data: JSON.stringify({
+        phrase: owners.length + offset !== owners.length ? `right#owner#${page + 1}` : 'none', id: ''
+      })
+    }
+  ]
+
+  kbb.push(inline_keyboard)
+
+  return {text, kbb}
+}
+
 const employee_attendance = (employees, lang) => {
   let kbb = [], arr = []
 
@@ -1085,7 +578,32 @@ const employee_attendance = (employees, lang) => {
   return {kbb, text}
 }
 
+const car_attendance = (employees, lang) => {
+  let kbb = [], arr = []
+
+  const text = (lang === kb.language.uz)
+    ? `<b>Jami: ${employees.length} ta ishchi mavjud.</b>`
+    : `<b>Всего: ${employees.length} сотрудника.</b>`
+
+  for (let i = 0; i < employees.length; i++) {
+    const employee = employees[i], flag = employee.status === 'active' ? '✅' : '➖'
+
+    const obj = {text: `${flag} ${employee.name}`, callback_data: JSON.stringify({phrase: 'e_edit', id: employee._id})}
+
+    arr.push(obj)
+
+    if (arr.length % 2 === 0) {
+      kbb.push(arr)
+      arr = []
+    }
+  }
+
+  kbb.push([{text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})}])
+
+  return {kbb, text}
+}
+
 module.exports = {
-  branch_manager_keyboard, employee_attendance, car_pagination,
-  bio, date, pagination, employee_pagination
+  keyboard, employee_attendance, car_pagination, fee_pagination,
+  report, date, wash_pagination, employee_pagination, owner_pagination
 }

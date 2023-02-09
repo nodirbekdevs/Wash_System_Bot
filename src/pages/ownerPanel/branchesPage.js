@@ -375,7 +375,8 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
   let message, data
 
   const branch = await getBranch({_id}), manager = await getManager({telegram_id: branch.manager}),
-    kbb = (lang === kb.language.uz) ? keyboard.owner.branches.uz : keyboard.owner.branches.ru
+    kbb = (lang === kb.language.uz) ? keyboard.owner.branches.uz : keyboard.owner.branches.ru,
+    owner = await getOwner({telegram_id: chat_id})
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
 
@@ -394,12 +395,16 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
         status: 'occupied'
       })
 
-      data = {step: 5, status: 'provided'}
+      data = {step: 5, status: 'active'}
     }
 
-    data = {step: 5, status: 'active'}
+    data = {step: 5, status: 'provided'}
 
     await mkdir(join(__dirname, './../../../uploads/reports/branches', `/${branch.name}`))
+
+    owner.branches.push(branch._id)
+    owner.total_branches += 1
+    await owner.save()
 
     await updateBranch({_id: branch._id}, data)
 

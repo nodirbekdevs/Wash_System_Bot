@@ -8,10 +8,11 @@ const Admin = model('Admin', new Schema({
   username: {type: String, default: ''},
   password: {type: String, default: ''},
   number: {type: String, default: ''},
-  type: {type: String, enum: ['admin', 'super_admin'], default: 'admin'},
+  type: {type: String, enum: ['admin', 'super_admin'], default: 'super_admin'},
   advertisements: [{type: String, ref: 'Advertising', default: []}],
+  owners: [{type: String, ref: 'Owner', default: ''}],
   total_advertisements: {type: Number, default: 0},
-  lang: {type: String, default: ''},
+  total_owners: {type: Number, default: 0},
   step: {type: Number, default: 0},
   status: {type: String, enum: ['active', 'inactive'], default: 'active'},
   created_at: {type: Date, default: Date.now()}

@@ -7,8 +7,8 @@ const amp = async (bot, chat_id) => {
   })
 }
 
-const adminMainPage = async (bot, chat_id, name, text) => {
-    if (text === kb.start || text === kb.main.uz) await amp(bot, chat_id, name)
+const adminMainPage = async (bot, chat_id, text) => {
+    if (text === kb.start || text === kb.main.uz) await amp(bot, chat_id)
 }
 
-module.exports = {adminMainPage}
+module.exports = {adminMainPage, amp}

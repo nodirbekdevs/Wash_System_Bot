@@ -4,7 +4,9 @@
   "description": "Telegram bot for car washers to automating",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "server": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",

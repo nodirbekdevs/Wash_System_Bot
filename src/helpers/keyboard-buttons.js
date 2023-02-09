@@ -15,19 +15,32 @@ module.exports = {
   admin: {
     pages: {
       settings: "Sozlamalar",
-      advertisements: "Reklama"
+      advertisements: "Reklama",
+      owners: "Moyka egalari",
+      cars: 'Avtomobillar'
     },
 
     settings: {
       name: "Ismni o'zgartirish",
       number: "Telefon raqamni o'zgartirish",
-      username: "Username ni o'zgartirish"
     },
 
     advertisements: {
       number: "Reklamalar Soni",
       all: "Jo'natilishi keraklilari",
-      add: "Qo'shish"
+      add: "Reklama qo'shish"
+    },
+
+    owners: {
+      number: "Mo'yka egalari soni",
+      all: "Barcha mo'yka egalari",
+      add: "Mo'yka egasini qo'shish"
+    },
+
+    cars: {
+      number: "Mashinalar soni",
+      all: "Barcha mashinalar",
+      add: "Mashina qo'shish"
     }
   },
 
@@ -309,6 +322,8 @@ module.exports = {
       }
     },
 
+
+
     owner: {
       branch: {
         settings: {
@@ -344,7 +359,6 @@ module.exports = {
         }
       }
     },
-
 
 
 

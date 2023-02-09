@@ -14,18 +14,30 @@ module.exports = {
 
   admin: {
     pages: [
-      [kb.admin.pages.uz.settings, kb.admin.pages.uz.settings]
+      [kb.admin.pages.settings, kb.admin.pages.advertisements],
+      [kb.admin.pages.cars, kb.admin.pages.owners]
     ],
 
     settings: [
-      [kb.admin.settings.uz.name, kb.admin.settings.uz.number],
-      [kb.admin.settings.uz.username, kb.admin.settings.uz.language],
+      [kb.admin.settings.name, kb.admin.settings.number],
       [kb.main.uz]
     ],
 
     advertisements: [
-      [kb.admin.advertisements.uz.add],
-      [kb.admin.advertisements.uz.all, kb.admin.advertisements.uz.number],
+      [kb.admin.advertisements.add],
+      [kb.admin.advertisements.all, kb.admin.advertisements.number],
+      [kb.main.uz]
+    ],
+
+    cars: [
+      [kb.admin.cars.add],
+      [kb.admin.cars.all, kb.admin.cars.number],
+      [kb.main.uz]
+    ],
+
+    owners: [
+      [kb.admin.owners.add],
+      [kb.admin.owners.all, kb.admin.owners.number],
       [kb.main.uz]
     ],
   },

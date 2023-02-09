@@ -343,10 +343,8 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
     const username = `${manager.name}_m_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
 
-    if (manager.branch) {
-      await updateBranch({name: manager.branch}, {manager: manager.name, status: 'provided'})
-      data = {username, password, step: 5, status: 'occupied'}
-    }
+
+    data = {branch: '', username, password, step: 5, status: 'active'}
 
     if (branch) {
       if (branch.total_employees > 0) {
@@ -361,8 +359,6 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
 
       data = {username, password, total_employees: branch.total_employees, step: 5, status: 'occupied'}
     }
-
-    data = {branch: '', username, password, step: 5, status: 'active'}
 
     await updateManager({_id: manager._id}, data)
 
