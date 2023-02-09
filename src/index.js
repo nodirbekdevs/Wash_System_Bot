@@ -23,9 +23,9 @@ bot.on('message', async message => {
 
   const admin = await getAdmin({telegram_id: message.from.id, status: 'active'})
 
+
   try {
     if (admin) {
-      console.log("Kevotti")
       await adminPanel(bot, message, admin)
     }
   } catch (e) {

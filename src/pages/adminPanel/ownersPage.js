@@ -26,7 +26,7 @@ const aos1 = async (bot, chat_id) => {
 const aos2 = async (bot, chat_id) => {
   const owners = await getOwners({status: 'active'})
 
-  const report = owner_pagination(1, 10, owners)
+  const report = await owner_pagination(1, 6)
 
   await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
 }
@@ -109,7 +109,7 @@ const aos7 = async (bot, chat_id, _id, text) => {
 const aos8 = async (bot, chat_id, _id, text) => {
   await updateOwner({_id}, {lang: text, step: 4})
 
-  const owner = await getOwner({_id})
+  const owner = await getOwner({_id}), started_at = date(owner.created_at)
 
   const data = {
     name: owner.name,

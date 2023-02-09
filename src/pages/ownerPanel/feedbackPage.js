@@ -1,7 +1,7 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {getAllFeedback, getFeedback, updateFeedback, countAllFeedback} = require('./../../controllers/feedbackController')
-const {bio} = require('./../../helpers/utils')
+const {report} = require('./../../helpers/utils')
 const {getEmployee} = require('./../../controllers/employeeController')
 const {getClient} = require('./../../controllers/clientController')
 
@@ -26,7 +26,7 @@ const ofs1 = async (bot, chat_id, lang) => {
 
   const data = {number, process, active, inactive, seen, done}
 
-  const message = bio(data, 'FEEDBACK_ALL', lang)
+  const message = report(data, 'FEEDBACK_ALL', lang)
 
   await bot.sendMessage(chat_id, message)
 }
@@ -54,7 +54,7 @@ const ofs2 = async (bot, chat_id, lang) => {
 
     const send_text = (lang === kb.language.uz) ? "Muommoni ko'rish boshlandi" : "Видение проблемы началось"
 
-    let clause = bio(data, 'FEEDBACK', lang)
+    let clause = report(data, 'FEEDBACK', lang)
 
     await bot.sendMessage(chat_id, clause, {
       reply_markup: {
@@ -101,7 +101,7 @@ const ofs3 = async (bot, chat_id, lang) => {
 
     const send_text = (lang === kb.language.uz) ? "Muommoni hal qilindi" : "Проблема решена"
 
-    let clause = bio(data, 'FEEDBACK', lang)
+    let clause = report(data, 'FEEDBACK', lang)
 
     await bot.sendMessage(chat_id, clause, {
       reply_markup: {
@@ -139,7 +139,7 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
     if (feedback.status === 'active') {
       await updateFeedback({_id: feedback._id}, {status: 'seen'})
 
-      message = bio(data, 'FEEDBACK_SEEN', author.lang)
+      message = report(data, 'FEEDBACK_SEEN', author.lang)
     }
 
     message = (lang === kb.language.uz)
@@ -151,7 +151,7 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
     if (feedback.status === 'seen') {
       await updateFeedback({_id: feedback._id}, {status: 'done'})
 
-      message = bio(data, 'FEEDBACK_DONE', author.lang)
+      message = report(data, 'FEEDBACK_DONE', author.lang)
     }
 
     message = (lang === kb.language.uz)

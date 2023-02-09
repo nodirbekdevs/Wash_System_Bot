@@ -7,8 +7,8 @@ const keyboard = require('./../../helpers/keyboard')
 const {getBranches, getBranch, makeBranch, updateBranch, deleteBranch, countBranches} = require('./../../controllers/branchController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManagers, getManager, updateManager} = require('./../../controllers/managerController')
-const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
-const {branch_manager_keyboard, bio} = require('./../../helpers/utils')
+const {updateManyEmployees} = require('./../../controllers/employeeController')
+const {universal_keyboard, report} = require('./../../helpers/utils')
 const {} = require('./../../../uploads/reports/branches')
 
 let type, branch_id
@@ -34,7 +34,7 @@ const obs1 = async (bot, chat_id, lang) => {
 
   if (branches.length > 0) {
     await updateOwner({telegram_id: chat_id}, {step: 8})
-    kbb = branch_manager_keyboard(branches, lang)
+    kbb = universal_keyboard(branches, lang)
     message = (lang === kb.language.uz) ? `Sizda ${count} filial mavjud` : `У вас есть ${count} филиалов`
   } else {
     message = (lang === kb.language.uz) ? `Sizda hali filiallar mavjud emas` : `У вас еще нет филиалов`
@@ -53,7 +53,7 @@ const obs2 = async (bot, chat_id, text, lang) => {
 
     await updateBranch({_id: branch._id}, {step: 6, status: 'process'})
 
-    message = bio(branch, 'BRANCH', lang)
+    message = report(branch, 'BRANCH', lang)
     kbb = (lang === kb.language.uz) ? keyboard.options.owner.branch.settings.uz : keyboard.options.owner.branch.settings.ru
   } else {
     if (lang === kb.language.uz) {
@@ -90,7 +90,7 @@ const obs4 = async (bot, chat_id, _id, text, lang) => {
 
   await updateBranch({_id}, {name: text, step: 6})
 
-  const branch = await getBranch({_id}), message = bio(branch, 'BRANCH', lang)
+  const branch = await getBranch({_id}), message = report(branch, 'BRANCH', lang)
 
   const new_path = join(__dirname, `./../../../uploads/reports/branches/${branch.name}`)
 
@@ -123,7 +123,7 @@ const obs6 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
   await updateBranch({_id}, {image: text, step: 6})
 
-  const branch = await getBranch({_id}), message = bio(branch, 'BRANCH', lang)
+  const branch = await getBranch({_id}), message = report(branch, 'BRANCH', lang)
 
   if (lang === kb.language.uz) {
     clause = "Filial rasmi muvaffaqiyatli o'zgartirildi"
@@ -143,7 +143,7 @@ const obs7 = async (bot, chat_id, _id, lang) => {
     ? "O'zgartirmoqchi bo'lgan menejerni yuboring"
     : "Укажите менеджера, которого хотите изменить"
 
-  const managers = await getManagers({owner: chat_id, status: 'active'}), kbb = branch_manager_keyboard(managers, lang)
+  const managers = await getManagers({owner: chat_id, status: 'active'}), kbb = universal_keyboard(managers, lang)
 
   await updateBranch({_id}, {step: 7})
 
@@ -186,7 +186,7 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
 
   await branch.save()
 
-  const message = bio(branch, 'BRANCH', lang)
+  const message = report(branch, 'BRANCH', lang)
 
   if (lang === kb.language.uz) {
     clause = "Filial menejeri muvaffaqiyatli o'zgartirildi"
@@ -227,7 +227,7 @@ const obs10 = async (bot, chat_id, _id, text, lang) => {
     await branch.save()
   }
 
-  const message = bio(branch, 'BRANCH', lang)
+  const message = report(branch, 'BRANCH', lang)
 
   if (lang === kb.language.uz) {
     clause = "Filial manzili muvaffaqiyatli o'zgartirildi"
@@ -283,7 +283,7 @@ const obs13 = async (bot, chat_id, _id, text, lang) => {
 
   const managers = await getManagers({owner: chat_id, status: 'active'})
 
-  kbb = branch_manager_keyboard(managers, lang)
+  kbb = universal_keyboard(managers, lang)
 
   if (lang === kb.language.uz) {
     message = 'Filial menejerini tanlang'
@@ -346,7 +346,7 @@ const obs16 = async (bot, chat_id, branch, text, lang) => {
       await branch.save()
     }
 
-    message = bio(branch, 'BRANCH', lang)
+    message = report(branch, 'BRANCH', lang)
 
     if (lang === kb.language.uz) {
       message += '\nTasdiqlaysizmi ?'

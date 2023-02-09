@@ -1,7 +1,11 @@
 const kb = require('./keyboard-buttons')
 const {getEmployee} = require('./../controllers/employeeController')
+const {getCars} = require('./../controllers/carController')
+const {getOwners} = require('./../controllers/ownerController')
+const Cars = require('./../models/carModel')
+const Owner = require('./../models/ownerModel')
 
-const keyboard = (data, lang) => {
+const universal_keyboard = (data, lang) => {
   let kbb = [], arr = [], text
 
   for (let i = 0; i < data.length; i++) {
@@ -477,10 +481,12 @@ const fee_pagination = (page, limit, cars, lang) => {
   return {text, kbb}
 }
 
-const car_pagination = (page, limit, cars) => {
+const car_pagination = async (page, limit) => {
   let offset = limit * (page - 1), text, kbb = [], arr = []
 
-  text = `<b>Hozirgi: ${offset + 1}-${cars.length + offset}, Jami:${cars.length}</b>\n\n`
+  const cars = await Cars.find({author: 669704116}).skip(offset).limit(limit), all_cars = await getCars({author: 669704116})
+
+  text = `<b>Hozirgi: ${offset + 1}-${cars.length + offset}, Jami:${all_cars.length}</b>\n\n`
 
   for (let i = 0; i < cars.length; i++) {
     const car = cars[i]
@@ -505,7 +511,7 @@ const car_pagination = (page, limit, cars) => {
     {
       text: ` ➡️`,
       callback_data: JSON.stringify({
-        phrase: cars.length + offset !== cars.length ? `right#car#${page + 1}` : 'none', id: ''
+        phrase: cars.length + offset !== all_cars.length ? `right#car#${page + 1}` : 'none', id: ''
       })
     }
   ]
@@ -515,10 +521,12 @@ const car_pagination = (page, limit, cars) => {
   return {text, kbb}
 }
 
-const owner_pagination = (page, limit, owners) => {
+const owner_pagination = async (page, limit) => {
   let offset = limit * (page - 1), text, kbb = [], arr = []
 
-  text = `<b>Hozirgi: ${offset + 1}-${owners.length + offset}, Jami:${owners.length}</b>\n\n`
+  const owners = await Owner.find({status: 'active'}).skip(offset).limit(limit), all_owners = await getOwners({status: 'active'})
+
+  text = `<b>Hozirgi: ${offset + 1}-${owners.length + offset}, Jami:${all_owners.length}</b>\n\n`
 
   for (let i = 0; i < owners.length; i++) {
     const owner = owners[i]
@@ -543,7 +551,7 @@ const owner_pagination = (page, limit, owners) => {
     {
       text: ` ➡️`,
       callback_data: JSON.stringify({
-        phrase: owners.length + offset !== owners.length ? `right#owner#${page + 1}` : 'none', id: ''
+        phrase: owners.length + offset !== all_owners.length ? `right#owner#${page + 1}` : 'none', id: ''
       })
     }
   ]
@@ -604,6 +612,6 @@ const car_attendance = (employees, lang) => {
 }
 
 module.exports = {
-  keyboard, employee_attendance, car_pagination, fee_pagination,
+  universal_keyboard, employee_attendance, car_pagination, fee_pagination,
   report, date, wash_pagination, employee_pagination, owner_pagination
 }

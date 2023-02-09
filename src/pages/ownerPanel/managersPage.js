@@ -7,7 +7,7 @@ const {getBranches, getBranch, updateBranch} = require('./../../controllers/bran
 const {getManagers, getManager, makeManager, updateManager, deleteManager, countManagers} = require('./../../controllers/managerController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
-const {branch_manager_keyboard, bio} = require('./../../helpers/utils')
+const {universal_keyboard, report} = require('./../../helpers/utils')
 
 let type, manager_id
 
@@ -32,7 +32,7 @@ const oms1 = async (bot, chat_id, lang) => {
 
   if (managers.length > 0) {
     await updateOwner({telegram_id: chat_id}, {step: 8})
-    kbb = branch_manager_keyboard(managers, lang)
+    kbb = universal_keyboard(managers, lang)
     message = (lang === kb.language.uz) ? `Sizda ${count} menejer mavjud` : `У вас есть ${count} менеджеров`
   } else {
     message = (lang === kb.language.uz) ? `Sizda hali menejerlar mavjud emas` : `У вас еще нет менеджеров`
@@ -49,7 +49,7 @@ const oms2 = async (bot, chat_id, text, lang) => {
   if (manager) {
     await updateOwner({telegram_id: chat_id}, {step: 9})
 
-    message = bio(manager, 'MANAGER', lang)
+    message = report(manager, 'MANAGER', lang)
     kbb = (lang === kb.language.uz) ? keyboard.options.owner.manager.settings.uz : keyboard.options.owner.manager.settings.ru
 
     await updateManager({_id: manager._id}, {step: 8, status: 'process'})
@@ -87,7 +87,7 @@ const oms4 = async (bot, chat_id, _id, text, lang) => {
 
   manager = await getManager({_id})
 
-  const message = bio(manager, 'MANAGER', lang)
+  const message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     clause = "Menejer nomi muvaffaqiyatli o'zgartirildi"
@@ -116,7 +116,7 @@ const oms6 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
   await updateManager({_id}, {number: text, step: 8})
 
-  const manager = await getManager({_id}), message = bio(manager, 'MANAGER', lang)
+  const manager = await getManager({_id}), message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     clause = "Menejer telefon raqami muvaffaqiyatli o'zgartirildi"
@@ -146,7 +146,7 @@ const oms8 = async (bot, chat_id, _id, text, lang) => {
 
   await updateManager({_id}, {username: text, step: 8})
 
-  const manager = await getManager({_id}), message = bio(manager, 'MANAGER', lang)
+  const manager = await getManager({_id}), message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     clause = "Menejer usernami muvaffaqiyatli o'zgartirildi"
@@ -166,7 +166,7 @@ const oms9 = async (bot, chat_id, _id, lang) => {
     ? "O'zgartirmoqchi bo'lgan filialni yuboring"
     : "Отправьте локацию, которое хотите изменить"
 
-  const branches = await getBranches({owner: chat_id, status: 'active'}), kbb = branch_manager_keyboard(branches, lang)
+  const branches = await getBranches({owner: chat_id, status: 'active'}), kbb = universal_keyboard(branches, lang)
 
   await updateManager({_id}, {step: 9})
 
@@ -208,7 +208,7 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
 
   await manager.save()
 
-  const message = bio(manager, 'MANAGER', lang)
+  const message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     clause = "Menejer filiali muvaffaqiyatli o'zgartirildi"
@@ -278,9 +278,9 @@ const oms14 = async (bot, chat_id, _id, text, lang) => {
 
   await updateManager({_id}, {number: text, step: 3})
 
-  const branches = await getBranches({owner: chat_id, manager: '', status: 'active'})
+  const branches = await getBranches({owner: chat_id, status: 'active'})
 
-  kbb = branch_manager_keyboard(branches, lang)
+  kbb = universal_keyboard(branches, lang)
 
   if (lang === kb.language.uz) {
     message = 'Menejerga filial tanlang'
@@ -302,7 +302,7 @@ const oms15 = async (bot, chat_id, _id, lang) => {
 
   const manager = await getManager({_id})
 
-  message = bio(manager, 'MANAGER', lang)
+  message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     message += '\nTasdiqlaysizmi'
@@ -322,7 +322,7 @@ const oms16 = async (bot, chat_id, _id, text, lang) => {
 
   await updateManager({_id}, {branch: text, step: 4})
 
-  message = bio(manager, 'MANAGER', lang)
+  message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     message += '\nTasdiqlaysizmi'
@@ -342,7 +342,6 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
     const username = `${manager.name}_m_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
-
 
     data = {branch: '', username, password, step: 5, status: 'active'}
 

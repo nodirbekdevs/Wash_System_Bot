@@ -24,7 +24,7 @@ const acs1 = async (bot, chat_id) => {
 const acs2 = async (bot, chat_id) => {
   const cars = await getCars({author: chat_id})
 
-  const report = car_pagination(1, 10, cars)
+  const report = await car_pagination(1, 6)
 
   await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
 }
@@ -32,12 +32,12 @@ const acs2 = async (bot, chat_id) => {
 const acs3 = async (bot, chat_id, query_id, message_id, phrase, _id) => {
   let message
 
-  const cars = await getCars({author: chat_id}), data = phrase.split('#')
+  const cars = await getCars({author: chat_id})
 
-  if ((data[0] === 'left' || data[0] === 'right') && data[1] === 'car') {
-    const current_page = parseInt(data[2])
+  if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'car') {
+    const current_page = parseInt(phrase.split('#')[2])
 
-    const report = await car_pagination(current_page, 10, cars)
+    const report = await car_pagination(current_page, 6)
 
     await bot.editMessageText(report.text, {
       chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
