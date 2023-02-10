@@ -32,6 +32,14 @@ const updateFee = async (query, data, text) => {
   }
 }
 
+const updateManyFees = async (query, data) => {
+  try {
+    return await Fee.updateMany(query, data)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 const deleteFee = async (query) => {
   try {
     return await Fee.findOneAndDelete(query)
@@ -48,4 +56,4 @@ const countFees = async (query) => {
   }
 }
 
-module.exports = {getFees, getFee, makeFee, updateFee, deleteFee, countFees}
+module.exports = {getFees, getFee, makeFee, updateFee, updateManyFees, deleteFee, countFees}

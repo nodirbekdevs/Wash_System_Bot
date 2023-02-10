@@ -7,6 +7,7 @@ const kb = require('./helpers/keyboard-buttons')
 // const {employeePanel, getEmployee, eos2} = require('./pages/employee_panel/employeePanel')
 
 const {adminPanel, getAdmin, amp, acs3, aos3, aas8} = require('./pages/adminPanel/adminPanel')
+const {ownerPanel, getOwner, ofs4, ofs14, ofs20} = require('./pages/ownerPanel/ownerPanel')
 
 const bot = new TelegramBot(config.TOKEN, {db, polling: true})
 
@@ -21,13 +22,14 @@ bot.on('message', async message => {
   // const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
   //   employee = await getEmployee(query), work = (await getWorks({}))[0]
 
-  const admin = await getAdmin({telegram_id: message.from.id, status: 'active'})
+  const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
+    owner = await getOwner(query)
 
 
   try {
-    if (admin) {
-      await adminPanel(bot, message, admin)
-    }
+    if (admin) await adminPanel(bot, message, admin)
+    if (owner) await ownerPanel(bot, message, owner)
+
   } catch (e) {
     console.log(e)
   }
@@ -37,7 +39,7 @@ bot.on('callback_query', async query => {
   const query_id = query.id, telegram_id = query.from.id, mid = query.message.message_id,
     data = query.data, {phrase, id} = JSON.parse(data)
 
-  const request = {telegram_id}, admin = await getAdmin(request)
+  const request = {telegram_id, status: 'active'}, admin = await getAdmin(request), owner = await getOwner(request)
 
   if (admin) {
     if (phrase === "SEND_AD") await aas8(bot, telegram_id, id)
@@ -56,5 +58,11 @@ bot.on('callback_query', async query => {
 
       await amp(bot, telegram_id)
     }
+  }
+
+  if (owner) {
+    if (phrase === 'seen' || phrase === 'done') await ofs4(bot, telegram_id, id, phrase, owner.lang)
+    if (phrase === 'e_car' || phrase === 'e_e') await ofs14(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
+    if (phrase === 's_car' || phrase === 's_e') await ofs20(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
   }
 })

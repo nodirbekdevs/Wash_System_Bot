@@ -47,12 +47,12 @@ module.exports = {
       uz: [
         [kb.owner.pages.uz.settings, kb.owner.pages.uz.feedback],
         [kb.owner.pages.uz.managers, kb.owner.pages.uz.branches],
-        [kb.owner.pages.uz.cars, kb.owner.pages.uz.reports]
+        [kb.owner.pages.uz.fees, kb.owner.pages.uz.reports]
       ],
       ru: [
         [kb.owner.pages.ru.settings, kb.owner.pages.ru.feedback],
         [kb.owner.pages.ru.managers, kb.owner.pages.ru.branches],
-        [kb.owner.pages.ru.cars, kb.owner.pages.ru.reports]
+        [kb.owner.pages.ru.fees, kb.owner.pages.ru.reports]
       ]
     },
 
@@ -89,13 +89,13 @@ module.exports = {
       ]
     },
 
-    cars: {
+    fees: {
       uz: [
-        [kb.owner.cars.uz.all, kb.owner.cars.uz.add],
+        [kb.owner.fees.uz.all, kb.owner.fees.uz.add],
         [kb.main.uz]
       ],
       ru: [
-        [kb.owner.cars.ru.all, kb.owner.cars.ru.add],
+        [kb.owner.fees.ru.all, kb.owner.fees.ru.add],
         [kb.main.ru]
       ]
     },
@@ -285,9 +285,22 @@ module.exports = {
             [kb.options.back.ru]
           ]
         }
+      },
+
+      fee: {
+        settings: {
+          uz: [
+            [kb.options.owner.fee.settings.uz.name, kb.options.owner.fee.settings.uz.description, kb.options.owner.fee.settings.uz.image],
+            [kb.options.owner.fee.settings.uz.cash, kb.options.owner.fee.settings.uz.car, kb.options.owner.fee.settings.uz.price],
+            [kb.options.back.uz]
+          ],
+          ru: [
+            [kb.options.owner.fee.settings.ru.name, kb.options.owner.fee.settings.ru.description, kb.options.owner.fee.settings.ru.image],
+            [kb.options.owner.fee.settings.ru.cash, kb.options.owner.fee.settings.ru.car, kb.options.owner.fee.settings.ru.price],
+            [kb.options.back.ru]
+          ]
+        }
       }
-
-
     },
 
     confirmation: {

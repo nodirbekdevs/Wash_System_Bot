@@ -12,6 +12,7 @@ const Branch = model('Branch', new Schema({
     latitude: {type: String, default: ''},
     longitude: {type: String, default: ''}
   },
+  total_fees: {type: Number, default: 0},
   total_employees: {type: Number, default: 0},
   total_washes: {type: Number, default: 0},
   step: {type: Number, default: 0},

@@ -24,8 +24,6 @@ const aos1 = async (bot, chat_id) => {
 }
 
 const aos2 = async (bot, chat_id) => {
-  const owners = await getOwners({status: 'active'})
-
   const report = await owner_pagination(1, 6)
 
   await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
@@ -34,12 +32,10 @@ const aos2 = async (bot, chat_id) => {
 const aos3 = async (bot, chat_id, query_id, message_id, phrase, _id) => {
   let message
 
-  const owners = await getOwners({status: 'active'}), data = phrase.split('#')
+  if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'owner') {
+    const current_page = parseInt(phrase.split('#')[2])
 
-  if ((data[0] === 'left' || data[0] === 'right') && data[1] === 'owner') {
-    const current_page = parseInt(data[2])
-
-    const report = await owner_pagination(current_page, 10, owners)
+    const report = await owner_pagination(current_page, 10)
 
     await bot.editMessageText(report.text, {
       chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}

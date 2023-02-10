@@ -8,7 +8,7 @@ const Car = model('Car', new Schema({
   type: {type: String, default: ''},
   description: {type: String, default: ''},
   image: {type: String, default: ''},
-  total_types: {type: Number, default: 0},
+  total_fees: {type: Number, default: 0},
   total_washes: {type: Number, default: 0},
   step: {type: Number, default: 4},
   status: {type: String, enum: ['process', 'inactive', 'active'], default: 'active'},

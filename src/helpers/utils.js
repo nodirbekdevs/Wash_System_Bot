@@ -170,6 +170,7 @@ const report = (data, kw, lang) => {
       message += `Bahosi - ${data.mark}\n`
       message += `Sababi - ${data.reason}\n`
       message += `Holati - ${data.status}`
+      message += `Yozilgan vaqti - ${data.created_at}`
     } else if (lang === kb.language.ru) {
       message += `Автор - ${data.author}\n`
       message += `Филиал - ${data.branch}\n`
@@ -177,6 +178,7 @@ const report = (data, kw, lang) => {
       message += `Рейтинг - ${data.mark}\n`
       message += `Причина - ${data.reason}\n`
       message += `Статус - ${data.status}`
+      message += `Записанное время - ${data.created_at}`
     }
   }
 
@@ -304,7 +306,7 @@ const report = (data, kw, lang) => {
       message += `Xo'jayin - ${data.owner}\n`
       message += `Menejer - ${data.manager}\n`
       message += `Filial - ${data.branch}\n`
-      message += `Turi - ${data.type}\n`
+      message += `Nomi - ${data.name}\n`
       message += `Tavsifi - ${data.description}\n`
       message += `Mashinalar - \n`
       for (let i = 0; i < data.cars.length; i++) message += `${i + 1}. ${data.cars[i]}\n`
@@ -324,6 +326,26 @@ const report = (data, kw, lang) => {
       message += `Цена автомойки - ${data.price}\n`
       message += `Чистая прибыль от автомойки - ${data.price - data.cash}\n`
       message += `Время начать работу - ${data.created_at}\n`
+    }
+  }
+
+  if (kw === 'FEE_SETTINGS') {
+    if (lang === kb.language.uz) {
+      message += `Nomi - ${data.name}\n`
+      message += `Tavsifi - ${data.description}\n`
+      message += `Mashinalar - \n`
+      for (let i = 0; i < data.cars.length; i++) message += `${i + 1}. ${data.cars[i]}\n`
+      message += `Yuvish kassasi - ${data.cash}\n`
+      message += `Yuvish narxi - ${data.price}\n`
+      message += `Yuvish foydasi - ${data.price - data.cash}\n`
+    } else if (lang === kb.language.ru) {
+      message += `Тип - ${data.type}\n`
+      message += `Описание - ${data.description}\n`
+      message += `Автомобили - \n`
+      for (let i = 0; i < data.cars.length; i++) message += `${i + 1}. ${data.cars[i]}\n`
+      message += `Yuvish kassasi - ${data.cash}\n`
+      message += `Цена автомойки - ${data.price}\n`
+      message += `Чистая прибыль от автомойки - ${data.price - data.cash}\n`
     }
   }
 
@@ -481,10 +503,10 @@ const fee_pagination = (page, limit, cars, lang) => {
   return {text, kbb}
 }
 
-const car_pagination = async (page, limit) => {
+const car_pagination = async (page, limit, author) => {
   let offset = limit * (page - 1), text, kbb = [], arr = []
 
-  const cars = await Cars.find({author: 669704116}).skip(offset).limit(limit), all_cars = await getCars({author: 669704116})
+  const cars = await Cars.find({author}).skip(offset).limit(limit), all_cars = await getCars({author: 669704116})
 
   text = `<b>Hozirgi: ${offset + 1}-${cars.length + offset}, Jami:${all_cars.length}</b>\n\n`
 
@@ -586,32 +608,45 @@ const employee_attendance = (employees, lang) => {
   return {kbb, text}
 }
 
-const car_attendance = (employees, lang) => {
-  let kbb = [], arr = []
+const car_attendance = (cars, list, lang, type) => {
+  let kbb = [], arr = [], obj
 
   const text = (lang === kb.language.uz)
-    ? `<b>Jami: ${employees.length} ta ishchi mavjud.</b>`
-    : `<b>Всего: ${employees.length} сотрудника.</b>`
+    ? `<b>Jami: ${cars.length} ta mashina mavjud.</b>`
+    : `<b>Всего: ${cars.length} автомобилей.</b>`
 
-  for (let i = 0; i < employees.length; i++) {
-    const employee = employees[i], flag = employee.status === 'active' ? '✅' : '➖'
+  for (let i = 0; i < cars.length; i++) {
+    const car = cars[i], flag = list.includes(car.name) ? '✅' : '➖'
 
-    const obj = {text: `${flag} ${employee.name}`, callback_data: JSON.stringify({phrase: 'e_edit', id: employee._id})}
+    if (type === 'select') {
+      obj = {text: `${flag} ${car.name}`, callback_data: JSON.stringify({phrase: 's_car', id: car._id})}
+    } else if (type === 'edit') {
+      obj = {text: `${flag} ${car.name}`, callback_data: JSON.stringify({phrase: 'e_car', id: car._id})}
+    }
+
 
     arr.push(obj)
 
-    if (arr.length % 2 === 0) {
+    if (arr.length % 4 === 0) {
       kbb.push(arr)
       arr = []
     }
   }
 
-  kbb.push([{text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})}])
+  const clause = (lang === kb.language.uz) ? "Tugatish" : "Прекращение"
+
+  if (type === 'select') {
+    obj = {text: clause, callback_data: JSON.stringify({phrase: `s_e`, id: ''})}
+  } else if (type === 'edit') {
+    obj = {text: clause, callback_data: JSON.stringify({phrase: `e_e`, id: ''})}
+  }
+
+  kbb.push([obj])
 
   return {kbb, text}
 }
 
 module.exports = {
   universal_keyboard, employee_attendance, car_pagination, fee_pagination,
-  report, date, wash_pagination, employee_pagination, owner_pagination
+  report, date, wash_pagination, employee_pagination, owner_pagination, car_attendance
 }

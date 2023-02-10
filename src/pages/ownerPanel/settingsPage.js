@@ -105,21 +105,15 @@ const ost6 = async (bot, chat_id, text, lang) => {
 const ownerSettings = async (bot, owner, text, lang) => {
   try {
     if (text === kb.owner.pages.uz.settings || text === kb.owner.pages.ru.settings) await ost0(bot, owner, lang)
-
     if (owner.step === 6 && text === kb.main.uz) await updateOwner({telegram_id: owner.telegram_id}, {step: 5})
-
     if (owner.step === 6) {
       if (text === kb.owner.settings.uz.name || text === kb.owner.settings.ru.name) await ost1(bot, owner.telegram_id, lang)
-
       if (text === kb.owner.settings.uz.number || text === kb.owner.settings.ru.number) await ost3(bot, owner.telegram_id, lang)
-
       if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await ost5(bot, owner.telegram_id, lang)
       type = text
     } else if (owner.step === 7) {
       if (text === kb.owner.settings.uz.name || text === kb.owner.settings.ru.name) await ost2(bot, owner.telegram_id, text, lang)
-
       if (text === kb.owner.settings.uz.number || text === kb.owner.settings.ru.number) await ost4(bot, owner.telegram_id, text, lang)
-
       if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await ost6(bot, owner.telegram_id, text, lang)
     }
   } catch (e) {

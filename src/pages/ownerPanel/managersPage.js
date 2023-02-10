@@ -7,6 +7,7 @@ const {getBranches, getBranch, updateBranch} = require('./../../controllers/bran
 const {getManagers, getManager, makeManager, updateManager, deleteManager, countManagers} = require('./../../controllers/managerController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
+const {updateManyFees} = require('./../../controllers/feeController')
 const {universal_keyboard, report} = require('./../../helpers/utils')
 
 let type, manager_id
@@ -183,6 +184,10 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
       await updateManyEmployees({manager: branch.manager, branch: branch.name}, {manager: manager.telegram_id})
     }
 
+    if (branch.total_fees > 0) {
+      await updateManyFees({owner: branch.owner, manager: branch.manager, branch: branch.name}, {manager: manager.telegram_id})
+    }
+
     if (branch.manager) {
       await updateManager({telegram_id: branch.manager, owner: branch.owner}, {branch: ''})
     }
@@ -348,6 +353,10 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
     if (branch) {
       if (branch.total_employees > 0) {
         await updateManyEmployees({manager: branch.manager, branch: branch.name}, {manager: 0})
+      }
+
+      if (branch.total_fees > 0) {
+        await updateManyFees({owner: branch.owner, manager: branch.manager, branch: branch.name}, {manager: 0})
       }
 
       if (branch.manager) {

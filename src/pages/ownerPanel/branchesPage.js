@@ -1,6 +1,6 @@
 const Geo = require('node-geocoder')
 const {mkdir, rename} = require('fs/promises')
-const {join} = require("path")
+const {join} = require("node:path")
 const config = require('./../../helpers/config')
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
@@ -8,8 +8,9 @@ const {getBranches, getBranch, makeBranch, updateBranch, deleteBranch, countBran
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManagers, getManager, updateManager} = require('./../../controllers/managerController')
 const {updateManyEmployees} = require('./../../controllers/employeeController')
+const {updateManyFees} = require('./../../controllers/feeController')
 const {universal_keyboard, report} = require('./../../helpers/utils')
-const {} = require('./../../../uploads/reports/branches')
+// const {} = require('./../../../uploads/reports/branches')
 
 let type, branch_id
 
@@ -168,6 +169,10 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
       await updateManyEmployees({branch: branch.name, manager: branch.manager}, {manager: manager.telegram_id})
     }
 
+    if (branch.total_fees > 0) {
+      await updateManyFees({branch: branch.name, manager: branch.manager}, {manager: manager.telegram_id})
+    }
+
     if (branch.manager) {
       await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: ''})
     }
@@ -216,6 +221,8 @@ const obs10 = async (bot, chat_id, _id, text, lang) => {
 
   const branch = await getBranch({_id}), geo = Geo(config.MAP_OPTIONS),
     place_geo = await geo.reverse({lat: text.latitude, lon: text.longitude})
+
+  console.log(place_geo)
 
   place_geo.map(place => place_name = `${place.country} ${place.city} ${place.county}`)
 
@@ -336,6 +343,8 @@ const obs16 = async (bot, chat_id, branch, text, lang) => {
   if (text.latitude && text.longitude) {
     const geo = Geo(config.MAP_OPTIONS), place_geo = await geo.reverse({lat: text.latitude, lon: text.longitude})
 
+    console.log(place_geo)
+
     place_geo.map(place => place_name = `${place.country} ${place.city} ${place.county}`)
 
     if (branch) {
@@ -380,7 +389,11 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
 
+    data = {manager: 0, step: 5, status: 'active'}
+
     if (manager) {
+      const managers_branch = await getBranch({owner: manager.owner, name: manager.branch})
+
       if (manager.total_employees > 0) {
         await updateManyEmployees({manager: manager.telegram_id, branch: manager.branch}, {manager: 0})
       }
@@ -389,16 +402,18 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
         await updateBranch({owner: manager.owner, name: manager.branch}, {manager: 0})
       }
 
+      if (managers_branch.total_fees > 0) {
+        await updateManyFees({branch: managers_branch.name, manager: managers_branch.manager}, {manager: 0})
+      }
+
       await updateManager({_id: manager._id}, {
         branch: branch.name,
         total_employees: branch.total_employees,
         status: 'occupied'
       })
 
-      data = {step: 5, status: 'active'}
+      data = {manager: manager.telegram_id, step: 5, status: 'provided'}
     }
-
-    data = {step: 5, status: 'provided'}
 
     await mkdir(join(__dirname, './../../../uploads/reports/branches', `/${branch.name}`))
 
@@ -423,6 +438,12 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
+const obs18 = async (bot, chat_id, _id, lang) => {
+  await deleteBranch({_id})
+
+  await obs0(bot, chat_id, lang)
+}
+
 const ownerBranch = async (bot, chat_id, text, lang) => {
   const owner = await getOwner({telegram_id: chat_id})
 
@@ -438,8 +459,7 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
 
     if (branch) {
       if (text === kb.options.back.uz) {
-        await updateBranch({_id: branch._id}, {step: 6, status: 'inactive'})
-        await obs0(bot, chat_id, lang)
+        await obs18(bot, chat_id, branch._id, lang)
       } else if (text !== kb.options.back.uz) {
         if (branch.step === 0) await obs12(bot, chat_id, branch._id, text, lang)
         if (branch.step === 1) await obs13(bot, chat_id, branch._id, text, lang)

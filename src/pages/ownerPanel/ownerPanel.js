@@ -3,6 +3,7 @@ const {ownerSettings} = require('./settingsPage')
 const {ownerBranch} = require('./branchesPage')
 const {ownerManager} = require('./managersPage')
 const {ownerFeedback, ofs4} = require('./feedbackPage')
+const {ownerFee, ofs14, ofs20} = require('./feePage')
 const {getOwner} = require('./../../controllers/ownerController')
 
 const ownerPanel = async (bot, message, owner) => {
@@ -22,10 +23,11 @@ const ownerPanel = async (bot, message, owner) => {
     await ownerSettings(bot, owner, text)
     await ownerBranch(bot, chat_id, text, lang)
     await ownerManager(bot, chat_id, text, lang)
+    await ownerFee(bot, chat_id, text, lang)
     await ownerFeedback(bot, chat_id, text, lang)
   } catch (e) {
     console.log(e)
   }
 }
 
-module.exports = {ownerPanel, getOwner, ofs4}
+module.exports = {ownerPanel, getOwner, ofs4, ofs14, ofs20}

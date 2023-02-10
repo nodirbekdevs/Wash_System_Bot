@@ -1,7 +1,7 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {getAllFeedback, getFeedback, updateFeedback, countAllFeedback} = require('./../../controllers/feedbackController')
-const {report} = require('./../../helpers/utils')
+const {report, date} = require('./../../helpers/utils')
 const {getEmployee} = require('./../../controllers/employeeController')
 const {getClient} = require('./../../controllers/clientController')
 
@@ -37,7 +37,7 @@ const ofs2 = async (bot, chat_id, lang) => {
   const allFeedback = await getAllFeedback({branch_owner: chat_id, is_read: false, status: 'active'})
 
   for (let i = 0; i < allFeedback.length; i++) {
-    const feedback = allFeedback[i]
+    const feedback = allFeedback[i], created_at = date(feedback.created_at)
 
     const author = feedback.is_employee
       ? await getEmployee({telegram_id: feedback.author})
@@ -49,7 +49,8 @@ const ofs2 = async (bot, chat_id, lang) => {
       type: feedback.is_employee,
       mark: feedback.mark,
       reason: feedback.reason,
-      status: feedback.status
+      status: feedback.status,
+      created_at
     }
 
     const send_text = (lang === kb.language.uz) ? "Muommoni ko'rish boshlandi" : "Видение проблемы началось"
@@ -84,7 +85,7 @@ const ofs3 = async (bot, chat_id, lang) => {
   const allFeedback = await getAllFeedback({branch_owner: chat_id, is_read: true, status: 'seen'})
 
   for (let i = 0; i < allFeedback.length; i++) {
-    const feedback = allFeedback[i]
+    const feedback = allFeedback[i], created_at = date(feedback.created_at)
 
     const author = feedback.is_employee
       ? await getEmployee({telegram_id: feedback.author})
@@ -96,7 +97,8 @@ const ofs3 = async (bot, chat_id, lang) => {
       type: feedback.is_employee,
       mark: feedback.mark,
       reason: feedback.reason,
-      status: feedback.status
+      status: feedback.status,
+      created_at
     }
 
     const send_text = (lang === kb.language.uz) ? "Muommoni hal qilindi" : "Проблема решена"

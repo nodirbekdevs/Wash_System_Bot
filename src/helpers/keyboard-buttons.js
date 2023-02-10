@@ -50,7 +50,7 @@ module.exports = {
         settings: "⚙️Sozlamalar",
         branches: "🏢  Filiallar",
         managers: "👨‍💼  Menejerlar",
-        cars: "🚘  Mashinalar",
+        fees: "🚘  Tariflar",
         feedback: "✍️Fikr bildirish",
         reports: "📊  Hisobotlar"
       },
@@ -58,7 +58,7 @@ module.exports = {
         settings: "⚙️Настройки",
         branches: "🏢  Филиалы",
         managers: "👨‍💼  Менеджеры",
-        cars: "🚘  Машины",
+        fees: "🚘  Тарифы",
         feedback: "✍️Комментировать",
         reports: "📊  Отчеты"
       }
@@ -99,14 +99,14 @@ module.exports = {
       }
     },
 
-    cars: {
+    fees: {
       uz: {
-        all: "Barcha mashinalar",
-        add: "Mashina qo'shish"
+        all: "Barcha tariflar",
+        add: "Tarif qo'shish"
       },
       ru: {
-        all: "Все автомобили",
-        add: "Добавить автомобиль"
+        all: "Все Тарифы",
+        add: "Добавить Тариф"
       }
     },
 
@@ -355,6 +355,27 @@ module.exports = {
             number: "Номер",
             username: "Username",
             branch: "Филиал"
+          }
+        }
+      },
+
+      fee: {
+        settings: {
+          uz: {
+            name: 'Nomni',
+            description: 'Tavsifi',
+            image: "Rasmni",
+            car: "Mashinalarni",
+            cash: "Yuvish kassasini",
+            price: "Yuvish narxini"
+          },
+          ru: {
+            name: 'Название',
+            description: 'Оисание',
+            image: "Картина",
+            car: "Автомобили",
+            cash: "Yuvish kassasini",
+            price: "Цена автомойки"
           }
         }
       }
