@@ -149,14 +149,14 @@ module.exports = {
         settings: "⚙️Sozlamalar",
         washes: "🚿  Yuvishlar",
         employees: "🙍‍♂️Xodimlar",
-        cars: "🚘  Mashinalar",
+        fees: "🚘  Tariflar",
         branch: "🏢  Filial",
       },
       ru: {
         settings: "⚙️Sozlamalar",
         washes: "🚿  Мойки",
         employees: "🙍‍♂️Сотрудники",
-        cars: "🚘  Машины",
+        fees: "🚘  Тарифы",
         branch: "🏢  Филиал",
       }
     },
@@ -200,14 +200,14 @@ module.exports = {
       }
     },
 
-    cars: {
+    fees: {
       uz: {
-        all: "Barcha mashinalar",
-        add: "Mashina qo'shish"
+        all: "Barcha tariflar",
+        edit: "Ta'rifni o'zgartirish"
       },
       ru: {
-        all: "Все автомобили",
-        add: "Добавить автомобиль"
+        all: "Все тарифы",
+        edit: "Изменение тарифа"
       }
     },
 

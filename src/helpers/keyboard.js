@@ -133,12 +133,12 @@ module.exports = {
     pages: {
       uz: [
         [kb.manager.pages.uz.settings, kb.manager.pages.uz.washes],
-        [kb.manager.pages.uz.cars, kb.manager.pages.uz.employees],
+        [kb.manager.pages.uz.fees, kb.manager.pages.uz.employees],
         [kb.manager.pages.uz.branch]
       ],
       ru: [
         [kb.manager.pages.ru.settings, kb.manager.pages.ru.washes],
-        [kb.manager.pages.ru.cars, kb.manager.pages.ru.employees],
+        [kb.manager.pages.ru.fees, kb.manager.pages.ru.employees],
         [kb.manager.pages.ru.branch]
       ]
     },
@@ -180,13 +180,13 @@ module.exports = {
       ]
     },
 
-    cars: {
+    fees: {
       uz: [
-        [kb.manager.cars.uz.all, kb.manager.cars.uz.add],
+        [kb.manager.fees.uz.all, kb.manager.fees.uz.edit],
         [kb.main.uz]
       ],
       ru: [
-        [kb.manager.cars.ru.all, kb.manager.cars.ru.add],
+        [kb.manager.fees.ru.all, kb.manager.fees.ru.edit],
         [kb.main.ru]
       ]
     }

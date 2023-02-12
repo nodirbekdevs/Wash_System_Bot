@@ -3,7 +3,7 @@ const keyboard = require('./../../helpers/keyboard')
 const {getBranch} = require('./../../controllers/branchController')
 const {getManager} = require('./../../controllers/managerController')
 const {getOwner} = require('./../../controllers/ownerController')
-const {date, bio} = require('./../../helpers/utils')
+const {date, report} = require('./../../helpers/utils')
 
 const mbs0 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}), owner = await getOwner({telegram_id: manager.owner}),
@@ -21,7 +21,7 @@ const mbs0 = async (bot, chat_id, lang) => {
     created_at: started_at
   }
 
-  const message = bio(data, 'MANAGER_BRANCH', lang)
+  const message = report(data, 'MANAGER_BRANCH', lang)
 
   await bot.sendLocation(chat_id, branch.location.latitude, branch.location.longitude)
 

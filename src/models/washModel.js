@@ -7,6 +7,7 @@ const Wash = model('Wash', new Schema({
   employee: {type: String, ref: 'Employee', default: ''},
   branch: {type: String, ref: 'Branch', default: ''},
   client: {type: Number, ref: 'Client', default: 0},
+  fee: {type: String, ref: 'Fee', default: ''},
   car: {type: String, ref: 'Car', default: ''},
   car_type: {type: String, default: ''},
   car_number: {type: String, default: ''},

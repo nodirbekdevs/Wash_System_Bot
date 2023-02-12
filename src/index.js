@@ -8,6 +8,7 @@ const kb = require('./helpers/keyboard-buttons')
 
 const {adminPanel, getAdmin, amp, acs3, aos3, aas8} = require('./pages/adminPanel/adminPanel')
 const {ownerPanel, getOwner, ofs4, ofs14, ofs20} = require('./pages/ownerPanel/ownerPanel')
+const {managerPanel, getManager, mmp, mws2, mws3, mws11, mws12, mes2, mes3, mes11, mcs2} = require('./pages/managerPanel/managerPanel')
 
 const bot = new TelegramBot(config.TOKEN, {db, polling: true})
 
@@ -39,7 +40,8 @@ bot.on('callback_query', async query => {
   const query_id = query.id, telegram_id = query.from.id, mid = query.message.message_id,
     data = query.data, {phrase, id} = JSON.parse(data)
 
-  const request = {telegram_id, status: 'active'}, admin = await getAdmin(request), owner = await getOwner(request)
+  const request = {telegram_id, status: 'active'}, admin = await getAdmin(request), owner = await getOwner(request),
+    manager = await getManager(request)
 
   if (admin) {
     if (phrase === "SEND_AD") await aas8(bot, telegram_id, id)
@@ -64,5 +66,21 @@ bot.on('callback_query', async query => {
     if (phrase === 'seen' || phrase === 'done') await ofs4(bot, telegram_id, id, phrase, owner.lang)
     if (phrase === 'e_car' || phrase === 'e_e') await ofs14(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
     if (phrase === 's_car' || phrase === 's_e') await ofs20(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
+  }
+
+  if (manager) {
+    if (data === 'none') {
+      const message = (manager.lang === kb.language.uz)
+        ? "Bu yerda ma'lumotlar yo'q. Siz noto'g'ri betni tanladingiz."
+        : "Здесь нет информации. Вы выбрали не ту страницу."
+
+      await bot.answerCallbackQuery(query_id, {text: message, show_alert: true})
+    }
+
+    if (data === 'delete') {
+      await bot.deleteMessage(telegram_id, mid)
+
+      await mmp(bot, telegram_id, manager.lang)
+    }
   }
 })

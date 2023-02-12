@@ -320,11 +320,14 @@ const ofs14 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
 
     if (index > -1) {
       fee.cars.splice(car.name)
+      car.total_fees -= 1
     } else if (index < -1) {
       fee.cars.push(car.name)
+      car.total_fees += 1
     }
 
     await fee.save()
+    await car.save()
 
     const cars = await getCars({status: 'active'}), report = await car_attendance(cars, fee.cars, lang, 'edit')
 
@@ -443,11 +446,14 @@ const ofs20 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
 
     if (index > -1) {
       fee.cars.splice(car.name)
+      car.total_fees -= 1
     } else if (index < -1) {
       fee.cars.push(car.name)
+      car.total_fees += 1
     }
 
     await fee.save()
+    await car.save()
 
     const cars = await getCars({status: 'active'}), report = await car_attendance(cars, fee.cars, lang, 'select')
 
