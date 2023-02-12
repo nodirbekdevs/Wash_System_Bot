@@ -363,4 +363,4 @@ const managerWashes = async (bot, chat_id, text, lang) => {
   }
 }
 
-module.exports = {managerWashes, mws2, mws4, mws10, mws11}
+module.exports = {managerWashes, mws2, mws10, mws11}

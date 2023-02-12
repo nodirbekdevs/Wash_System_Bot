@@ -51,7 +51,7 @@ module.exports = {
         branches: "🏢  Filiallar",
         managers: "👨‍💼  Menejerlar",
         fees: "🚘  Tariflar",
-        feedback: "✍️Fikr bildirish",
+        feedback: "✍️Izohlar",
         reports: "📊  Hisobotlar"
       },
       ru: {
@@ -59,7 +59,7 @@ module.exports = {
         branches: "🏢  Филиалы",
         managers: "👨‍💼  Менеджеры",
         fees: "🚘  Тарифы",
-        feedback: "✍️Комментировать",
+        feedback: "✍️Комментарии",
         reports: "📊  Отчеты"
       }
     },

@@ -3,7 +3,7 @@ const {v4} = require('uuid')
 
 const Manager = model('Manager', new Schema({
   _id: {type: String, default: v4},
-  telegram_id: {type: Number, unique: true, required: true},
+  telegram_id: {type: Number, unique: true},
   owner: {type: Number, ref: 'Owner', default: ''},
   branch: {type: String, ref: 'Branch', default: ''},
   name: {type: String, default: ''},

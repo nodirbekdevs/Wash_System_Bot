@@ -6,10 +6,23 @@ const {report} = require('./../../helpers/utils')
 let type
 
 const ost0 = async (bot, owner, lang) => {
-  const message = report(owner, 'OWNER', lang), kbb = (lang === kb.language.uz)
-    ? keyboard.owner.settings.uz : keyboard.owner.settings.ru
+  let message, kbb
+
+  console.log("Kevotti1")
+
+  if (lang === kb.language.uz) {
+    message = 'Sozlamalar sahifasi'
+    kbb = keyboard.owner.settings.uz
+  } else if (lang === kb.language.ru) {
+    message = 'Страница настроек'
+    kbb = keyboard.owner.settings.ru
+  }
+
+  const clause = report(owner, 'OWNER', lang)
 
   await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
+
+  await bot.sendMessage(owner.telegram_id, clause)
 
   await bot.sendMessage(owner.telegram_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }

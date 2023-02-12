@@ -72,7 +72,7 @@ const ofs2 = async (bot, chat_id, text, lang) => {
 
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message, reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  } else {
+  } else if (fee.image === '') {
     await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
 }
@@ -600,35 +600,37 @@ const ownerFee = async (bot, chat_id, text, lang) => {
       if (owner.step === 11) {
         const fee = await getFee({owner: owner.telegram_id, step: 8, status: 'process'})
 
-        if (text === kb.options.back.uz || text === kb.options.back.ru) {
-          await ofs15(bot, chat_id, fee._id)
-        } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
-          if (fee.step === 8) {
-            if (text === kb.options.owner.fee.settings.uz.name || text === kb.options.owner.branch.settings.ru.name)
-              await ofs3(bot, chat_id, fee._id, lang)
-            if (text === kb.options.owner.fee.settings.uz.description || text === kb.options.owner.fee.settings.ru.description)
-              await ofs5(bot, chat_id, fee._id, lang)
-            if (text === kb.options.owner.fee.settings.uz.image || text === kb.options.owner.fee.settings.ru.image)
-              await ofs7(bot, chat_id, fee._id, lang)
-            if (text === kb.options.owner.fee.settings.uz.cash || text === kb.options.owner.fee.settings.ru.cash)
-              await ofs9(bot, chat_id, fee._id, lang)
-            if (text === kb.options.owner.fee.settings.uz.price || text === kb.options.owner.fee.settings.ru.price)
-              await ofs11(bot, chat_id, fee._id, lang)
-            if (text === kb.options.owner.fee.settings.uz.car || text === kb.options.owner.fee.settings.ru.cash)
-              await ofs13(bot, chat_id, fee._id, lang)
+        if (fee) {
+          if (text === kb.options.back.uz || text === kb.options.back.ru) {
+            await ofs15(bot, chat_id, fee._id)
+          } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+            if (fee.step === 8) {
+              if (text === kb.options.owner.fee.settings.uz.name || text === kb.options.owner.branch.settings.ru.name)
+                await ofs3(bot, chat_id, fee._id, lang)
+              if (text === kb.options.owner.fee.settings.uz.description || text === kb.options.owner.fee.settings.ru.description)
+                await ofs5(bot, chat_id, fee._id, lang)
+              if (text === kb.options.owner.fee.settings.uz.image || text === kb.options.owner.fee.settings.ru.image)
+                await ofs7(bot, chat_id, fee._id, lang)
+              if (text === kb.options.owner.fee.settings.uz.cash || text === kb.options.owner.fee.settings.ru.cash)
+                await ofs9(bot, chat_id, fee._id, lang)
+              if (text === kb.options.owner.fee.settings.uz.price || text === kb.options.owner.fee.settings.ru.price)
+                await ofs11(bot, chat_id, fee._id, lang)
+              if (text === kb.options.owner.fee.settings.uz.car || text === kb.options.owner.fee.settings.ru.cash)
+                await ofs13(bot, chat_id, fee._id, lang)
 
-            type = text
-          } else if (fee.step === 7) {
-            if (type === kb.options.owner.fee.settings.uz.name || type === kb.options.owner.fee.settings.ru.name)
-              await ofs4(bot, chat_id, fee._id, text, lang)
-            if (type === kb.options.owner.fee.settings.uz.description || type === kb.options.owner.fee.settings.ru.description)
-              await ofs6(bot, chat_id, fee._id, text, lang)
-            if (type === kb.options.owner.fee.settings.uz.image || type === kb.options.owner.fee.settings.ru.image)
-              await ofs8(bot, chat_id, fee._id, text, lang)
-            if (type === kb.options.owner.fee.settings.uz.cash || type === kb.options.owner.fee.settings.ru.cash)
-              await ofs10(bot, chat_id, fee._id, text, lang)
-            if (type === kb.options.owner.fee.settings.uz.price || type === kb.options.owner.fee.settings.ru.price)
-              await ofs12(bot, chat_id, fee._id, text, lang)
+              type = text
+            } else if (fee.step === 7) {
+              if (type === kb.options.owner.fee.settings.uz.name || type === kb.options.owner.fee.settings.ru.name)
+                await ofs4(bot, chat_id, fee._id, text, lang)
+              if (type === kb.options.owner.fee.settings.uz.description || type === kb.options.owner.fee.settings.ru.description)
+                await ofs6(bot, chat_id, fee._id, text, lang)
+              if (type === kb.options.owner.fee.settings.uz.image || type === kb.options.owner.fee.settings.ru.image)
+                await ofs8(bot, chat_id, fee._id, text, lang)
+              if (type === kb.options.owner.fee.settings.uz.cash || type === kb.options.owner.fee.settings.ru.cash)
+                await ofs10(bot, chat_id, fee._id, text, lang)
+              if (type === kb.options.owner.fee.settings.uz.price || type === kb.options.owner.fee.settings.ru.price)
+                await ofs12(bot, chat_id, fee._id, text, lang)
+            }
           }
         }
       }

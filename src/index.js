@@ -8,7 +8,7 @@ const kb = require('./helpers/keyboard-buttons')
 
 const {adminPanel, getAdmin, amp, acs3, aos3, aas8} = require('./pages/adminPanel/adminPanel')
 const {ownerPanel, getOwner, ofs4, ofs14, ofs20} = require('./pages/ownerPanel/ownerPanel')
-const {managerPanel, getManager, mmp, mws2, mws3, mws11, mws12, mes2, mes3, mes11, mcs2} = require('./pages/managerPanel/managerPanel')
+const {managerPanel, getManager, mmp, mws2, mws10, mws11, mes2, mes3, mes11, mfs2} = require('./pages/managerPanel/managerPanel')
 
 const bot = new TelegramBot(config.TOKEN, {db, polling: true})
 
@@ -20,16 +20,15 @@ bot.setMyCommands(
 
 
 bot.on('message', async message => {
-  // const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
-  //   employee = await getEmployee(query), work = (await getWorks({}))[0]
-
   const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
-    owner = await getOwner(query)
-
+    owner = await getOwner(query), manager = await getManager(query)
 
   try {
     if (admin) await adminPanel(bot, message, admin)
-    if (owner) await ownerPanel(bot, message, owner)
+    if (owner) {
+      await ownerPanel(bot, message, owner)
+    }
+    if (manager) await managerPanel(bot, message, manager)
 
   } catch (e) {
     console.log(e)
@@ -69,6 +68,21 @@ bot.on('callback_query', async query => {
   }
 
   if (manager) {
+    if (((phrase.split('#')[0] === 'left' || data.split('#')[0] === 'right') && phrase.split('#')[1] === 'wash') || phrase === 'wash') {
+      await mws2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+    }
+    if (phrase === 'washing') await mws10(bot, telegram_id, mid, phrase, id, manager.lang)
+    if (phrase === 'washed') await mws11(bot, telegram_id, mid, phrase, id, manager.lang)
+
+    if (((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'employee') || phrase === 'employee')
+      await mes2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+
+    if (phrase === 'e_delete' || phrase === 'e_back') await mes3(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+    if (phrase === 'e_edit') await mes11(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+
+    if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'fee')
+      await mfs2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+
     if (data === 'none') {
       const message = (manager.lang === kb.language.uz)
         ? "Bu yerda ma'lumotlar yo'q. Siz noto'g'ri betni tanladingiz."

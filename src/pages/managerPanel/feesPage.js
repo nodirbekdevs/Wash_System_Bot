@@ -42,15 +42,11 @@ const mfs1 = async (bot, chat_id, lang) => {
 }
 
 const mfs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
-  let message
-
-  const manager = await getManager({telegram_id: chat_id}), btn = data.split('#'),
+  const manager = await getManager({telegram_id: chat_id}),
     query = {owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'}
 
-  if ((btn[0] === 'left' || btn[0] === 'right') && btn[1] === 'fee') {
-    const current_page = parseInt(btn[2])
-
-    const report = await fee_pagination(current_page, 1, query, lang)
+  if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'fee') {
+    const report = await fee_pagination(parseInt(data.split('#')[2]), 1, query, lang)
 
     await bot.editMessageText(report.text, {
       chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}

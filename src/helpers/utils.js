@@ -83,8 +83,6 @@ const date = (day) => {
 const report = (data, kw, lang) => {
   let message = ''
 
-  message = ''
-
   if (kw === 'ADMIN') {
     message += 'Ma\'lumotlaringiz: \n'
     message += `Ismingiz - ${data.name}.\n`
