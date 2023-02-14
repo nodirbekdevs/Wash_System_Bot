@@ -26,12 +26,12 @@ const ofs0 = async (bot, chat_id, lang) => {
 const ofs1 = async (bot, chat_id, lang) => {
   let kbb, message
 
-  const query = {owner: chat_id, status: 'active'}, fees = await getFees(query), count = countFees(query)
+  const fees = await getFees({owner: chat_id, status: 'active'})
 
   if (fees.length > 0) {
-    await updateOwner({telegram_id: chat_id}, {step: 10})
+    await updateOwner({telegram_id: chat_id}, {step: 12})
     kbb = universal_keyboard(fees, lang)
-    message = (lang === kb.language.uz) ? `Sizda ${count} tarif mavjud` : `У вас есть ${count} тарифов`
+    message = (lang === kb.language.uz) ? `Sizda ${fees.length} tarif mavjud` : `У вас есть ${fees.length} тарифов`
   } else {
     message = (lang === kb.language.uz) ? `Sizda hali tariflar mavjud emas` : `У вас еще нет тарифов`
   }
@@ -39,28 +39,28 @@ const ofs1 = async (bot, chat_id, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ofs2 = async (bot, chat_id, text, lang) => {
+const ofs2 = async (bot, chat_id, text, lang, kw) => {
   let message, kbb
 
   const fee = await getFee({name: text})
 
   if (fee) {
-    await updateOwner({telegram_id: chat_id}, {step: 11})
+    await updateOwner({telegram_id: chat_id}, {step: 13})
 
     await updateFee({_id: fee._id}, {step: 8, status: 'process'})
 
-    const data = {
-      name: fee.name,
-      description: fee.description,
-      cars: fee.cars,
-      cash: fee.cash,
-      price: fee.price,
-    }
+    const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price}
 
     message = report(data, 'FEE_SETTINGS', lang)
 
     kbb = (lang === kb.language.uz) ? keyboard.options.owner.fee.settings.uz : keyboard.options.owner.fee.settings.ru
-  } else {
+
+    if (fee.image !== '') {
+      await bot.sendPhoto(chat_id, fee.image, {caption: message, reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    } else if (fee.image === '') {
+      await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    }
+  } else if (!fee && !kw) {
     if (lang === kb.language.uz) {
       message = "Bunday tarif topilmadi"
       kbb = keyboard.owner.fees.uz
@@ -68,23 +68,25 @@ const ofs2 = async (bot, chat_id, text, lang) => {
       message = "Такой тариф не найдено"
       kbb = keyboard.owner.fees.ru
     }
-  }
 
-  if (fee.image !== '') {
-    await bot.sendPhoto(chat_id, fee.image, {caption: message, reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  } else if (fee.image === '') {
     await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
 }
 
 const ofs3 = async (bot, chat_id, _id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan nomni yozing"
-    : "Введите название, которое хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan nomni yozing"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите название, которое хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateFee({_id}, {step: 9})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs4 = async (bot, chat_id, _id, text, lang) => {
@@ -94,13 +96,7 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
 
   const fee = await getFee({_id})
 
-  const data = {
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-  }
+  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
   const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -112,23 +108,29 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
     kbb = keyboard.options.owner.fee.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message})
   } else {
     await bot.sendMessage(chat_id, message)
   }
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs5 = async (bot, chat_id, _id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan tavsifni yozing"
-    : "Введите описание, которое хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan tavsifni yozing"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите описание, которое хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateFee({_id}, {step: 9})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs6 = async (bot, chat_id, _id, text, lang) => {
@@ -138,13 +140,7 @@ const ofs6 = async (bot, chat_id, _id, text, lang) => {
 
   const fee = await getFee({_id})
 
-  const data = {
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-  }
+  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
   const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -156,23 +152,29 @@ const ofs6 = async (bot, chat_id, _id, text, lang) => {
     kbb = keyboard.options.owner.fee.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message})
   } else {
     await bot.sendMessage(chat_id, message)
   }
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs7 = async (bot, chat_id, _id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan rasmni jo'nating"
-    : "Отправьте изображение, которое хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan rasmni jo'nating"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Отправьте изображение, которое хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateFee({_id}, {step: 9})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs8 = async (bot, chat_id, _id, text, lang) => {
@@ -182,13 +184,7 @@ const ofs8 = async (bot, chat_id, _id, text, lang) => {
 
   const fee = await getFee({_id})
 
-  const data = {
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-  }
+  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
   const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -200,23 +196,29 @@ const ofs8 = async (bot, chat_id, _id, text, lang) => {
     kbb = keyboard.options.owner.fee.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message})
   } else {
     await bot.sendMessage(chat_id, message)
   }
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs9 = async (bot, chat_id, _id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan tarif kassa narxini yozing"
-    : "Введите расчетную цену тарифа, которую вы хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan tarif kassa narxini yozing"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите расчетную цену тарифа, которую вы хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateFee({_id}, {step: 9})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs10 = async (bot, chat_id, _id, text, lang) => {
@@ -226,13 +228,7 @@ const ofs10 = async (bot, chat_id, _id, text, lang) => {
 
   const fee = await getFee({_id})
 
-  const data = {
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-  }
+  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
   const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -244,23 +240,29 @@ const ofs10 = async (bot, chat_id, _id, text, lang) => {
     kbb = keyboard.options.owner.fee.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message})
   } else {
     await bot.sendMessage(chat_id, message)
   }
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs11 = async (bot, chat_id, _id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan tarif narxini yozing"
-    : "Введите цену тарифа, которую вы хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan tarif narxini yozing"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите цену тарифа, которую вы хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateFee({_id}, {step: 9})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs12 = async (bot, chat_id, _id, text, lang) => {
@@ -270,13 +272,7 @@ const ofs12 = async (bot, chat_id, _id, text, lang) => {
 
   const fee = await getFee({_id})
 
-  const data = {
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-  }
+  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price}
 
   const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -288,13 +284,13 @@ const ofs12 = async (bot, chat_id, _id, text, lang) => {
     kbb = keyboard.options.owner.fee.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   if (fee.image !== '') {
     await bot.sendPhoto(chat_id, fee.image, {caption: message})
   } else {
     await bot.sendMessage(chat_id, message)
   }
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs13 = async (bot, chat_id, _id, lang) => {
@@ -319,12 +315,13 @@ const ofs14 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
     const index = fee.cars.indexOf(car.name)
 
     if (index > -1) {
-      fee.cars.splice(car.name)
+      fee.cars.splice(index, 1)
       car.total_fees -= 1
-    } else if (index < -1) {
+    } else if (index <= -1) {
       fee.cars.push(car.name)
       car.total_fees += 1
     }
+
 
     await fee.save()
     await car.save()
@@ -341,13 +338,7 @@ const ofs14 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
 
     await updateFee({_id: fee._id}, {step: 8})
 
-    const data = {
-      name: fee.name,
-      description: fee.description,
-      cars: fee.cars,
-      cash: fee.cash,
-      price: fee.price,
-    }
+    const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
     const message = report(data, 'FEE_SETTINGS', lang)
 
@@ -359,32 +350,48 @@ const ofs14 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
       kbb = keyboard.options.owner.fee.settings.ru
     }
 
-    await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
     if (fee.image !== '') {
       await bot.sendPhoto(chat_id, fee.image, {caption: message})
     } else {
       await bot.sendMessage(chat_id, message)
     }
+
+    await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
 }
 
-const ofs15 = async (bot, chat_id, _id) => {
-  await updateOwner({telegram_id: chat_id}, {step: 10})
+const ofs15 = async (bot, chat_id, _id, lang) => {
+  await updateOwner({telegram_id: chat_id}, {step: 12})
 
   await updateFee({_id, owner: chat_id, step: 8, status: 'process'}, {step: 7, status: 'active'})
+
+  await ofs1(bot, chat_id, lang)
 }
 
 const ofs16 = async (bot, chat_id, lang) => {
-  const new_fee = await makeFee({owner: chat_id})
+  let message, kbb
 
-  fee_id = new_fee._id
+  const branches = await getBranches({owner: chat_id})
 
-  const branches = await getBranches({owner: chat_id}), kbb = universal_keyboard(branches, lang)
+  if (branches.length > 0) {
+    const new_fee = await makeFee({owner: chat_id})
 
-  const message = (lang === kb.language.uz)
-    ? "Bu tarif qaysi filial uchunligini tanlang."
-    : "Выберите, для какого филиала этот тариф."
+    fee_id = new_fee._id
+
+    kbb = universal_keyboard(branches, lang)
+
+    message = (lang === kb.language.uz)
+      ? "Bu tarif qaysi filial uchunligini tanlang."
+      : "Выберите, для какого филиала этот тариф."
+  } else if (branches.length <= 0) {
+    if (lang === kb.language.uz) {
+      message = "Sizda filiallar mavjud bo'lmagani uchun ta'rif qo'sha olmaysiz"
+      kbb = keyboard.owner.fees.uz
+    } else if (lang === kb.language.ru) {
+      message = "Sizda filiallar mavjud bo'lmagani uchun ta'rif qo'sha olmaysiz"
+      kbb = keyboard.owner.fees.uz
+    }
+  }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -444,10 +451,12 @@ const ofs20 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
 
     const index = fee.cars.indexOf(car.name)
 
+    console.log(index)
+
     if (index > -1) {
-      fee.cars.splice(car.name)
+      fee.cars.splice(index, 1)
       car.total_fees -= 1
-    } else if (index < -1) {
+    } else if (index <= -1) {
       fee.cars.push(car.name)
       car.total_fees += 1
     }
@@ -475,7 +484,9 @@ const ofs20 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
       kbb = keyboard.options.back.ru
     }
 
-    await bot.editMessageText(message, {chat_id, message_id, reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    await bot.deleteMessage(chat_id, message_id)
+
+    await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
 }
 
@@ -579,30 +590,36 @@ const ownerFee = async (bot, chat_id, text, lang) => {
     else if (text === kb.owner.fees.uz.add || text === kb.owner.fees.ru.add) await ofs16(bot, chat_id, lang)
     else if (text === kb.main.uz || text === kb.main.ru) await updateOwner({telegram_id: chat_id}, {step: 5})
 
-    if (fee) {
-      if (text === kb.options.back.uz) {
-        await ofs24(bot, chat_id, fee._id, lang)
-      } else if (text !== kb.options.back.uz) {
-        if (fee.step === 0) await ofs17(bot, chat_id, fee._id, text, lang)
-        if (fee.step === 1) await ofs18(bot, chat_id, fee._id, text, lang)
-        if (fee.step === 2) await ofs19(bot, chat_id, fee._id, text, lang)
-        if (fee.step === 4) await ofs21(bot, chat_id, fee._id, text, lang)
-        if (fee.step === 5) await ofs22(bot, chat_id, fee._id, text, lang)
-        if (fee.step === 6) await ofs23(bot, chat_id, fee._id, text, lang)
+    if (owner.step === 5) {
+      if (fee) {
+        if (text === kb.options.back.uz) {
+          await ofs24(bot, chat_id, fee._id, lang)
+        } else if (text !== kb.options.back.uz) {
+          if (fee.step === 0) await ofs17(bot, chat_id, fee._id, text, lang)
+          if (fee.step === 1) await ofs18(bot, chat_id, fee._id, text, lang)
+          if (fee.step === 2) await ofs19(bot, chat_id, fee._id, text, lang)
+          if (fee.step === 4) await ofs21(bot, chat_id, fee._id, text, lang)
+          if (fee.step === 5) await ofs22(bot, chat_id, fee._id, text, lang)
+          if (fee.step === 6) await ofs23(bot, chat_id, fee._id, text, lang)
+        }
       }
     }
 
     if (owner) {
-      if (owner.step === 10) {
-        await ofs2(bot, chat_id, text, lang)
+      if (owner.step === 12) {
+        if (text === kb.options.back.uz || text === kb.options.back.ru) {
+          await updateOwner({telegram_id: chat_id}, {step: 5})
+          await ofs0(bot, chat_id, lang)
+        }
+        if (text !== kb.options.back.uz || text !== kb.options.back.ru) await ofs2(bot, chat_id, text, lang, 'back')
       }
 
-      if (owner.step === 11) {
-        const fee = await getFee({owner: owner.telegram_id, step: 8, status: 'process'})
+      if (owner.step === 13) {
+        const fee = await getFee({owner: owner.telegram_id, status: 'process'})
 
         if (fee) {
           if (text === kb.options.back.uz || text === kb.options.back.ru) {
-            await ofs15(bot, chat_id, fee._id)
+            await ofs15(bot, chat_id, fee._id, lang)
           } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
             if (fee.step === 8) {
               if (text === kb.options.owner.fee.settings.uz.name || text === kb.options.owner.branch.settings.ru.name)
@@ -615,11 +632,11 @@ const ownerFee = async (bot, chat_id, text, lang) => {
                 await ofs9(bot, chat_id, fee._id, lang)
               if (text === kb.options.owner.fee.settings.uz.price || text === kb.options.owner.fee.settings.ru.price)
                 await ofs11(bot, chat_id, fee._id, lang)
-              if (text === kb.options.owner.fee.settings.uz.car || text === kb.options.owner.fee.settings.ru.cash)
+              if (text === kb.options.owner.fee.settings.uz.car || text === kb.options.owner.fee.settings.ru.car)
                 await ofs13(bot, chat_id, fee._id, lang)
 
               type = text
-            } else if (fee.step === 7) {
+            } else if (fee.step === 9) {
               if (type === kb.options.owner.fee.settings.uz.name || type === kb.options.owner.fee.settings.ru.name)
                 await ofs4(bot, chat_id, fee._id, text, lang)
               if (type === kb.options.owner.fee.settings.uz.description || type === kb.options.owner.fee.settings.ru.description)

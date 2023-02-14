@@ -21,13 +21,15 @@ bot.setMyCommands(
 
 bot.on('message', async message => {
   const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
-    owner = await getOwner(query), manager = await getManager(query)
+    owner = await getOwner(query)
+
+  const manager = await getManager({telegram_id: message.from.id, status: 'active'})
+    ? await getManager({telegram_id: message.from.id, status: 'active'})
+    : await getManager({telegram_id: message.from.id, status: 'occupied'})
 
   try {
     if (admin) await adminPanel(bot, message, admin)
-    if (owner) {
-      await ownerPanel(bot, message, owner)
-    }
+    if (owner) await ownerPanel(bot, message, owner)
     if (manager) await managerPanel(bot, message, manager)
 
   } catch (e) {

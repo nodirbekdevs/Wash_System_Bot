@@ -44,7 +44,7 @@ const obs1 = async (bot, chat_id, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const obs2 = async (bot, chat_id, text, lang) => {
+const obs2 = async (bot, chat_id, text, lang, kw) => {
   let message, kbb
 
   const branch = await getBranch({name: text})
@@ -63,7 +63,7 @@ const obs2 = async (bot, chat_id, text, lang) => {
     }
 
     await bot.sendPhoto(chat_id, branch.image, {caption: message, reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  } else {
+  } else if (!branch && !kw) {
     if (lang === kb.language.uz) {
       message = "Bunday filial topilmadi"
       kbb = keyboard.owner.pages.uz
@@ -158,7 +158,7 @@ const obs6 = async (bot, chat_id, _id, text, lang) => {
 const obs7 = async (bot, chat_id, _id, lang) => {
   let message, kbb
 
-  const managers = await getManagers({owner: chat_id, status: 'active'})
+  const managers = await getManagers({owner: chat_id})
 
   if (managers.length > 0) {
     await updateBranch({_id}, {step: 7})
@@ -191,10 +191,6 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
       await updateManyEmployees({manager: manager.telegram_id, branch: manager.branch}, {manager: 0})
     }
 
-    if (manager.branch) {
-      await updateBranch({name: manager.branch}, {manager: 0})
-    }
-
     if (branch.total_employees > 0) {
       await updateManyEmployees({branch: branch.name, manager: branch.manager}, {manager: manager.telegram_id})
     }
@@ -203,8 +199,12 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
       await updateManyFees({branch: branch.name, manager: branch.manager}, {manager: manager.telegram_id})
     }
 
+    if (manager.branch) {
+      await updateBranch({name: manager.branch}, {manager: 0, status: 'active'})
+    }
+
     if (branch.manager) {
-      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: ''})
+      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: '', status: 'active'})
     }
 
     await updateManager({_id: manager._id}, {
@@ -216,8 +216,6 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
 
   branch.manager = manager.telegram_id
   branch.step = 6
-
-  if (branch.status !== 'provided') branch.status = 'provided'
 
   await branch.save()
 
@@ -332,26 +330,25 @@ const obs12 = async (bot, chat_id, _id, text, lang) => {
 
 const obs13 = async (bot, chat_id, _id, text, lang) => {
   let message, obj, kbb, data
-  await updateBranch({_id}, {image: text})
 
   const managers = await getManagers({owner: chat_id, status: 'active'})
 
   if (managers.length > 0) {
-    data = {step: 2}
+    data = {image: text, step: 2}
 
     kbb = universal_keyboard(managers, lang)
 
     if (lang === kb.language.uz) {
       message = 'Filial menejerini tanlang'
       obj = [kb.options.skipping.uz]
-      kbb.splice(-2, 0, obj)
+      kbb.splice(-1, 0, obj)
     } else if (lang === kb.language.ru) {
       message = 'Выбрать управляющего филиалом'
       obj = [kb.options.skipping.ru]
-      kbb.splice(-2, 0, obj)
+      kbb.splice(-1, 0, obj)
     }
   } else if (managers.length <= 0) {
-    data = {step: 3}
+    data = {image: text, step: 3}
 
     if (lang === kb.language.uz) {
       message = "Filialni manzilini jo'nating"
@@ -370,17 +367,21 @@ const obs13 = async (bot, chat_id, _id, text, lang) => {
 const obs14 = async (bot, chat_id, _id, text, lang) => {
   let message, kbb
 
-  await updateBranch({_id}, {manager: text, step: 3})
+  const manager = await getManager({owner: chat_id, name: text})
 
-  if (lang === kb.language.uz) {
-    message = "Filialni manzilini jo'nating"
-    kbb = keyboard.options.back.uz
-  } else if (lang === kb.language.ru) {
-    message = 'Отправить локацию филиала'
-    kbb = keyboard.options.back.ru
+  if (manager) {
+    await updateBranch({_id}, {manager: manager.telegram_id, step: 3})
+
+    if (lang === kb.language.uz) {
+      message = "Filialni manzilini jo'nating"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = 'Отправить локацию филиала'
+      kbb = keyboard.options.back.ru
+    }
+
+    await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
-
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const obs15 = async (bot, chat_id, _id, lang) => {
@@ -404,6 +405,8 @@ const obs16 = async (bot, chat_id, branch, text, lang) => {
 
   if (text.latitude && text.longitude) {
     const geo = Geo(config.MAP_OPTIONS), place_geo = await geo.reverse({lat: text.latitude, lon: text.longitude})
+
+    console.log(place_geo)
 
     place_geo.map(place => place_name = `${place.country} ${place.city} ${place.county}`)
 
@@ -463,8 +466,8 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
         await updateBranch({owner: manager.owner, name: manager.branch}, {manager: 0})
       }
 
-      if (managers_branch.total_fees > 0) {
-        await updateManyFees({branch: managers_branch.name, manager: managers_branch.manager}, {manager: 0})
+      if (managers_branch.total_fees >= 0) {
+        await updateManyFees({manager: managers_branch.manager, branch: managers_branch.name}, {manager: 0})
       }
 
       await updateManager({_id: manager._id}, {
@@ -511,6 +514,8 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
     ? await getBranch({_id: branch_id, owner: owner.telegram_id, status: 'process'})
     : (await getBranches({owner: owner.telegram_id, status: 'process'}))[0]
 
+  console.log(text)
+
   try {
     if (text === kb.owner.pages.uz.branches || text === kb.owner.pages.ru.branches) await obs0(bot, chat_id, lang)
     else if (text === kb.owner.branches.uz.all || text === kb.owner.branches.ru.all) await obs1(bot, chat_id, lang)
@@ -525,7 +530,7 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
           if (branch.step === 0) await obs12(bot, chat_id, branch._id, text, lang)
           if (branch.step === 1) await obs13(bot, chat_id, branch._id, text, lang)
           if (branch.step === 2) {
-            if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await obs14(bot, chat_id, branch._id, text, lang, 'yes')
+            if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await obs14(bot, chat_id, branch._id, text, lang)
             if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await obs15(bot, chat_id, branch._id, lang)
           }
           if (branch.step === 3) await obs16(bot, chat_id, branch, text, lang)
@@ -536,7 +541,11 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
 
     if (owner) {
       if (owner.step === 8) {
-        await obs2(bot, chat_id, text, lang)
+        if (text !== kb.options.back.uz || text !== kb.options.back.ru) await obs2(bot, chat_id, text, lang, 'back')
+        if (text === kb.options.back.uz || text === kb.options.back.ru) {
+          await updateOwner({telegram_id: chat_id}, {step: 5})
+          await obs0(bot, chat_id, lang)
+        }
       }
 
       if (owner.step === 9) {
@@ -545,10 +554,9 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
         if (branch) {
           if (text === kb.options.back.uz || text === kb.options.back.ru) {
             await updateOwner({telegram_id: chat_id}, {step: 8})
-
             const data = branch.manager ? {step: 5, status: 'provided'} : {step: 5, status: 'active'}
-
             await updateBranch({owner: chat_id, status: 'process'}, data)
+            await obs1(bot, chat_id, lang)
           } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
             if (branch.step === 6) {
               if (text === kb.options.owner.branch.settings.uz.name || text === kb.options.owner.branch.settings.ru.name)
@@ -572,10 +580,8 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
                 await obs10(bot, chat_id, branch._id, text, lang)
             }
           }
-
         }
-
-        }
+      }
     }
 
   } catch (e) {

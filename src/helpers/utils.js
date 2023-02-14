@@ -9,7 +9,7 @@ const Fee = require('./../models/feeModel')
 const Manager = require('./../models/managerModel')
 const Employee = require('./../models/employeeModel')
 
-const universal_keyboard = (data, lang) => {
+const universal_keyboard = (data, lang, kw) => {
   let kbb = [], arr = [], text
 
   for (let i = 0; i < data.length; i++) {
@@ -37,8 +37,13 @@ const universal_keyboard = (data, lang) => {
     kbb.push([{text}])
   }
 
-  if (lang === kb.language.uz) kbb.push([kb.options.back.uz])
-  else if (lang === kb.language.ru) kbb.push([kb.options.back.ru])
+  // if (kw === 'skip') {
+  //   (lang === kb.language.uz) ? kbb.push([kb.options.skipping.uz, kb.options.back.uz]) : kbb.push([kb.options.skipping.ru, kb.options.back.ru])
+  // } else {
+    if (lang === kb.language.uz) kbb.push([kb.options.back.uz])
+    else if (lang === kb.language.ru) kbb.push([kb.options.back.ru])
+  // }
+
 
   return kbb
 }
@@ -667,7 +672,6 @@ const car_attendance = (cars, list, lang, type) => {
     } else if (type === 'edit') {
       obj = {text: `${flag} ${car.name}`, callback_data: JSON.stringify({phrase: 'e_car', id: car._id})}
     }
-
 
     arr.push(obj)
 

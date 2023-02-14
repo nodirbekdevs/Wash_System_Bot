@@ -3,7 +3,7 @@ const keyboard = require('./../../helpers/keyboard')
 const {getEmployees, getEmployee, makeEmployee, updateEmployee, deleteEmployee, countEmployees} = require('./../../controllers/employeeController')
 const {getManager} = require('./../../controllers/managerController')
 const {getBranch} = require('./../../controllers/branchController')
-const {bio, date, employee_pagination, employee_attendance} = require('./../../helpers/utils')
+const {report, date, employee_pagination, employee_attendance} = require('./../../helpers/utils')
 
 let employee_id
 
@@ -67,7 +67,7 @@ const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
       created_at: started_at
     }
 
-    message = bio(data, 'EMPLOYEE', lang)
+    message = report(data, 'EMPLOYEE', lang)
 
     if (lang === kb.language.uz) {
       clause = kb.options.dismissal.uz
@@ -211,7 +211,7 @@ const mes8 = async (bot, chat_id, _id, text, lang) => {
     created_at: started_at
   }
 
-  message = bio(data, 'EMPLOYEE', lang)
+  message = report(data, 'EMPLOYEE', lang)
 
   if (lang === kb.language.uz) {
     message = "\nTugatilganini tasdiqlaysizmi?"
@@ -318,7 +318,7 @@ const managerEmployee = async (bot, chat_id, text, lang) => {
 
   const employee = await getEmployee({_id: employee_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
     ? await getEmployee({_id: employee_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
-    : (await getEmployee({manager: manager.telegram_id, branch: manager.branch, status: 'process'}))[0]
+    : (await getEmployees({manager: manager.telegram_id, branch: manager.branch, status: 'process'}))[0]
 
   if (text === kb.manager.pages.uz.employees || text === kb.manager.pages.ru.employees) await mes0(bot, chat_id, lang)
   if (text === kb.manager.employees.uz.all || text === kb.manager.employees.ru.all) await mes1(bot, chat_id, lang)
