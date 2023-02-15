@@ -204,7 +204,7 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
     }
 
     if (branch.manager) {
-      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: '', status: 'active'})
+      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: '', status: 'active', total_employees: 0})
     }
 
     await updateManager({_id: manager._id}, {

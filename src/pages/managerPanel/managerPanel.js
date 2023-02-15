@@ -1,6 +1,6 @@
 const {managerMainPage, mmp} = require('./mainPage')
 const {managerSettings} = require('./settingsPage')
-const {managerWashes, mws2, mws10, mws11} = require('./washesPage')
+const {managerWashes, mws2, mws11, mws12, mws13} = require('./washesPage')
 const {managerEmployee, mes2, mes3, mes11} = require('./employeesPage')
 const {managerFees, mfs2} = require('./feesPage')
 const {managerBranch} = require('./branchPage')
@@ -30,4 +30,4 @@ const managerPanel = async (bot, message, manager) => {
   }
 }
 
-module.exports = {managerPanel, getManager, mmp, mws2, mws10, mws11, mes2, mes3, mes11, mfs2}
+module.exports = {managerPanel, getManager, mmp, mws2, mws11, mws12, mws13, mes2, mes3, mes11, mfs2}

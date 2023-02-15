@@ -18,7 +18,7 @@ const mes0 = async (bot, chat_id, lang) => {
     kbb = keyboard.manager.employees.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
 }
 
 const mes1 = async (bot, chat_id, lang) => {
@@ -41,30 +41,22 @@ const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 
   if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'employee') {
 
-    const report = await employee_pagination(data.split('#')[2], 6, query, lang)
+    const report = await employee_pagination(parseInt(data.split('#')[2]), 6, query, lang)
 
     await bot.editMessageText(report.text, {
       chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
     })
-
-    await bot.answerCallbackQuery(query_id, '')
   }
 
-  if (data === 'employee') {
+  if (data === 'emp') {
     const employee = await getEmployee({_id})
 
     const started_at = date(employee.created_at)
 
     const data = {
-      manager: manager.name,
-      branch: employee.branch,
-      name: employee.name,
-      number: employee.number,
-      total_washes: employee.total_washes,
-      is_idler: employee.is_idler,
-      lang: employee.lang,
-      status: employee.status,
-      created_at: started_at
+      manager: manager.name, branch: employee.branch, name: employee.name, number: employee.number,
+      total_washes: employee.total_washes, is_idler: employee.is_idler, lang: employee.lang,
+      status: employee.status, created_at: started_at
     }
 
     message = report(data, 'EMPLOYEE', lang)
@@ -81,23 +73,22 @@ const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
       chat_id, message_id, parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [
-          [{text: clause, callback_data: JSON.stringify({phrase: "e_delete", id: employee._id})}],
-          [{text: back, callback_data: JSON.stringify({phrase: "e_back", id: ''})}],
+          [{text: clause, callback_data: JSON.stringify({phrase: "e_d", id: employee._id})}],
+          [{text: back, callback_data: JSON.stringify({phrase: "e_b", id: ''})}],
         ]
       }
     })
-
-    await bot.answerCallbackQuery(query_id, '')
   }
 }
 
 const mes3 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   let message
 
-  const manager = await getManager({telegram_id: chat_id}), employee = await getEmployee({_id}),
-    branch = await getBranch({manager: employee.manager, name: employee.branch})
+  const manager = await getManager({telegram_id: chat_id})
 
-  if (data === 'e_delete') {
+  if (data === 'e_d') {
+    const employee = await getEmployee({_id}), branch = await getBranch({manager: chat_id, name: employee.branch})
+
     if (!employee.is_idler) {
       employee.status = 'unemployed'
       employee.step = 6
@@ -136,15 +127,26 @@ const mes4 = async (bot, chat_id, lang) => {
 
   const manager = await getManager({telegram_id: chat_id})
 
-  const new_employee = await makeEmployee({manager: manager.telegram_id, branch: manager.branch})
-  employee_id = new_employee._id
+  if (manager.branch) {
+    const new_employee = await makeEmployee({manager: manager.telegram_id, branch: manager.branch})
 
-  if (lang === kb.language.uz) {
-    message = "Xodimni telegram id sini kiriting."
-    kbb = keyboard.options.back.uz
-  } else if (lang === kb.language.ru) {
-    message = "Введите telegram id сотрудника."
-    kbb = keyboard.options.back.ru
+    employee_id = new_employee._id
+
+    if (lang === kb.language.uz) {
+      message = "Xodimni telegram id sini kiriting."
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = "Введите telegram id сотрудника."
+      kbb = keyboard.options.back.ru
+    }
+  } else if (!manager.branch) {
+    if (lang === kb.language.uz) {
+      message = "Sizga filial biriktirilmaganligi sababli siz avtomobil yuvish qo'sha olmaysiz"
+      kbb = keyboard.manager.washes.uz
+    } else if (lang === kb.language.ru) {
+      message = "Вы не можете добавить автомойку, потому что у вас нет филиалаю"
+      kbb = keyboard.manager.washes.uz
+    }
   }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -197,27 +199,22 @@ const mes8 = async (bot, chat_id, _id, text, lang) => {
   let message, kbb
   await updateEmployee({_id}, {lang: text, step: 4})
 
-  const employee = await getEmployee({_id}), manager = await getManager({_id}), started_at = date(employee.created_at)
+  const employee = await getEmployee({_id}), manager = await getManager({telegram_id: chat_id}),
+    started_at = date(employee.created_at)
 
   const data = {
-    manager: manager.name,
-    branch: employee.branch,
-    name: employee.name,
-    number: employee.number,
-    total_washes: employee.total_washes,
-    is_idler: employee.is_idler,
-    lang: employee.lang,
-    status: employee.status,
+    manager: manager.name, branch: employee.branch, name: employee.name, number: employee.number,
+    total_washes: employee.total_washes, is_idler: employee.is_idler, lang: employee.lang, status: employee.status,
     created_at: started_at
   }
 
   message = report(data, 'EMPLOYEE', lang)
 
   if (lang === kb.language.uz) {
-    message = "\nTugatilganini tasdiqlaysizmi?"
+    message += "\nTugatilganini tasdiqlaysizmi?"
     kbb = keyboard.options.confirmation.uz
   } else if (lang === kb.language.ru) {
-    message = "\n Подтвердить завершение?"
+    message += "\n Подтвердить завершение?"
     kbb = keyboard.options.confirmation.ru
   }
 
@@ -285,17 +282,13 @@ const mes11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
       }
 
       await employee.save()
-
-      message = (lang === kb.language.uz)
-        ? `${employee.name} - ${manager.name} - ${employee.branch} - ${employee.number}. Xodim ishdan bo'shatildi.`
-        : `${employee.name} - ${manager.name} - ${employee.branch} - ${employee.number}. Сотрудник был уволен.`
     } else if (employee.is_idler) {
       message = (lang === kb.language.uz)
         ? "Xodim hozir ishlayapti. Iltimos ishini tugatgandan so'ng uni ketishiga ruxsat bering."
         : "В настоящее время сотрудник работает. Пожалуйста, отпустите его, когда он закончит."
-    }
 
-    await bot.sendMessage(chat_id, message)
+      await bot.sendMessage(chat_id, message)
+    }
   }
 
   const employees = await getEmployees({manager: manager.telegram_id, branch: manager.branch})
@@ -313,10 +306,31 @@ const mes11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   })
 }
 
+const mes12 = async (bot, chat_id, _id, lang) => {
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "Yangi xodim ishga qabul qilinmadi."
+    kbb = keyboard.manager.employees.uz
+  } else if (lang === kb.language.ru) {
+    message = "Новый сотрудник не был принят на работу."
+    kbb = keyboard.manager.employees.ru
+  }
+
+  await deleteEmployee({_id})
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+}
+
 const managerEmployee = async (bot, chat_id, text, lang) => {
   const manager = await getManager({telegram_id: chat_id})
 
-  const employee = await getEmployee({_id: employee_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
+  const employee = await getEmployee({
+    _id: employee_id,
+    manager: manager.telegram_id,
+    branch: manager.branch,
+    status: 'process'
+  })
     ? await getEmployee({_id: employee_id, manager: manager.telegram_id, branch: manager.branch, status: 'process'})
     : (await getEmployees({manager: manager.telegram_id, branch: manager.branch, status: 'process'}))[0]
 
@@ -326,11 +340,15 @@ const managerEmployee = async (bot, chat_id, text, lang) => {
   if (text === kb.manager.employees.uz.attendance || text === kb.manager.employees.ru.attendance) await mes10(bot, chat_id, lang)
 
   if (employee) {
-    if (employee.step === 0) await mes5(bot, chat_id, employee._id, text, lang)
-    if (employee.step === 1) await mes6(bot, chat_id, employee._id, text, lang)
-    if (employee.step === 2) await mes7(bot, chat_id, employee._id, text, lang)
-    if (employee.step === 3) await mes8(bot, chat_id, employee._id, text, lang)
-    if (employee.step === 4) await mes9(bot, chat_id, employee._id, text, lang)
+    if (text === kb.options.back.uz || text === kb.options.back.ru) {
+      await mes12(bot, chat_id, employee._id, lang)
+    } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+      if (employee.step === 0) await mes5(bot, chat_id, employee._id, text, lang)
+      if (employee.step === 1) await mes6(bot, chat_id, employee._id, text, lang)
+      if (employee.step === 2) await mes7(bot, chat_id, employee._id, text, lang)
+      if (employee.step === 3) await mes8(bot, chat_id, employee._id, text, lang)
+      if (employee.step === 4) await mes9(bot, chat_id, employee._id, text, lang)
+    }
   }
 }
 

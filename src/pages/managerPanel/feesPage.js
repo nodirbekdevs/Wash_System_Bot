@@ -20,25 +20,35 @@ const mfs0 = async (bot, chat_id, lang) => {
 }
 
 const mfs1 = async (bot, chat_id, lang) => {
-  let report = {}
+  let message, kbb
 
   const manager = await getManager({telegram_id: chat_id}),
     query = {owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'},
   fees = await getFees(query)
 
   if (fees.length > 0) {
-    report = fee_pagination(1, 1, query, lang)
-  } else {
-    if (lang === kb.language.uz) {
-      report.text = "Hali tariflar mavjud emas"
-      report.kbb = keyboard.manager.fees.uz
-    } else if (lang === kb.language.ru) {
-      report.text = "Тарифов пока нет"
-      report.kbb = keyboard.manager.fees.ru
-    }
-  }
+    const report = await fee_pagination(1, 1, query, lang)
 
-  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+    console.log("Kevotti1")
+
+    message = report.text
+    kbb = report.kbb
+
+    await bot.sendMessage(chat_id, message, {parse_mode: 'HTML', reply_markup: {inline_keyboard: kbb}})
+  } else {
+
+    console.log("Kevotti2")
+
+    if (lang === kb.language.uz) {
+      message = "Hali tariflar mavjud emas"
+      kbb = keyboard.manager.fees.uz
+    } else if (lang === kb.language.ru) {
+      message = "Тарифов пока нет"
+      kbb = keyboard.manager.fees.ru
+    }
+
+    await bot.sendMessage(chat_id, message, {parse_mode: 'HTML', reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  }
 }
 
 const mfs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {

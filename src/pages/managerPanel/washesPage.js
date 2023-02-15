@@ -7,7 +7,7 @@ const {getEmployees, getEmployee, updateEmployee} = require('./../../controllers
 const {getCars, getCar} = require('./../../controllers/carController')
 const {getClient} = require('./../../controllers/clientController')
 const {getBranch} = require('./../../controllers/branchController')
-const {report, wash_pagination, universal_keyboard, date, car_keyboard} = require('./../../helpers/utils')
+const {report, wash_pagination, washing_pagination, universal_keyboard, date, car_keyboard} = require('./../../helpers/utils')
 const {mmp} = require('./mainPage')
 
 let wash_id
@@ -23,7 +23,13 @@ const mws0 = async (bot, chat_id, lang) => {
     kbb = keyboard.manager.washes.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  await bot.sendMessage(chat_id, message, {
+    reply_markup: {
+      resize_keyboard: true,
+      keyboard: kbb,
+      one_time_keyboard: true
+    }
+  })
 }
 
 const mws1 = async (bot, chat_id, lang) => {
@@ -36,9 +42,17 @@ const mws1 = async (bot, chat_id, lang) => {
       }
     }
 
-  const report = await wash_pagination(1, 10, query, lang)
+  const report = await wash_pagination(1, 6, query, lang)
 
-  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  if (report.kbb === keyboard.manager.washes.uz || report.kbb === keyboard.manager.washes.ru) {
+    await bot.sendMessage(chat_id, report.text, {
+      parse_mode: 'HTML',
+      reply_markup: {resize_keyboard: true, keyboard: report.kbb}
+    })
+  } else {
+    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  }
+
 }
 
 const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
@@ -54,7 +68,7 @@ const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     }
 
   if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'wash') {
-    const report = await wash_pagination(parseInt(data.split('#')[2]), 10, query, lang)
+    const report = await wash_pagination(parseInt(data.split('#')[2]), 6, query, lang)
 
     await bot.editMessageText(report.text, {
       chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
@@ -69,17 +83,9 @@ const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     const started_at = date(wash.washed_time.started_at), ended_at = date(wash.washed_time.washed_at)
 
     const data = {
-      employee: wash.employee,
-      branch: wash.branch,
-      fee: wash.fee,
-      car: wash.car,
-      car_type: wash.car_type,
-      car_number: wash.car_number,
-      price: wash.price,
-      cash: wash.cash,
-      benefit: wash.price - wash.cash,
-      washing_time_started: started_at,
-      washing_time_ended: ended_at
+      employee: wash.employee, branch: wash.branch, fee: wash.fee, car: wash.car, car_type: wash.car_type,
+      car_number: wash.car_number, price: wash.price, cash: wash.cash, benefit: wash.price - wash.cash,
+      washing_time_started: started_at, washing_time_ended: ended_at
     }
 
     message = report(data, 'WASH', lang)
@@ -91,20 +97,50 @@ const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 }
 
 const mws3 = async (bot, chat_id, lang) => {
+  let message, kbb
+
   const manager = await getManager({telegram_id: chat_id}),
-    employees = await getEmployees({
-      manager: manager.telegram_id,
-      branch: manager.branch,
-      is_idler: false,
-      status: 'active'
-    }),
-    kbb = universal_keyboard(employees, lang),
-    message = (lang === kb.language.uz)
-      ? "Ishni bajarish uchun xodimni kiriting." : "Введите сотрудника для выполнения работы."
+    fees = await getFees({owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'})
 
-  const new_wash = await makeWash({manager: manager.telegram_id, branch: manager.branch})
+  if (manager.branch && fees.length > 0) {
+    const employees = await getEmployees({
+      manager: manager.telegram_id, branch: manager.branch, is_idler: false, status: 'active'
+    })
 
-  wash_id = new_wash.id
+    if (employees.length > 0) {
+      kbb = universal_keyboard(employees, lang)
+
+      message = (lang === kb.language.uz) ? "Ishni bajarish uchun xodimni kiriting." : "Введите сотрудника для выполнения работы."
+
+      const new_wash = await makeWash({manager: manager.telegram_id, branch: manager.branch})
+
+      wash_id = new_wash.id
+    } else if (employees.length <= 0) {
+      if (lang === kb.language.uz) {
+        message = "Mashina yuvishga hali xodim bo'shagani yo'q"
+        kbb = keyboard.manager.washes.uz
+      } else if (lang === kb.language.ru) {
+        message = "Пока нет сотрудника, который мог бы помыть машину"
+        kbb = keyboard.manager.washes.ru
+      }
+    }
+  } else if (!manager.branch) {
+    if (lang === kb.language.uz) {
+      message = "Sizga filial biriktirilmaganligi sababli siz avtomobil yuvish qo'sha olmaysiz"
+      kbb = keyboard.manager.washes.uz
+    } else if (lang === kb.language.ru) {
+      message = "Вы не можете добавить автомойку, потому что у вас нет филиалаю"
+      kbb = keyboard.manager.washes.uz
+    }
+  } else if (fees.length <= 0) {
+    if (lang === kb.language.uz) {
+      message = "Filialga tarif qo'shilmagani sababli siz avtomobil yuvish qo'sha olmaysiz"
+      kbb = keyboard.manager.washes.uz
+    } else if (lang === kb.language.ru) {
+      message = "Вы не можете добавить автомойку, потому что в филиале нет добавленного тарифа"
+      kbb = keyboard.manager.washes.uz
+    }
+  }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -126,10 +162,14 @@ const mws5 = async (bot, chat_id, _id, text, lang) => {
 
   const manager = await getManager({telegram_id: chat_id})
 
-  const fee = await getFee({owner: manager.owner, manager: chat_id, branch: manager.branch, name: text, status: 'active'})
+  const fee = await getFee({
+    owner: manager.owner, manager: chat_id, branch: manager.branch, name: text, status: 'active'
+  })
 
-  const kbb = car_keyboard(fee.cars, lang), message = (lang === kb.language.uz)
-      ? "Mashinani markasini tanlang." : "Выберите марку автомобиля."
+  console.log(fee)
+
+  const message = (lang === kb.language.uz) ? "Mashinani markasini tanlang." : "Выберите марку автомобиля.",
+    kbb = car_keyboard(fee.cars, lang)
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -227,7 +267,23 @@ const mws8 = async (bot, chat_id, _id, text, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const mws9 = async (bot, chat_id, lang) => {
+const mws9 = async (bot, chat_id, _id, lang) => {
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "Yangi mashina yuvish ma'qullanmadi."
+    kbb = keyboard.manager.washes.uz
+  } else if (lang === kb.language.ru) {
+    message = "Новую автомойку не одобрили."
+    kbb = keyboard.manager.washes.ru
+  }
+
+  await deleteWash({_id})
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+}
+
+const mws10 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     query = {
       manager: manager.telegram_id, branch: manager.branch, step: 5, status: 'washing',
@@ -237,33 +293,45 @@ const mws9 = async (bot, chat_id, lang) => {
       }
     }
 
-  const report = await wash_pagination(1, 10, query, lang)
+  const report = await washing_pagination(1, 6, query, lang)
 
-  await bot.sendMessage(chat_id, report.text, {
-    parse_mode: 'HTML',
-    reply_markup: {inline_keyboard: report.kbb}
+  if (report.kbb === keyboard.manager.washes.uz || report.kbb === keyboard.manager.washes.ru) {
+    await bot.sendMessage(chat_id, report.text, {
+      parse_mode: 'HTML',
+      reply_markup: {resize_keyboard: true, keyboard: report.kbb}
+    })
+  } else {
+    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  }
+}
+
+const mws11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
+  const manager = await getManager({telegram_id: chat_id}),
+    query = {
+      manager: manager.telegram_id, branch: manager.branch, status: 'washing',
+      created_at: {
+        $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date().setHours(23, 59, 59))
+      }
+    }
+
+  const report = await washing_pagination(parseInt(data.split('#')[2]), 6, query, lang)
+
+  await bot.editMessageText(report.text, {
+    chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
   })
 }
 
-const mws10 = async (bot, chat_id, message_id, data, _id, lang) => {
+const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
   let clause, back
 
-  const wash = await getWash({_id}), manager = await getManager({telegram_id: chat_id}),
-    car = await getCar({type: wash.car, branch: wash.branch})
+  const wash = await getWash({_id}), manager = await getManager({telegram_id: chat_id})
 
   const day = date(wash.washed_time.started_at)
 
   data = {
-    manager: manager.name,
-    employee: wash.employee,
-    branch: wash.branch,
-    car_type: wash.car,
-    car: wash.car_type,
-    car_number: wash.car_number,
-    cash: car.cash,
-    price: car.price,
-    benefit: car.price - car.cash,
-    started_at: day
+    manager: manager.name, employee: wash.employee, branch: wash.branch, car_type: wash.car, car: wash.car_type,
+    car_number: wash.car_number, cash: wash.cash, price: wash.price, benefit: wash.price - wash.cash, started_at: day
   }
 
   const message = report(data, 'WASH_MAKING', lang)
@@ -287,22 +355,23 @@ const mws10 = async (bot, chat_id, message_id, data, _id, lang) => {
   })
 }
 
-const mws11 = async (bot, chat_id, message_id, data, _id, lang) => {
+const mws13 = async (bot, chat_id, message_id, data, _id, lang) => {
   let client, message
 
-  const manager = await getManager({telegram_id: chat_id}), wash = await getWash({_id}),
-    employee = await getEmployee({name: wash.employee}),
-    branch = await getBranch({manager: wash.manager, name: wash.branch}),
-    fee = await getFee({owner: branch.owner, manager: branch.manager, branch: branch.name, name: wash.fee})
+  const manager = await getManager({telegram_id: chat_id}), wash = await getWash({_id})
 
-  if (wash.client) {
-    client = await getClient({telegram_id: wash.client})
-  }
+  if (data === 'washed' && wash.status === 'washing') {
+    const employee = await getEmployee({name: wash.employee}),
+      branch = await getBranch({manager: wash.manager, name: wash.branch}),
+      fee = await getFee({owner: branch.owner, manager: branch.manager, branch: branch.name, name: wash.fee})
 
-  if (data === 'washed') {
+    if (wash.client) {
+      client = await getClient({telegram_id: wash.client})
+    }
+
     wash.status = 'washed'
     wash.step = 6
-    wash.washed_time.washed_at = new Date()
+    wash.washed_time.washed_at = Date.now()
     await wash.save()
 
     employee.total_washes += 1
@@ -325,6 +394,12 @@ const mws11 = async (bot, chat_id, message_id, data, _id, lang) => {
       : `${employee.name} - ${wash.car} - ${wash.car_type} - ${wash.car_number}. Автомойка завершена`
 
     await bot.sendMessage(chat_id, message)
+  } else if (data === 'washed' && wash.status === 'washed') {
+    message = (lang === kb.language.uz)
+      ? `Avtomobil yuvib bo'lingan`
+      : `Машину помыли`
+
+    await bot.sendMessage(chat_id, message)
   }
 
   const query = {
@@ -333,13 +408,34 @@ const mws11 = async (bot, chat_id, message_id, data, _id, lang) => {
       $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
       $lt: new Date(new Date().setHours(23, 59, 59))
     }
+  }, washes = await getWashes(query)
+
+  console.log(washes.length)
+
+  if (washes.length > 0) {
+    console.log("Kevotti1")
+    const report = await washing_pagination(1, 6, query, lang)
+
+    await bot.editMessageText(report.text, {
+      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
+    })
+  } else if (washes.length <= 0) {
+    console.log("Kevotti")
+
+    let clause, kbb
+
+    if (lang === kb.language.uz) {
+      clause = "Yuvilayotgan mashina qolmadi"
+      kbb = keyboard.manager.washes.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Машины больше не моют"
+      kbb = keyboard.manager.washes.ru
+    }
+
+    await bot.deleteMessage(chat_id, message_id)
+
+    await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   }
-
-  const report = await wash_pagination(1, 10, query, lang)
-
-  await bot.editMessageText(report.text, {
-    chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
-  })
 }
 
 const managerWashes = async (bot, chat_id, text, lang) => {
@@ -352,15 +448,20 @@ const managerWashes = async (bot, chat_id, text, lang) => {
   if (text === kb.manager.pages.uz.washes || text === kb.manager.pages.ru.washes) await mws0(bot, chat_id, lang)
   if (text === kb.manager.washes.uz.today || text === kb.manager.washes.ru.today) await mws1(bot, chat_id, lang)
   if (text === kb.manager.washes.uz.add || text === kb.manager.washes.ru.add) await mws3(bot, chat_id, lang)
-  if (text === kb.manager.washes.uz.washing || text === kb.manager.washes.ru.washing) await mws9(bot, chat_id, lang)
+  if (text === kb.manager.washes.uz.washing || text === kb.manager.washes.ru.washing) await mws10(bot, chat_id, lang)
 
   if (wash) {
-    if (wash.step === 0) await mws4(bot, chat_id, wash._id, text, lang)
-    if (wash.step === 1) await mws5(bot, chat_id, wash._id, text, lang)
-    if (wash.step === 2) await mws6(bot, chat_id, wash._id, text, lang)
-    if (wash.step === 3) await mws7(bot, chat_id, wash._id, text, lang)
-    if (wash.step === 4) await mws8(bot, chat_id, wash._id, text, lang)
+    if (text === kb.options.back.uz || text === kb.options.back.ru) {
+      await mws9(bot, chat_id, wash._id, lang)
+    } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+      if (wash.step === 0) await mws4(bot, chat_id, wash._id, text, lang)
+      if (wash.step === 1) await mws5(bot, chat_id, wash._id, text, lang)
+      if (wash.step === 2) await mws6(bot, chat_id, wash._id, text, lang)
+      if (wash.step === 3) await mws7(bot, chat_id, wash._id, text, lang)
+      if (wash.step === 4) await mws8(bot, chat_id, wash._id, text, lang)
+    }
   }
 }
 
-module.exports = {managerWashes, mws2, mws10, mws11}
+
+module.exports = {managerWashes, mws2, mws11, mws12, mws13}
