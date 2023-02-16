@@ -125,8 +125,8 @@ const ofs3 = async (bot, chat_id, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ofs4 = async (bot, chat_id, _id, text, lang) => {
-  let message
+const ofs4 = async (bot, chat_id, _id, text, message_id, lang) => {
+  let message, clause
 
   const feedback = await getFeedback({_id})
 
@@ -137,38 +137,45 @@ const ofs4 = async (bot, chat_id, _id, text, lang) => {
   const data = {name: author.name, feedback: feedback.reason},
     kbb = (lang === kb.language.uz) ? keyboard.owner.feedback.uz : keyboard.owner.feedback.ru
 
+  await bot.deleteMessage(chat_id, message_id)
+
   if (text === 'seen') {
+    message = (lang === kb.language.uz)
+      ? "Bu izoh ustida ishlar boshlangan"
+      : "Этот комментарий находится в обработке"
+
     if (feedback.status === 'active') {
       await updateFeedback({_id: feedback._id}, {status: 'seen'})
 
       message = report(data, 'FEEDBACK_SEEN', author.lang)
-    }
 
-    message = (lang === kb.language.uz)
-      ? "Bu izoh ustida ishlar boshlangan"
-      : "Этот комментарий находится в обработке"
+      clause = (lang === kb.language.uz) ? "Bu izoh ustida ishlar boshlandi" : "Начата работа над этим комментарием"
+    }
   }
 
   if (text === 'done') {
+    message = (lang === kb.language.uz)
+      ? "Bu izoh ustida ishlar tugallangan. Muammo bartaraf etilgan."
+      : "Этот комментарий завершен. Проблема решена."
+
     if (feedback.status === 'seen') {
       await updateFeedback({_id: feedback._id}, {status: 'done'})
 
       message = report(data, 'FEEDBACK_DONE', author.lang)
-    }
 
-    message = (lang === kb.language.uz)
-      ? "Bu izoh ustida ishlar tugallangan. Muammo bartaraf etilgan."
-      : "Этот комментарий завершен. Проблема решена."
+      clause = (lang === kb.language.uz) ? "Izoh muvaffaqqiyatli bajarildi" : "Комментарий завершен успешно"
+    }
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  await bot.sendMessage(feedback.author, message)
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 
 const ownerFeedback = async (bot, chat_id, text, lang) => {
   try {
     if (text === kb.owner.pages.uz.feedback || text === kb.owner.pages.ru.feedback) await ofs0(bot, chat_id, lang)
-
     if (text === kb.owner.feedback.uz.number || text === kb.owner.feedback.ru.number) await ofs1(bot, chat_id, lang)
     if (text === kb.owner.feedback.uz.read || text === kb.owner.feedback.ru.read) await ofs2(bot, chat_id, lang)
     if (text === kb.owner.feedback.uz.doing || text === kb.owner.feedback.ru.doing) await ofs3(bot, chat_id, lang)

@@ -9,7 +9,7 @@ const kb = require('./helpers/keyboard-buttons')
 const {adminPanel, getAdmin, amp, acs3, aos3, aas8} = require('./pages/adminPanel/adminPanel')
 const {ownerPanel, getOwner, ofs4, ofs14, ofs20} = require('./pages/ownerPanel/ownerPanel')
 const {managerPanel, getManager, mmp, mws2, mws11, mws12, mws13, mes2, mes3, mes11, mfs2} = require('./pages/managerPanel/managerPanel')
-const {employeePanel, getEmployee, emp, ews2, efs1} = require('./pages/employeePanel/employeePanel')
+const {employeePanel, getEmployee, emp, efs1, ews2, ews4, ews5} = require('./pages/employeePanel/employeePanel')
 
 const bot = new TelegramBot(config.TOKEN, {db, polling: true})
 
@@ -45,8 +45,8 @@ bot.on('callback_query', async query => {
 
   const admin = await getAdmin(request), owner = await getOwner(request), employee = await getEmployee(request)
 
-  const manager = await getManager({telegram_id, status: 'active'})
-    ? await getManager({telegram_id, status: 'active'})
+  const manager = await getManager(request)
+    ? await getManager(request)
     : await getManager({telegram_id, status: 'occupied'})
 
   if (admin) {
@@ -69,7 +69,7 @@ bot.on('callback_query', async query => {
   }
 
   if (owner) {
-    if (phrase === 'seen' || phrase === 'done') await ofs4(bot, telegram_id, id, phrase, owner.lang)
+    if (phrase === 'seen' || phrase === 'done') await ofs4(bot, telegram_id, id, phrase, mid, owner.lang)
     if (phrase === 'e_car' || phrase === 'e_e') await ofs14(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
     if (phrase === 's_car' || phrase === 's_e') await ofs20(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
   }
@@ -89,15 +89,14 @@ bot.on('callback_query', async query => {
       await mmp(bot, telegram_id, manager.lang)
     }
 
-    if (((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'wash') || phrase === 'wash') {
-      await mws2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-    }
+    await mws2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
+
     if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'washing')
       await mws11(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
     if (phrase === 'washing') await mws12(bot, telegram_id, mid, phrase, id, manager.lang)
     if (phrase === 'washed' || phrase === 'w_back') await mws13(bot, telegram_id, mid, phrase, id, manager.lang)
 
-    if (((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'employee') || phrase === 'emp')
+
       await mes2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
 
     if (phrase === 'e_d' || phrase === 'e_b') await mes3(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
@@ -122,7 +121,10 @@ bot.on('callback_query', async query => {
       await emp(bot, telegram_id, employee.lang)
     }
 
-    await mws2(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
+    await ews2(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
+    await ews4(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
+
+    if (phrase === 'wash') await ews5(bot, telegram_id, query_id, mid, id, employee.lang)
     await efs1(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
 
   }

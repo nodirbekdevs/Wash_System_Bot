@@ -42,17 +42,9 @@ const mws1 = async (bot, chat_id, lang) => {
       }
     }
 
-  const report = await wash_pagination(1, 6, query, lang)
+  const report = await wash_pagination(1, 6, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-  if (report.kbb === keyboard.manager.washes.uz || report.kbb === keyboard.manager.washes.ru) {
-    await bot.sendMessage(chat_id, report.text, {
-      parse_mode: 'HTML',
-      reply_markup: {resize_keyboard: true, keyboard: report.kbb}
-    })
-  } else {
-    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
-  }
-
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: kbb})
 }
 
 const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
@@ -65,16 +57,12 @@ const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
         $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date().setHours(23, 59, 59))
       }
-    }
+    }, phrase = data.split('#')
 
-  if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'wash') {
-    const report = await wash_pagination(parseInt(data.split('#')[2]), 6, query, lang)
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'wash') {
+    const report = await wash_pagination(parseInt(phrase[2]), 6, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-    await bot.editMessageText(report.text, {
-      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
-    })
-
-    await bot.answerCallbackQuery(query_id, '')
+    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
   }
 
   if (data === 'wash') {
@@ -130,7 +118,7 @@ const mws3 = async (bot, chat_id, lang) => {
       kbb = keyboard.manager.washes.uz
     } else if (lang === kb.language.ru) {
       message = "Вы не можете добавить автомойку, потому что у вас нет филиалаю"
-      kbb = keyboard.manager.washes.uz
+      kbb = keyboard.manager.washes.ru
     }
   } else if (fees.length <= 0) {
     if (lang === kb.language.uz) {
@@ -138,7 +126,7 @@ const mws3 = async (bot, chat_id, lang) => {
       kbb = keyboard.manager.washes.uz
     } else if (lang === kb.language.ru) {
       message = "Вы не можете добавить автомойку, потому что в филиале нет добавленного тарифа"
-      kbb = keyboard.manager.washes.uz
+      kbb = keyboard.manager.washes.ru
     }
   }
 
@@ -165,8 +153,6 @@ const mws5 = async (bot, chat_id, _id, text, lang) => {
   const fee = await getFee({
     owner: manager.owner, manager: chat_id, branch: manager.branch, name: text, status: 'active'
   })
-
-  console.log(fee)
 
   const message = (lang === kb.language.uz) ? "Mashinani markasini tanlang." : "Выберите марку автомобиля.",
     kbb = car_keyboard(fee.cars, lang)
@@ -203,17 +189,9 @@ const mws7 = async (bot, chat_id, _id, text, lang) => {
     manager = await getManager({telegram_id: wash.manager})
 
   const data = {
-    manager: manager.name,
-    employee: wash.employee,
-    branch: wash.branch,
-    fee: wash.fee,
-    car: wash.car,
-    car_type: wash.car_type,
-    car_number: wash.car_number,
-    price: fee.price,
-    cash: fee.cash,
-    benefit: fee.price - fee.cash,
-    started_at: day
+    manager: manager.name, employee: wash.employee, branch: wash.branch, fee: wash.fee, car: wash.car,
+    car_type: wash.car_type, car_number: wash.car_number, price: fee.price, cash: fee.cash,
+    benefit: fee.price - fee.cash, started_at: day
   }
 
   message = report(data, 'WASH_MAKING', lang)
@@ -293,16 +271,9 @@ const mws10 = async (bot, chat_id, lang) => {
       }
     }
 
-  const report = await washing_pagination(1, 6, query, lang)
+  const report = await wash_pagination(1, 6, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-  if (report.kbb === keyboard.manager.washes.uz || report.kbb === keyboard.manager.washes.ru) {
-    await bot.sendMessage(chat_id, report.text, {
-      parse_mode: 'HTML',
-      reply_markup: {resize_keyboard: true, keyboard: report.kbb}
-    })
-  } else {
-    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
-  }
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: kbb})
 }
 
 const mws11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
@@ -315,11 +286,10 @@ const mws11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
       }
     }
 
-  const report = await washing_pagination(parseInt(data.split('#')[2]), 6, query, lang)
+  const report = await wash_pagination(parseInt(data.split('#')[2]), 6, query, 'MANAGER', lang),
+    kbb = report.kbs.reply_markup
 
-  await bot.editMessageText(report.text, {
-    chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
-  })
+  await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
 }
 
 const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
@@ -395,9 +365,7 @@ const mws13 = async (bot, chat_id, message_id, data, _id, lang) => {
 
     await bot.sendMessage(chat_id, message)
   } else if (data === 'washed' && wash.status === 'washed') {
-    message = (lang === kb.language.uz)
-      ? `Avtomobil yuvib bo'lingan`
-      : `Машину помыли`
+    message = (lang === kb.language.uz) ? `Avtomobil yuvib bo'lingan` : `Машину помыли`
 
     await bot.sendMessage(chat_id, message)
   }
@@ -408,33 +376,20 @@ const mws13 = async (bot, chat_id, message_id, data, _id, lang) => {
       $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
       $lt: new Date(new Date().setHours(23, 59, 59))
     }
-  }, washes = await getWashes(query)
+  }
 
-  console.log(washes.length)
+  const report = await wash_pagination(1, 6, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-  if (washes.length > 0) {
-    console.log("Kevotti1")
-    const report = await washing_pagination(1, 6, query, lang)
+  console.log(report.text)
+  console.log(report.kbs)
 
-    await bot.editMessageText(report.text, {
-      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
-    })
-  } else if (washes.length <= 0) {
-    console.log("Kevotti")
 
-    let clause, kbb
-
-    if (lang === kb.language.uz) {
-      clause = "Yuvilayotgan mashina qolmadi"
-      kbb = keyboard.manager.washes.uz
-    } else if (lang === kb.language.ru) {
-      clause = "Машины больше не моют"
-      kbb = keyboard.manager.washes.ru
-    }
-
+  if (report.text === 'Hali yuvishlar mavjud emas' || report.text === 'Автомоек пока нет') {
     await bot.deleteMessage(chat_id, message_id)
-
-    await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    const clause = (lang === kb.language.uz) ? "Yuvilayotgan mashina qolmadi" : "Машины больше не моют"
+    await bot.sendMessage(chat_id, clause, report.kbs)
+  } else if (report.text !== 'Hali yuvishlar mavjud emas' || report.text !== 'Автомоек пока нет') {
+    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
   }
 }
 

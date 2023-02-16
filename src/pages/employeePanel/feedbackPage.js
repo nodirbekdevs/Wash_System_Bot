@@ -67,7 +67,7 @@ const efs3 = async (bot, chat_id, _id, text, lang) => {
   const feedback = await getFeedback({_id}), employee = await getEmployee({telegram_id: chat_id})
 
   if (feedback.mark === kb.options.feedback.uz.good || feedback.mark === kb.options.feedback.ru.good) {
-    await updateFeedback({_id: feedback._id}, {action: 'done'})
+    await updateFeedback({_id: feedback._id}, {status: 'done'})
   }
 
   await updateEmployee({_id: employee._id}, {$inc: {total_feedback: 1}})

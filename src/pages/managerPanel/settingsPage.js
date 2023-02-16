@@ -13,7 +13,6 @@ const mss0 = async (bot, manager, lang) => {
   await updateManager({telegram_id: manager.telegram_id}, {step: 7})
 
   await bot.sendMessage(manager.telegram_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
 }
 
 const mss1 = async (bot, chat_id, lang) => {
@@ -107,7 +106,7 @@ const mss6 = async (bot, chat_id, text, lang) => {
 
   await updateManager({telegram_id: chat_id}, {lang: text, step: 7})
 
-  const manager = await getManager({telegram_id: chat_id}), report = report(manager, 'MANAGER', lang)
+  const manager = await getManager({telegram_id: chat_id}), bio = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     message = "Platformadagi tilingiz muvaffaqiyatli o'zgartirildi"
@@ -119,7 +118,7 @@ const mss6 = async (bot, chat_id, text, lang) => {
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 
-  await bot.sendMessage(chat_id, report)
+  await bot.sendMessage(chat_id, bio)
 }
 
 const managerSettings = async (bot, manager, text, lang) => {

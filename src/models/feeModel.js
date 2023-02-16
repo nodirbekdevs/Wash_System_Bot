@@ -3,8 +3,8 @@ const {v4} = require('uuid')
 
 const Fee = model('Fee', new Schema({
   _id: {type: String, default: v4},
-  owner: {type: Number, ref: 'Owner'},
-  manager: {type: Number, ref: 'Manager'},
+  owner: {type: Number, ref: 'Owner', default: 0},
+  manager: {type: Number, ref: 'Manager', default: 0},
   branch: {type: String, ref: 'Branch', default: ''},
   image: {type: String, default: ''},
   name: {type: String, default: ''},

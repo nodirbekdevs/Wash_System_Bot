@@ -153,7 +153,7 @@ module.exports = {
         branch: "🏢  Filial",
       },
       ru: {
-        settings: "⚙️Sozlamalar",
+        settings: "⚙ Настройки",
         washes: "🚿  Мойки",
         employees: "🙍‍♂️Сотрудники",
         fees: "🚘  Тарифы",

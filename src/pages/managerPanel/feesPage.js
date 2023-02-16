@@ -20,49 +20,22 @@ const mfs0 = async (bot, chat_id, lang) => {
 }
 
 const mfs1 = async (bot, chat_id, lang) => {
-  let message, kbb
-
-  const manager = await getManager({telegram_id: chat_id}),
-    query = {owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'},
-  fees = await getFees(query)
-
-  if (fees.length > 0) {
-    const report = await fee_pagination(1, 1, query, lang)
-
-    console.log("Kevotti1")
-
-    message = report.text
-    kbb = report.kbb
-
-    await bot.sendMessage(chat_id, message, {parse_mode: 'HTML', reply_markup: {inline_keyboard: kbb}})
-  } else {
-
-    console.log("Kevotti2")
-
-    if (lang === kb.language.uz) {
-      message = "Hali tariflar mavjud emas"
-      kbb = keyboard.manager.fees.uz
-    } else if (lang === kb.language.ru) {
-      message = "Тарифов пока нет"
-      kbb = keyboard.manager.fees.ru
-    }
-
-    await bot.sendMessage(chat_id, message, {parse_mode: 'HTML', reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  }
-}
-
-const mfs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     query = {owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'}
 
-  if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'fee') {
-    const report = await fee_pagination(parseInt(data.split('#')[2]), 1, query, lang)
+  const report = await fee_pagination(1, 1, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-    await bot.editMessageText(report.text, {
-      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
-    })
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: kbb})
+}
 
-    await bot.answerCallbackQuery(query_id, '')
+const mfs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
+  const manager = await getManager({telegram_id: chat_id}), phrase = data.split('#'),
+    query = {owner: manager.owner, manager: chat_id, branch: manager.branch, status: 'active'}
+
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'fee') {
+    const report = await fee_pagination(parseInt(phrase[2]), 1, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
+
+    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
   }
 }
 

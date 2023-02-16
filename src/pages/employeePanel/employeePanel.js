@@ -1,6 +1,6 @@
 const {employeeMainPage, emp} = require('./mainPage')
 const {employeeSettings} = require('./settingsPage')
-const {employeeWashes, ews2} = require('./washesPage')
+const {employeeWashes, ews2, ews4, ews5} = require('./washesPage')
 const {employeeFeedback} = require('./feedbackPage')
 const {employeeFees, efs1} = require('./feesPage')
 const {employeeBranch} = require('./branchesPage')
@@ -9,6 +9,8 @@ const {getEmployee} = require('./../../controllers/employeeController')
 const employeePanel = async (bot, message, employee) => {
   let text
   const chat_id = message.chat.id, lang = employee.lang
+
+  console.log("Kevotti")
 
   if (message.location) {
     text = message.location
@@ -30,4 +32,4 @@ const employeePanel = async (bot, message, employee) => {
   }
 }
 
-module.exports = {employeePanel, getEmployee, emp, ews2, efs1}
+module.exports = {employeePanel, getEmployee, emp, efs1, ews2, ews4, ews5}

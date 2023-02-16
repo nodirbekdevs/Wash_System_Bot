@@ -18,7 +18,13 @@ const mes0 = async (bot, chat_id, lang) => {
     kbb = keyboard.manager.employees.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
+  await bot.sendMessage(chat_id, message, {
+    reply_markup: {
+      resize_keyboard: true,
+      keyboard: kbb,
+      one_time_keyboard: true
+    }
+  })
 }
 
 const mes1 = async (bot, chat_id, lang) => {
@@ -27,19 +33,16 @@ const mes1 = async (bot, chat_id, lang) => {
 
   const report = await employee_pagination(1, 6, query, lang)
 
-  await bot.sendMessage(chat_id, report.text, {
-    parse_mode: 'HTML',
-    reply_markup: {inline_keyboard: report.kbb}
-  })
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
 }
 
 const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   let message, back, clause
 
-  const manager = await getManager({telegram_id: chat_id}),
+  const manager = await getManager({telegram_id: chat_id}), phrase = data.split('#'),
     query = {manager: manager.telegram_id, branch: manager.branch, status: 'active'}
 
-  if ((data.split('#')[0] === 'left' || data.split('#')[0] === 'right') && data.split('#')[1] === 'employee') {
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'employee') {
 
     const report = await employee_pagination(parseInt(data.split('#')[2]), 6, query, lang)
 
@@ -251,24 +254,17 @@ const mes9 = async (bot, chat_id, _id, text, lang) => {
 }
 
 const mes10 = async (bot, chat_id, lang) => {
-  let workers = []
-
   const manager = await getManager({telegram_id: chat_id}),
-    employees = await getEmployees({manager: manager.telegram_id, branch: manager.branch})
+    employees = await getEmployees({manager: manager.telegram_id, branch: manager.branch, status: {$in: ["active", "inactive"]}
+    })
 
-  for (let i = 0; i < employees.length; i++) {
-    if (employees[i].status !== 'process' || employees[i].status !== 'unemployed') {
-      workers.push(employees[i])
-    }
-  }
+  const report = employee_attendance(employees, lang)
 
-  const report = employee_attendance(workers, lang)
-
-  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
 
 const mes11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
-  let message, workers = []
+  let message
 
   const manager = await getManager({telegram_id: chat_id}), employee = await getEmployee({_id})
 
@@ -291,18 +287,14 @@ const mes11 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     }
   }
 
-  const employees = await getEmployees({manager: manager.telegram_id, branch: manager.branch})
+  const employees = await getEmployees({
+    manager: manager.telegram_id, branch: manager.branch, status: {$in: ["active", "inactive"]}
+  })
 
-  for (let i = 0; i < employees.length; i++) {
-    if (employees[i].status !== 'process' || employees[i] !== 'unemployed') {
-      workers.push(employees[i])
-    }
-  }
-
-  const report = await employee_attendance(workers, lang)
+  const report = await employee_attendance(employees, lang)
 
   await bot.editMessageText(report.text, {
-    chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
+    chat_id, message_id, parse_mode: 'HTML', reply_markup: report.kbs.reply_markup
   })
 }
 

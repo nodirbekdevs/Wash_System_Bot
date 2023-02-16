@@ -8,8 +8,6 @@ let type
 const ost0 = async (bot, owner, lang) => {
   let message, kbb
 
-  console.log("Kevotti1")
-
   if (lang === kb.language.uz) {
     message = 'Sozlamalar sahifasi'
     kbb = keyboard.owner.settings.uz
@@ -20,11 +18,11 @@ const ost0 = async (bot, owner, lang) => {
 
   const clause = report(owner, 'OWNER', lang)
 
-  await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
-
   await bot.sendMessage(owner.telegram_id, clause)
 
   await bot.sendMessage(owner.telegram_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+
+  await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
 }
 
 const ost1 = async (bot, chat_id, lang) => {
@@ -118,7 +116,8 @@ const ost6 = async (bot, chat_id, text, lang) => {
 const ownerSettings = async (bot, owner, text, lang) => {
   try {
     if (text === kb.owner.pages.uz.settings || text === kb.owner.pages.ru.settings) await ost0(bot, owner, lang)
-    if (owner.step === 6 && text === kb.main.uz) await updateOwner({telegram_id: owner.telegram_id}, {step: 5})
+    if (owner.step === 6 && (text === kb.main.uz || text === kb.main.ru))
+      await updateOwner({telegram_id: owner.telegram_id}, {step: 5})
     if (owner.step === 6) {
       if (text === kb.owner.settings.uz.name || text === kb.owner.settings.ru.name) await ost1(bot, owner.telegram_id, lang)
       if (text === kb.owner.settings.uz.number || text === kb.owner.settings.ru.number) await ost3(bot, owner.telegram_id, lang)
