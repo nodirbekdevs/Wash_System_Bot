@@ -3,7 +3,7 @@ const keyboard = require('../../helpers/keyboard')
 const {getAllFeedback, getFeedback, makeFeedback, updateFeedback, deleteFeedback, countAllFeedback} = require('../../controllers/feedbackController')
 const {getEmployee, updateEmployee} = require('../../controllers/employeeController')
 const {getManager} = require('../../controllers/managerController')
-const {bio} = require('./../../helpers/utils')
+const {report} = require('./../../helpers/utils')
 
 let feedback_id
 
@@ -97,12 +97,12 @@ const efs4 = async (bot, chat_id, lang) => {
   if (count > 0) {
     const data = {number: count, process, active, inactive, seen, done}
 
-    message = bio(data, 'FEEDBACK_ALL', lang)
+    message = report(data, 'FEEDBACK_ALL', lang)
   } else if (count <= 0) {
     message = "Hozircha siz fikr qoldirmagansiz"
   }
 
-  await bot.sendMessage(id, message)
+  await bot.sendMessage(chat_id, message)
 }
 
 const efs5 = async (bot, chat_id, _id, lang) => {
@@ -110,7 +110,7 @@ const efs5 = async (bot, chat_id, _id, lang) => {
   await efs0(bot, chat_id, lang)
 }
 
-const employeeFeedback = async (bot, chat_id, name, text, lang) => {
+const employeeFeedback = async (bot, chat_id, text, lang) => {
 
   const feedback = await getFeedback({_id: feedback_id, status: 'process'})
     ? await getFeedback({_id: feedback_id, status: 'process'})

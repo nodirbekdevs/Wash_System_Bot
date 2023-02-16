@@ -12,7 +12,6 @@ const ess0 = async (bot, employee, lang) => {
   await updateEmployee({telegram_id: employee.telegram_id}, {step: 6})
 
   await bot.sendMessage(employee.telegram_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
 }
 
 const ess1 = async (bot, chat_id, lang) => {
@@ -105,24 +104,17 @@ const ess6 = async (bot, chat_id, text, lang) => {
 
 const employeeSettings = async (bot, employee, text, lang) => {
   try {
-    if (text === kb.manager.pages.uz.settings || text === kb.manager.pages.ru.settings) await ess0(bot, employee, lang)
-
-    if (employee.step === 6 && (text === kb.main.uz || text === kb.main.ru))
-      await updateEmployee({telegram_id: employee.telegram_id}, {step: 5})
-
+    if (text === kb.employee.pages.uz.settings || text === kb.employee.pages.ru.settings) await ess0(bot, employee, lang)
+    if (employee.step === 6 && (text === kb.main.uz || text === kb.main.ru)) await updateEmployee({telegram_id: employee.telegram_id}, {step: 5})
     if (employee.step === 6) {
       if (text === kb.employee.settings.uz.name || text === kb.employee.settings.ru.name) await ess1(bot, employee.telegram_id, lang)
-
       if (text === kb.employee.settings.uz.number || text === kb.employee.settings.ru.number) await ess3(bot, employee.telegram_id, lang)
-
       if (text === kb.employee.settings.uz.language || text === kb.employee.settings.ru.language) await ess5(bot, employee.telegram_id, lang)
       type = text
     } else if (employee.step === 7) {
-      if (text === kb.employee.settings.uz.name || text === kb.employee.settings.ru.name) await ess2(bot, employee.telegram_id, text, lang)
-
-      if (text === kb.employee.settings.uz.number || text === kb.employee.settings.ru.number) await ess4(bot, employee.telegram_id, text, lang)
-
-      if (text === kb.employee.settings.uz.language || text === kb.employee.settings.ru.language) await ess6(bot, employee.telegram_id, text, lang)
+      if (type === kb.employee.settings.uz.name || type === kb.employee.settings.ru.name) await ess2(bot, employee.telegram_id, text, lang)
+      if (type === kb.employee.settings.uz.number || type === kb.employee.settings.ru.number) await ess4(bot, employee.telegram_id, text, lang)
+      if (type === kb.employee.settings.uz.language || type === kb.employee.settings.ru.language) await ess6(bot, employee.telegram_id, text, lang)
     }
   } catch (e) {
     console.log(e)

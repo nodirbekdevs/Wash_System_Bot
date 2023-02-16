@@ -196,12 +196,12 @@ module.exports = {
     pages: {
       uz: [
         [kb.employee.pages.uz.settings, kb.employee.pages.uz.washes],
-        [kb.employee.pages.uz.feedback, kb.employee.pages.uz.cars],
+        [kb.employee.pages.uz.feedback, kb.employee.pages.uz.fees],
         [kb.employee.pages.uz.branch]
       ],
       ru: [
         [kb.employee.pages.ru.settings, kb.employee.pages.ru.washes],
-        [kb.employee.pages.ru.feedback, kb.employee.pages.ru.cars],
+        [kb.employee.pages.ru.feedback, kb.employee.pages.ru.fees],
         [kb.employee.pages.ru.branch]
       ]
     },
@@ -219,13 +219,11 @@ module.exports = {
 
     washes: {
       uz: [
-        [kb.manager.washes.uz.today, kb.manager.washes.uz.washing],
-        [kb.manager.washes.uz.add],
+        [kb.employee.washes.uz.today, kb.employee.washes.uz.all],
         [kb.main.uz]
       ],
       ru: [
-        [kb.manager.washes.ru.today, kb.manager.washes.ru.washing],
-        [kb.manager.washes.ru.add],
+        [kb.employee.washes.ru.today, kb.employee.washes.ru.all],
         [kb.main.ru]
       ]
     },
@@ -240,17 +238,7 @@ module.exports = {
         [kb.main.ru]
       ]
     },
-
-    cars: {
-      uz: [
-        [kb.employee.cars.uz.all],
-        [kb.main.uz]
-      ],
-      ru: [
-        [kb.employee.cars.ru.all],
-        [kb.main.ru]
-      ]
-    }},
+  },
 
   client: {},
 

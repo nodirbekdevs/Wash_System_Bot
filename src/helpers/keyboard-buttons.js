@@ -222,15 +222,15 @@ module.exports = {
       uz: {
         settings: "⚙️Sozlamalar",
         washes: "🚿  Yuvishlar",
-        feedback: "✍️Fikr bildirish",
-        cars: "🚘  Mashinalar",
+        feedback: "✍️Izohlar",
+        fees: "🚘  Tariflar",
         branch: "🏢  Filial",
       },
       ru: {
         settings: "⚙️Sozlamalar",
         washes: "🚿  Мойки",
-        feedback: "✍️Комментировать",
-        cars: "🚘  Машины",
+        feedback: "✍️Комментарии",
+        fees: "🚘  Тарифы",
         branch: "🏢  Филиал",
       }
     },
@@ -250,9 +250,13 @@ module.exports = {
 
     washes: {
       uz: {
-
+        all: 'Barcha yuvgan mashinalarim',
+        today: 'Bugungi yuvgan mashinalarim'
       },
-      ru: {}
+      ru: {
+        all: 'Все мои машины вымыты',
+        today: 'Машины, которые я сегодня помыл'
+      }
     },
 
     feedback: {
@@ -263,15 +267,6 @@ module.exports = {
       ru: {
         my_feedback: '📃 Мои коментарии',
         add: '📝 Оставить коментария'
-      }
-    },
-
-    cars: {
-      uz: {
-        all: "Barcha mashinalar",
-      },
-      ru: {
-        all: "Все автомобили",
       }
     },
   },
