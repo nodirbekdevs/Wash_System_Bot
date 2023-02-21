@@ -115,16 +115,12 @@ module.exports = {
 
     reports: {
       uz: [
-        [kb.owner.reports.uz.five_day, kb.owner.reports.uz.ten_day],
-        [kb.owner.reports.uz.week, kb.owner.reports.uz.month],
-        [kb.owner.reports.uz.year],
-        [kb.main.uz]
+        [kb.owner.reports.uz.one_day, kb.owner.reports.uz.other_days],
+        [kb.options.back.uz]
       ],
       ru: [
-        [kb.owner.reports.ru.day, kb.owner.reports.ru.five_day],
-        [kb.owner.reports.ru.ten_day, kb.owner.reports.ru.week],
-        [kb.owner.reports.ru.month, kb.owner.reports.ru.year],
-        [kb.main.ru]
+        [kb.owner.reports.ru.one_day, kb.owner.reports.ru.other_days],
+        [kb.options.back.ru]
       ]
     }
   },

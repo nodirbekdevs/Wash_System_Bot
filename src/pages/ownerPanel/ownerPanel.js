@@ -5,6 +5,7 @@ const {ownerBranch} = require('./branchesPage')
 const {ownerManager} = require('./managersPage')
 const {ownerFeedback} = require('./feedbackPage')
 const {ownerFee} = require('./feePage')
+const {ownerReports} = require('./reportPage')
 const {getOwner} = require('./../../controllers/ownerController')
 const {ownerPanelQuery} = require('./ownerPanelQuery')
 
@@ -28,6 +29,7 @@ const ownerPanel = async (bot, message, owner) => {
       await ownerManager(bot, chat_id, text, lang)
       await ownerFee(bot, chat_id, text, lang)
       await ownerFeedback(bot, chat_id, text, lang)
+      await ownerReports(bot, chat_id, text, lang)
     } else if (!owner.is_paid) {
       const message = owner.lang === kb.language.uz
         ? "Bu oy uchun pul to'lanmagan. Platformani ishlatish uchun admin bilan bog'laning"

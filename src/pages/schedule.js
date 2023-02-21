@@ -81,15 +81,13 @@ const schedule = (bot) => {
             daily_washes.push(wash)
           }
 
-          const name = date_name()
+          const filename = date_name(), name = `${path}/${filename}_${branch.name}_daily.xlsx`
 
           const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes)
 
-          excel.utils.book_append_sheet(new_workbook, data, name)
+          excel.utils.book_append_sheet(new_workbook, data, filename)
 
-          excel.writeFile(new_workbook, `${path}/${name}.xlsx`)
-
-          const document = `${path}/${name}.xlsx`
+          excel.writeFile(new_workbook, name)
 
           const file_options = {
             filename: document,
@@ -100,7 +98,7 @@ const schedule = (bot) => {
             ? `Bugungi avtomobil yuvishlardan ${total} foyda ko'rildi`
             : `${total} прибыль от сегодняшних автомоек`
 
-          await bot.sendDocument(owner.telegram_id, document, {}, file_options)
+          await bot.sendDocument(owner.telegram_id, name, {}, file_options)
 
           await bot.sendMessage(owner.telegram_id, message)
         } else if (washes.length <= 0) {

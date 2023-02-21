@@ -125,20 +125,12 @@ module.exports = {
 
     reports: {
       uz: {
-        day: 'Bugungi hisobot',
-        five_day: '5 kunlik hisobot',
-        ten_day: '10 kunlik hisobot',
-        week: 'Haftalik hisobot',
-        month: 'Oylik hisobot',
-        year: 'Yillik hisobot',
+        one_day: 'Отчет за 1 день',
+        other_days: "Boshqa kunlar oralig'idagi hisobotlar"
       },
       ru: {
-        day: 'Сегодняшний отчет',
-        five_day: 'отчет за 5 дней',
-        ten_day: 'отчет за 10 дней',
-        week: 'Еженедельный отчет',
-        month: 'Месячный отчет',
-        year: 'Годовой отчет',
+        one_day: 'Bugungi hisobot',
+        other_days: "Прочие ежедневные отчеты."
       }
     }
   },
