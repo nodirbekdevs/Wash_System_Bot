@@ -26,7 +26,7 @@ const makeManager = async (data) => {
 
 const updateManager = async (query, data) => {
   try {
-    return await Manager.findOneAndUpdate(query, data)
+    return await Manager.findOneAndUpdate(query, data, {new: true})
   } catch (e) {
     console.log(e)
   }
@@ -47,5 +47,55 @@ const countManagers = async (query) => {
     console.log(e)
   }
 }
+
+
+
+// const getManagers = async (query) => {
+//   try {
+//     return await Manager.findAll({where: query, order: [['created_at', 'DESC']]})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const getManager = async (query) => {
+//   try {
+//     return await Manager.findOne({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const makeManager = async (data) => {
+//   try {
+//     return await Manager.create(data)
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const updateManager = async (query, data) => {
+//   try {
+//     return await Manager.update(data, {where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const deleteManager = async (query) => {
+//   try {
+//     return await Manager.destroy({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const countManagers = async (query) => {
+//   try {
+//     return await Manager.count({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
 
 module.exports = {getManagers, getManager, makeManager, updateManager, deleteManager, countManagers}

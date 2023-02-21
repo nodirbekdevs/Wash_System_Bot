@@ -1,9 +1,10 @@
-const {adminMainPage, amp} = require('./mainPage')
+const {adminMainPage} = require('./mainPage')
 const {adminSettings} = require('./settingsPage')
-const {adminAdvertising, aas8} = require('./advertisingPage')
-const {adminCars, acs3} = require('./carsPage')
-const {adminOwners, aos3} = require('./ownersPage')
-const {getAdmin, makeAdmin} = require('./../../controllers/adminController')
+const {adminAdvertising} = require('./advertisingPage')
+const {adminCars} = require('./carsPage')
+const {adminOwners} = require('./ownersPage')
+const {getAdmin} = require('./../../controllers/adminController')
+const {adminPanelQuery} = require('./adminPanelQuery')
 
 const adminPanel = async (bot, message, admin) => {
   const chat_id = message.chat.id, username = message.from.username,
@@ -20,4 +21,4 @@ const adminPanel = async (bot, message, admin) => {
   }
 }
 
-module.exports = {adminPanel, getAdmin, amp, acs3, aos3, aas8}
+module.exports = {adminPanel, adminPanelQuery, getAdmin}

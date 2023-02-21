@@ -16,13 +16,17 @@ const ost0 = async (bot, owner, lang) => {
     kbb = keyboard.owner.settings.ru
   }
 
-  const clause = report(owner, 'OWNER', lang)
+  console.log(owner)
+
+  await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
+
+  const clause = report(owner, "OWNER", lang)
+
+  console.log(clause)
 
   await bot.sendMessage(owner.telegram_id, clause)
 
   await bot.sendMessage(owner.telegram_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
-  await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
 }
 
 const ost1 = async (bot, chat_id, lang) => {
@@ -50,9 +54,9 @@ const ost2 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.owner.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, message)
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
 }
 
 const ost3 = async (bot, chat_id, lang) => {
@@ -80,9 +84,9 @@ const ost4 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.owner.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, message)
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
 }
 
 const ost5 = async (bot, chat_id, lang) => {
@@ -108,9 +112,9 @@ const ost6 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.owner.settings.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, report)
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard:true}})
 }
 
 const ownerSettings = async (bot, owner, text, lang) => {
@@ -124,9 +128,9 @@ const ownerSettings = async (bot, owner, text, lang) => {
       if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await ost5(bot, owner.telegram_id, lang)
       type = text
     } else if (owner.step === 7) {
-      if (text === kb.owner.settings.uz.name || text === kb.owner.settings.ru.name) await ost2(bot, owner.telegram_id, text, lang)
-      if (text === kb.owner.settings.uz.number || text === kb.owner.settings.ru.number) await ost4(bot, owner.telegram_id, text, lang)
-      if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await ost6(bot, owner.telegram_id, text, lang)
+      if (type === kb.owner.settings.uz.name || type === kb.owner.settings.ru.name) await ost2(bot, owner.telegram_id, text, lang)
+      if (type === kb.owner.settings.uz.number || type === kb.owner.settings.ru.number) await ost4(bot, owner.telegram_id, text, lang)
+      if (type === kb.owner.settings.uz.language || type === kb.owner.settings.ru.language) await ost6(bot, owner.telegram_id, text, lang)
     }
   } catch (e) {
     console.log(e)

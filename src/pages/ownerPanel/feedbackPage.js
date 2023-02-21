@@ -125,7 +125,7 @@ const ofs3 = async (bot, chat_id, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ofs4 = async (bot, chat_id, _id, text, message_id, lang) => {
+const ofs4 = async (bot, chat_id, message_id, text, _id, lang) => {
   let message, clause
 
   const feedback = await getFeedback({_id})

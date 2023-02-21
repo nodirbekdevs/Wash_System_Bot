@@ -48,4 +48,55 @@ const countAdmins = async (query) => {
   }
 }
 
+
+
+
+// const getAdmins = async (query) => {
+//   try {
+//     return await Admin.findAll({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const getAdmin = async (query) => {
+//   try {
+//     return await Admin.findOne({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const makeAdmin = async (data) => {
+//   try {
+//     return await Admin.create(data)
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const updateAdmin = async (query, data) => {
+//   try {
+//     return await Admin.update(data, {where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const deleteAdmin = async (query) => {
+//   try {
+//     return await Admin.destroy({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const countAdmins = async (query) => {
+//   try {
+//     return await Admin.count({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+
 module.exports = {getAdmins, getAdmin, makeAdmin, updateAdmin, deleteAdmin, countAdmins}

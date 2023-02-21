@@ -1,5 +1,4 @@
-const {Schema, model} = require('mongoose')
-const {v4} = require('uuid')
+const {Schema, model} = require('mongoose'), {v4} = require('uuid')
 
 const Admin = model('Admin', new Schema({
   _id: {type: String, default: v4},
@@ -17,5 +16,24 @@ const Admin = model('Admin', new Schema({
   status: {type: String, enum: ['active', 'inactive'], default: 'active'},
   created_at: {type: Date, default: Date.now()}
 }))
+
+// const {DataTypes} = require("sequelize"), db = require("./../helpers/db");
+//
+// const Admin = db.define('Admin', {
+//   _id: {type: DataTypes.STRING, defaultValue: DataTypes.UUIDV4},
+//   telegram_id: {type: DataTypes.INTEGER, unique: true, allowNull: true},
+//   name: {type: DataTypes.STRING, defaultValue: ''},
+//   username: {type: DataTypes.STRING, defaultValue: ''},
+//   password: {type: DataTypes.STRING, defaultValue: ''},
+//   number: {type: DataTypes.STRING, defaultValue: ''},
+//   type: {type: DataTypes.ENUM, values: ['admin', 'super_admin'], defaultValue: 'super_admin'},
+//   advertisements: {type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: []},
+//   owners: {type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: []},
+//   total_advertisements: {type: DataTypes.INTEGER, defaultValue: 0},
+//   total_owners: {type: DataTypes.INTEGER, defaultValue: 0},
+//   step: {type: DataTypes.INTEGER, defaultValue: 0},
+//   status: {type: DataTypes.ENUM, values: ['active', 'inactive'], defaultValue: 'active'},
+//   created_at: {type: DataTypes.DATE, defaultValue: DataTypes.NOW}
+// })
 
 module.exports = Admin

@@ -115,9 +115,9 @@ module.exports = {
 
     reports: {
       uz: [
-        [kb.owner.reports.uz.day, kb.owner.reports.uz.five_day],
-        [kb.owner.reports.uz.ten_day, kb.owner.reports.uz.week],
-        [kb.owner.reports.uz.month, kb.owner.reports.uz.year],
+        [kb.owner.reports.uz.five_day, kb.owner.reports.uz.ten_day],
+        [kb.owner.reports.uz.week, kb.owner.reports.uz.month],
+        [kb.owner.reports.uz.year],
         [kb.main.uz]
       ],
       ru: [

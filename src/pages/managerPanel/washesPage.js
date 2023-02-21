@@ -380,10 +380,6 @@ const mws13 = async (bot, chat_id, message_id, data, _id, lang) => {
 
   const report = await wash_pagination(1, 6, query, 'MANAGER', lang), kbb = report.kbs.reply_markup
 
-  console.log(report.text)
-  console.log(report.kbs)
-
-
   if (report.text === 'Hali yuvishlar mavjud emas' || report.text === 'Автомоек пока нет') {
     await bot.deleteMessage(chat_id, message_id)
     const clause = (lang === kb.language.uz) ? "Yuvilayotgan mashina qolmadi" : "Машины больше не моют"

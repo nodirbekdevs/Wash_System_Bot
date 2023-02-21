@@ -24,9 +24,9 @@ const makeClient = async (data) => {
   }
 }
 
-const updateClient = async (query, data, text) => {
+const updateClient = async (query, data) => {
   try {
-    return await Client.findOneAndUpdate(query, data)
+    return await Client.findOneAndUpdate(query, data, {new: true})
   } catch (e) {
     console.log(e)
   }
@@ -47,5 +47,55 @@ const countClients = async (query) => {
     console.log(e)
   }
 }
+
+
+
+// const getClients = async (query) => {
+//   try {
+//     return await Client.findAll({where: query, order: [['created_at', 'DESC']]})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const getClient = async (query) => {
+//   try {
+//     return await Client.findOne({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const makeClient = async (data) => {
+//   try {
+//     return  await Client.create(data)
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const updateClient = async (query, data) => {
+//   try {
+//     return await Client.update(data, {where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const deleteClient = async (query) => {
+//   try {
+//     return await Client.destroy({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+//
+// const countClients = async (query) => {
+//   try {
+//     return await Client.count({where: query})
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
 
 module.exports = {getClients, getClient, makeClient, updateClient, deleteClient, countClients}

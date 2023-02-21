@@ -406,8 +406,6 @@ const obs16 = async (bot, chat_id, branch, text, lang) => {
   if (text.latitude && text.longitude) {
     const geo = Geo(config.MAP_OPTIONS), place_geo = await geo.reverse({lat: text.latitude, lon: text.longitude})
 
-    console.log(place_geo)
-
     place_geo.map(place => place_name = `${place.country} ${place.city} ${place.county}`)
 
     if (branch) {
@@ -424,12 +422,11 @@ const obs16 = async (bot, chat_id, branch, text, lang) => {
       message += '\nTasdiqlaysizmi ?'
       kbb = keyboard.options.confirmation.uz
     } else if (lang === kb.language.ru) {
-      message = '\nВы одобряете ?'
+      message += '\nВы одобряете ?'
       kbb = keyboard.options.confirmation.ru
     }
 
     await bot.sendPhoto(chat_id, branch.image, {caption: message, reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   } else if (!text.latitude && !text.longitude) {
     if (lang === kb.language.uz) {
       message = "Iltimos lokatsiya yuboring"
@@ -466,7 +463,7 @@ const obs17 = async (bot, chat_id, _id, text, lang) => {
         await updateBranch({owner: manager.owner, name: manager.branch}, {manager: 0})
       }
 
-      if (managers_branch.total_fees >= 0) {
+      if (managers_branch && managers_branch.total_fees > 0) {
         await updateManyFees({manager: managers_branch.manager, branch: managers_branch.name}, {manager: 0})
       }
 
@@ -524,6 +521,8 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
 
     if (owner.step === 5) {
       if (branch) {
+        console.log("Kevotti")
+
         if (text === kb.options.back.uz) {
           await obs18(bot, chat_id, branch._id, lang)
         } else if (text !== kb.options.back.uz) {

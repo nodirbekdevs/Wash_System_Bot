@@ -26,38 +26,29 @@ const aos1 = async (bot, chat_id) => {
 const aos2 = async (bot, chat_id) => {
   const report = await owner_pagination(1, 6)
 
-  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
 
-const aos3 = async (bot, chat_id, query_id, message_id, phrase, _id) => {
+const aos3 = async (bot, chat_id, query_id, message_id, data, _id) => {
   let message
 
-  if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'owner') {
-    const current_page = parseInt(phrase.split('#')[2])
+  const phrase = data.split("#")
 
-    const report = await owner_pagination(current_page, 10)
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'owner') {
+    const report = await owner_pagination(parseInt(phrase[2]), 6)
 
     await bot.editMessageText(report.text, {
-      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
+      chat_id, message_id, parse_mode: 'HTML', reply_markup: report.kbs.reply_markup
     })
-
-    await bot.answerCallbackQuery(query_id, '')
   }
 
-  if (phrase === 'owner') {
+  if (data === 'owner') {
     const owner = await getOwner({_id}), started_at = date(owner.created_at)
 
     const data = {
-      name: owner.name,
-      username: owner.username,
-      number: owner.number,
-      total_branches: owner.total_branches,
-      total_managers: owner.total_managers,
-      is_paid: owner.is_paid,
-      balance: owner.balance,
-      lang: owner.lang,
-      status: owner.status,
-      created_at: started_at
+      name: owner.name, username: owner.username, number: owner.number, total_branches: owner.total_branches,
+      total_managers: owner.total_managers, is_paid: owner.is_paid, balance: owner.balance, lang: owner.lang,
+      status: owner.status, created_at: started_at
     }
 
     message = report(data, 'ADMIN_OWNER', kb.language.uz)
@@ -108,16 +99,9 @@ const aos8 = async (bot, chat_id, _id, text) => {
   const owner = await getOwner({_id}), started_at = date(owner.created_at)
 
   const data = {
-    name: owner.name,
-    username: owner.username,
-    number: owner.number,
-    total_branches: owner.total_branches,
-    total_managers: owner.total_managers,
-    is_paid: owner.is_paid,
-    balance: owner.balance,
-    lang: owner.lang,
-    status: owner.status,
-    created_at: started_at
+    name: owner.name, username: owner.username, number: owner.number, total_branches: owner.total_branches,
+    total_managers: owner.total_managers, is_paid: owner.is_paid, balance: owner.balance, lang: owner.lang,
+    status: owner.status, created_at: started_at
   }
 
   let message = report(data, 'ADMIN_OWNER', kb.language.uz)
@@ -132,7 +116,6 @@ const aos8 = async (bot, chat_id, _id, text) => {
 const aos9 = async (bot, chat_id, _id, text) => {
   let message
 
-
   if (text === kb.options.confirmation.uz) {
     await updateOwner({_id}, {step: 5, status: 'active'})
 
@@ -144,7 +127,7 @@ const aos9 = async (bot, chat_id, _id, text) => {
 
     message = "Mo'yka xo'jayini muvaffaqqiyati qo'shildi"
   } else if (text === kb.options.not_to_confirmation.uz) {
-    await deleteCar({_id})
+    await deleteOwner({_id})
 
     message = "Mo'yka xo'jayini qo'shilmadi"
   }

@@ -7,6 +7,12 @@ const cars = [
   },
   {
     author: 669704116,
+    name: 'Matiz',
+    description: '',
+    type: 'Yengil avtomobil'
+  },
+  {
+    author: 669704116,
     name: 'Damas',
     description: '',
     type: 'Yengil avtomobil'
@@ -55,12 +61,6 @@ const cars = [
   },
   {
     author: 669704116,
-    name: 'Malibu',
-    description: '',
-    type: 'Yengil avtomobil'
-  },
-  {
-    author: 669704116,
     name: 'Orlando',
     description: '',
     type: 'Yengil avtomobil'
@@ -73,7 +73,7 @@ const cars = [
   },
   {
     author: 669704116,
-    name: 'Equinov',
+    name: 'Equinox',
     description: '',
     type: 'Yengil avtomobil'
   },

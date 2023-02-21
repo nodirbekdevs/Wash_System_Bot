@@ -28,8 +28,6 @@ const mss1 = async (bot, chat_id, lang) => {
 const mss2 = async (bot, chat_id, text, lang) => {
   let clause, kbb
 
-  console.log("Kevotti")
-
   const manager = await getManager({telegram_id: chat_id})
 
   const username = `${text}_MAN_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)

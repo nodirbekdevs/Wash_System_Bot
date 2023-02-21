@@ -1,31 +1,27 @@
 const TelegramBot = require('node-telegram-bot-api')
 const config = require('./helpers/config')
 const db = require('./helpers/db')
-const kb = require('./helpers/keyboard-buttons')
-// const {userPanel, getUser, getOrders, ups4, uos13, uos19} = require('./pages/user_panel/userPanel')
-// const {adminPanel, getAdmin, getWorks, aos3, aas8} = require('./pages/admin_panel/adminPanel')
-// const {employeePanel, getEmployee, eos2} = require('./pages/employee_panel/employeePanel')
-
-const {adminPanel, getAdmin, amp, acs3, aos3, aas8} = require('./pages/adminPanel/adminPanel')
-const {ownerPanel, getOwner, ofs4, ofs14, ofs20} = require('./pages/ownerPanel/ownerPanel')
-const {managerPanel, getManager, mmp, mws2, mws11, mws12, mws13, mes2, mes3, mes11, mfs2} = require('./pages/managerPanel/managerPanel')
-const {employeePanel, getEmployee, emp, efs1, ews2, ews4, ews5} = require('./pages/employeePanel/employeePanel')
+const {adminPanel, adminPanelQuery, getAdmin} = require('./pages/adminPanel/adminPanel')
+const {ownerPanel, ownerPanelQuery, getOwner} = require('./pages/ownerPanel/ownerPanel')
+const {managerPanel, managerPanelQuery, getManager} = require('./pages/managerPanel/managerPanel')
+const {employeePanel, employeePanelQuery, getEmployee} = require('./pages/employeePanel/employeePanel')
+const {schedule} = require('./pages/schedule')
 
 const bot = new TelegramBot(config.TOKEN, {db, polling: true})
 
 bot.setMyCommands(
   [
-    {command: '/start', description: 'Start the bot'}
+    {command: '/start', description: 'Start the bot'},
+    {command: '/stop', description: 'Stop the bot'}
   ]
 ).then()
-
 
 bot.on('message', async message => {
   const query = {telegram_id: message.from.id, status: 'active'}, admin = await getAdmin(query),
     owner = await getOwner(query), employee = await getEmployee(query)
 
-  const manager = await getManager({telegram_id: message.from.id, status: 'active'})
-    ? await getManager({telegram_id: message.from.id, status: 'active'})
+  const manager = await getManager(query)
+    ? await getManager(query)
     : await getManager({telegram_id: message.from.id, status: 'occupied'})
 
   try {
@@ -33,15 +29,14 @@ bot.on('message', async message => {
     if (owner) await ownerPanel(bot, message, owner)
     if (manager) await managerPanel(bot, message, manager)
     if (employee) await employeePanel(bot, message, employee)
-
   } catch (e) {
     console.log(e)
   }
 })
 
 bot.on('callback_query', async query => {
-  const query_id = query.id, telegram_id = query.from.id, mid = query.message.message_id,
-    data = query.data, {phrase, id} = JSON.parse(data), request = {telegram_id, status: 'active'}
+  const query_id = query.id, telegram_id = query.from.id, message_id = query.message.message_id,
+    {phrase, id} = JSON.parse(query.data), request = {telegram_id, status: 'active'}
 
   const admin = await getAdmin(request), owner = await getOwner(request), employee = await getEmployee(request)
 
@@ -49,83 +44,14 @@ bot.on('callback_query', async query => {
     ? await getManager(request)
     : await getManager({telegram_id, status: 'occupied'})
 
-  if (admin) {
-    if (phrase === "SEND_AD") await aas8(bot, telegram_id, id)
-
-    await aos3(bot, telegram_id, query_id, mid, phrase, id)
-    await acs3(bot, telegram_id, query_id, mid, phrase, id)
-
-    if (phrase === 'none') {
-      await bot.answerCallbackQuery(query_id, {
-        text: "Bu yerda ma'lumotlar yo'q. Siz noto'g'ri betni tanladingiz.", show_alert: true
-      })
-    }
-
-    if (phrase === 'delete') {
-      await bot.deleteMessage(telegram_id, mid)
-
-      await amp(bot, telegram_id)
-    }
-  }
-
-  if (owner) {
-    if (phrase === 'seen' || phrase === 'done') await ofs4(bot, telegram_id, id, phrase, mid, owner.lang)
-    if (phrase === 'e_car' || phrase === 'e_e') await ofs14(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
-    if (phrase === 's_car' || phrase === 's_e') await ofs20(bot, telegram_id, query_id, mid, phrase, id, owner.lang)
-  }
-
-  if (manager) {
-    if (phrase === 'none') {
-      const message = (manager.lang === kb.language.uz)
-        ? "Bu yerda ma'lumotlar yo'q. Siz noto'g'ri betni tanladingiz."
-        : "Здесь нет информации. Вы выбрали не ту страницу."
-
-      await bot.answerCallbackQuery(query_id, {text: message, show_alert: true})
-    }
-
-    if (phrase === 'delete') {
-      await bot.deleteMessage(telegram_id, mid)
-
-      await mmp(bot, telegram_id, manager.lang)
-    }
-
-    await mws2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-
-    if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'washing')
-      await mws11(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-    if (phrase === 'washing') await mws12(bot, telegram_id, mid, phrase, id, manager.lang)
-    if (phrase === 'washed' || phrase === 'w_back') await mws13(bot, telegram_id, mid, phrase, id, manager.lang)
-
-
-      await mes2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-
-    if (phrase === 'e_d' || phrase === 'e_b') await mes3(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-    if (phrase === 'e_edit') await mes11(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-
-    if ((phrase.split('#')[0] === 'left' || phrase.split('#')[0] === 'right') && phrase.split('#')[1] === 'fee')
-      await mfs2(bot, telegram_id, query_id, mid, phrase, id, manager.lang)
-  }
-
-  if (employee) {
-    if (phrase === 'none') {
-      const message = (employee.lang === kb.language.uz)
-        ? "Bu yerda ma'lumotlar yo'q. Siz noto'g'ri betni tanladingiz."
-        : "Здесь нет информации. Вы выбрали не ту страницу."
-
-      await bot.answerCallbackQuery(query_id, {text: message, show_alert: true})
-    }
-
-    if (phrase === 'delete') {
-      await bot.deleteMessage(telegram_id, mid)
-
-      await emp(bot, telegram_id, employee.lang)
-    }
-
-    await ews2(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
-    await ews4(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
-
-    if (phrase === 'wash') await ews5(bot, telegram_id, query_id, mid, id, employee.lang)
-    await efs1(bot, telegram_id, query_id, mid, phrase, id, employee.lang)
-
+  try {
+    if (admin) await adminPanelQuery(bot, telegram_id, query_id, message_id, phrase, id)
+    if (owner) await ownerPanelQuery(bot, telegram_id, query_id, message_id, phrase, id, owner.lang)
+    if (manager) await managerPanelQuery(bot, telegram_id, query_id, message_id, phrase, id, manager.lang)
+    if (employee) await employeePanelQuery(bot, telegram_id, query_id, message_id, phrase, id, employee.lang)
+  } catch (e) {
+    console.log(e)
   }
 })
+
+schedule(bot)

@@ -1,5 +1,4 @@
-const {Schema, model} = require('mongoose')
-const {v4} = require('uuid')
+const {Schema, model} = require('mongoose'), {v4} = require('uuid')
 
 const Feedback = model('Feedback', new Schema({
   _id: {type: String, default: v4},
@@ -14,5 +13,22 @@ const Feedback = model('Feedback', new Schema({
   status: {type: String, enum: ['process', 'inactive', 'active', 'seen', 'done'], default: 'process'},
   created_at: {type: Date, default: Date.now}
 }))
+
+// const {DataTypes} = require("sequelize"), db = require("./../helpers/db"), Owner = require('./ownerModel'),
+//   Branch = require('./branchModel');
+//
+// const Feedback = db.define('Feedback', {
+//   _id: {type: DataTypes.STRING, defaultValue: DataTypes.UUIDV4},
+//   author: {type: DataTypes.INTEGER, allowNull: false},
+//   branch_owner: {type: DataTypes.INTEGER, references: {model: Owner, key: 'telegram_id'}, defaultValue: 0},
+//   branch: {type: DataTypes.STRING, references: {model: Branch, key: 'name'}, defaultValue: ''},
+//   is_employee: {type: DataTypes.BOOLEAN, defaultValue: false},
+//   mark: {type: DataTypes.STRING, defaultValue: ''},
+//   reason: {type: DataTypes.STRING, defaultValue: ''},
+//   is_read: {type: DataTypes.BOOLEAN, defaultValue: false},
+//   step: {type: DataTypes.INTEGER, defaultValue: 0},
+//   status: {type: DataTypes.ENUM, values: ['process', 'inactive', 'active', 'seen', 'done'], defaultValue: 'process'},
+//   created_at: {type: DataTypes.DATE, defaultValue: DataTypes.NOW}
+// })
 
 module.exports = Feedback

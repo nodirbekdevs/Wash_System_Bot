@@ -343,11 +343,11 @@ const oms14 = async (bot, chat_id, _id, text, lang) => {
     if (lang === kb.language.uz) {
       message = 'Menejerga filial tanlang'
       obj = [kb.options.skipping.uz]
-      kbb.splice(-2, 0, obj)
+      kbb.splice(-1, 0, obj)
     } else if (lang === kb.language.ru) {
       message = "Выберите филиал к менеджеру"
       obj = [kb.options.skipping.ru]
-      kbb.splice(-2, 0, obj)
+      kbb.splice(-1, 0, obj)
     }
 
     await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -357,6 +357,9 @@ const oms14 = async (bot, chat_id, _id, text, lang) => {
 }
 
 const oms15 = async (bot, chat_id, _id, lang) => {
+
+  console.log("Kevotti1")
+
   await updateManager({_id}, {step: 4})
 
   const message = (lang === kb.language.uz) ? 'Menejerni platformadagi tilini kiriting' : 'Введите язык платформы менеджера',
@@ -366,12 +369,15 @@ const oms15 = async (bot, chat_id, _id, lang) => {
 }
 
 const oms16 = async (bot, chat_id, _id, text, lang) => {
+  console.log("Kevotti2")
+
   await updateManager({_id}, {branch: text, step: 4})
 
-  const message = (lang === kb.language.uz) ? 'Menejerni platformadagi tilini kiriting' : 'Введите язык платформы менеджера',
-    kbb = keyboard.language
+  console.log(lang)
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  const message = (lang === kb.language.uz) ? 'Menejerni platformadagi tilini kiriting' : 'Введите язык платформы менеджера'
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: keyboard.language}})
 }
 
 const oms17 = async (bot, chat_id, _id, text, lang) => {
@@ -381,13 +387,15 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
 
   const manager = await getManager({_id})
 
+  console.log(manager.branch)
+
   message = report(manager, 'MANAGER', lang)
 
   if (lang === kb.language.uz) {
     message += '\nTasdiqlaysizmi'
     kbb = keyboard.options.confirmation.uz
   } else if (lang === kb.language.ru) {
-    message = '\nВы одобряете ?'
+    message += '\nВы одобряете ?'
     kbb = keyboard.options.confirmation.ru
   }
 
@@ -474,8 +482,8 @@ const ownerManager = async (bot, chat_id, text, lang) => {
           if (manager.step === 1) await oms13(bot, chat_id, manager._id, text, lang)
           if (manager.step === 2) await oms14(bot, chat_id, manager._id, text, lang)
           if (manager.step === 3) {
-            if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await oms16(bot, chat_id, manager._id, lang)
-            if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await oms15(bot, chat_id, manager._id, text, lang)
+            if (text !== kb.options.skipping.uz || text !== kb.options.skipping.ru) await oms16(bot, chat_id, manager._id, text, lang)
+            if (text === kb.options.skipping.uz || text === kb.options.skipping.ru) await oms15(bot, chat_id, manager._id, lang)
           }
           if (manager.step === 4) await oms17(bot, chat_id, manager._id, text, lang)
           if (manager.step === 5) await oms18(bot, chat_id, manager._id, text, lang)
