@@ -1,12 +1,13 @@
 const keyboard = require('./../../helpers/keyboard')
 const kb = require('./../../helpers/keyboard-buttons')
+const {genSalt, hash} = require('bcrypt')
 const {getEmployee, updateEmployee} = require('../../controllers/employeeController')
 const {report} = require('./../../helpers/utils')
 
 let type
 
 const ess0 = async (bot, employee, lang) => {
-  const message = bio(employee, 'EMPLOYEE_SETTINGS', lang), kbb = (lang === kb.language.uz)
+  const message = report(employee, 'EMPLOYEE_SETTINGS', lang), kbb = (lang === kb.language.uz)
     ? keyboard.employee.settings.uz : keyboard.employee.settings.ru
 
   await updateEmployee({telegram_id: employee.telegram_id}, {step: 6})
@@ -39,9 +40,9 @@ const ess2 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.manager.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, message)
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ess3 = async (bot, chat_id, lang) => {
@@ -57,7 +58,9 @@ const ess3 = async (bot, chat_id, lang) => {
 const ess4 = async (bot, chat_id, text, lang) => {
   let clause, kbb
 
-  await updateEmployee({telegram_id: chat_id}, {number: text, step: 6})
+  const salt = await genSalt(), password = await hash(text, salt)
+
+  await updateEmployee({telegram_id: chat_id}, {password, number: text, step: 6})
 
   const employee = await getEmployee({telegram_id: chat_id}), message = report(employee, 'EMPLOYEE_SETTINGS', lang)
 
@@ -69,9 +72,9 @@ const ess4 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.manager.settings.ru
   }
 
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, message)
+
+  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ess5 = async (bot, chat_id, lang) => {
@@ -97,9 +100,9 @@ const ess6 = async (bot, chat_id, text, lang) => {
     kbb = keyboard.manager.settings.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
   await bot.sendMessage(chat_id, report)
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const employeeSettings = async (bot, employee, text, lang) => {

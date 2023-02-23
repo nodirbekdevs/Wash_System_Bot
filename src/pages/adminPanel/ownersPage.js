@@ -1,9 +1,10 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
+const {genSalt, hash} = require('bcrypt')
 const {getOwners, getOwner, makeOwner, updateOwner, deleteOwner, countOwners} = require('./../../controllers/ownerController')
 const {getAdmin} = require('./../../controllers/adminController')
 const {owner_pagination, date, report} = require('./../../helpers/utils')
-const {amp} = require('./mainPage')
+
 
 let owner_id
 
@@ -117,9 +118,13 @@ const aos9 = async (bot, chat_id, _id, text) => {
   let message
 
   if (text === kb.options.confirmation.uz) {
-    await updateOwner({_id}, {step: 5, status: 'active'})
+    const owner = await getOwner({_id})
 
-    const admin = await getAdmin({telegram_id: chat_id}), owner = await getOwner({_id})
+    const salt = await genSalt(), password = await hash(owner.number, salt)
+
+    await updateOwner({_id}, {password, step: 5, status: 'active'})
+
+    const admin = await getAdmin({telegram_id: chat_id})
 
     admin.owners.push(owner._id)
     admin.total_owners += 1

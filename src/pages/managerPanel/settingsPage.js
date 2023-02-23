@@ -30,11 +30,7 @@ const mss2 = async (bot, chat_id, text, lang) => {
 
   const manager = await getManager({telegram_id: chat_id})
 
-  const username = `${text}_MAN_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
-
   manager.name = text
-  manager.username = username
-  manager.password = password
   manager.step = 7
   await manager.save()
 
@@ -68,10 +64,9 @@ const mss4 = async (bot, chat_id, text, lang) => {
 
   const manager = await getManager({telegram_id: chat_id})
 
-  const username = `${manager.name}_MAN_${text}`, salt = await genSalt(), password = await hash(username, salt)
+  const salt = await genSalt(), password = await hash(text, salt)
 
   manager.number = text
-  manager.username = username
   manager.password = password
   manager.step = 7
   await manager.save()

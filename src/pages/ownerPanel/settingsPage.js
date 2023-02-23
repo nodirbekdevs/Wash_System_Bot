@@ -1,5 +1,6 @@
 const keyboard = require('./../../helpers/keyboard')
 const kb = require('./../../helpers/keyboard-buttons')
+const {genSalt, hash} = require('bcrypt')
 const {getOwner, updateOwner} = require('../../controllers/ownerController')
 const {report} = require('./../../helpers/utils')
 
@@ -68,7 +69,9 @@ const ost3 = async (bot, chat_id, lang) => {
 const ost4 = async (bot, chat_id, text, lang) => {
   let clause, kbb
 
-  await updateOwner({telegram_id: chat_id}, {number: text, step: 6})
+  const salt = await genSalt(), password = await hash(text, salt)
+
+  await updateOwner({telegram_id: chat_id}, {password, number: text, step: 6})
 
   const owner = await getOwner({telegram_id: chat_id}), message = report(owner, 'OWNER', lang)
 

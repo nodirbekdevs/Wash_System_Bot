@@ -34,7 +34,7 @@ const mws0 = async (bot, chat_id, lang) => {
 const mws1 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     query = {
-      branch: manager.branch, status: 'washed',
+      manager: {$gt: 0}, branch: manager.branch, status: 'washed',
       created_at: {
         $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date().setHours(23, 59, 59))

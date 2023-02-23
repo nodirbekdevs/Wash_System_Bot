@@ -1,14 +1,16 @@
 const Geo = require('node-geocoder')
-const {mkdir, rename} = require('fs/promises')
-const {join} = require("node:path")
+const {mkdir, rename, readdir} = require('fs/promises')
+const {existsSync} = require('fs')
+const {join, parse} = require("node:path")
 const config = require('./../../helpers/config')
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {getBranches, getBranch, makeBranch, updateBranch, deleteBranch, countBranches} = require('./../../controllers/branchController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManagers, getManager, updateManager} = require('./../../controllers/managerController')
-const {updateManyEmployees} = require('./../../controllers/employeeController')
-const {updateManyFees} = require('./../../controllers/feeController')
+const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
+const {getFees, updateManyFees} = require('./../../controllers/feeController')
+const {getWashes} = require('./../../controllers/washController')
 const {universal_keyboard, report} = require('./../../helpers/utils')
 // const {} = require('./../../../uploads/reports/branches')
 
@@ -52,7 +54,7 @@ const obs2 = async (bot, chat_id, text, lang, kw) => {
   if (branch) {
     await updateOwner({telegram_id: chat_id}, {step: 9})
 
-    await updateBranch({_id: branch._id}, {step: 6, status: 'process'})
+    await updateBranch({_id: branch._id}, {step: 6, situation: 'edit'})
 
     message = report(branch, 'BRANCH', lang)
 
@@ -98,11 +100,92 @@ const obs4 = async (bot, chat_id, _id, text, lang) => {
   const exits_branch = await getBranch({_id}),
     old_path = join(__dirname, `./../../../uploads/reports/branches/${exits_branch.name}`)
 
+  const fees = await getFees({branch: exits_branch.name}), manager = await getManager({branch: exits_branch.name}),
+    employees = await getEmployees({branch: exits_branch.name}),
+    washes = await getWashes({
+      manager: exits_branch.manager, branch: exits_branch.name,
+      created_at: {
+        $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date().setHours(23, 59, 59))
+      }})
+
   await updateBranch({_id}, {name: text, step: 6})
 
   const branch = await getBranch({_id}), message = report(branch, 'BRANCH', lang)
 
   const new_path = join(__dirname, `./../../../uploads/reports/branches/${branch.name}`)
+
+  // const files = await readdir(old_path);
+  //
+  // console.log(files)
+  //
+  // if (files) {
+  //   console.log("File o'zgartirilvotti")
+  //
+  //   for (let i = 0; i < files.length; i++) {
+  //     let newPath
+  //
+  //     const file = files[i], file_info = parse(file), name = file_info.name.split('_')
+  //
+  //     console.log(file)
+  //
+  //     console.log(file_info)
+  //
+  //     console.log(name)
+  //
+  //     const oldPath = join(__dirname, old_path, `${file_info.name}.${file_info.ext}`);
+  //
+  //     console.log(existsSync(oldPath))
+  //
+  //     console.log(oldPath)
+  //
+  //     if (name.length === 3) {
+  //       newPath = join(__dirname, old_path, `${name[0]}_${branch.name}_${name[2]}.${file_info.ext}`);
+  //     } else if (name.length === 4) {
+  //       newPath =  join(__dirname, old_path, `${name[0]}_${name[1]}_${branch.name}_${name[3]}.${file_info.ext}`);
+  //     }
+  //
+  //     console.log(newPath)
+  //
+  //     await rename(oldPath, newPath);
+  //
+  //     console.log("O'zgartirildi")
+  //   }
+  // }
+
+  if (fees.length > 0) {
+    console.log("Fee o'zgartirildi")
+
+    for (let i = 0; i < fees.length; i++) {
+      fees[i].branch = branch.name
+      await fees[i].save()
+    }
+  }
+
+  if (manager) {
+    console.log("Manager o'zgartirildi")
+
+    manager.branch = branch.name
+    await manager.save()
+  }
+
+  if (employees.length > 0) {
+    console.log("Employee o'zgartirildi")
+
+    for (let i = 0; i < employees.length; i++) {
+      employees[i].branch = branch.name
+      await employees[i].save()
+    }
+  }
+
+  if (washes.length > 0) {
+    console.log("Wash o'zgartirildi")
+
+    for (let i = 0; i < washes.length; i++) {
+      washes[i].branch = branch.name
+      await washes[i].save()
+    }
+  }
 
   await rename(old_path, new_path)
 
@@ -552,7 +635,7 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
       }
 
       if (owner.step === 9) {
-        const branch = await getBranch({owner: owner.telegram_id, status: 'process'})
+        const branch = await getBranch({owner: owner.telegram_id, situation: 'edit'})
 
         if (branch) {
           if (text === kb.options.back.uz || text === kb.options.back.ru) {

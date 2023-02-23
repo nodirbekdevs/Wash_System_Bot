@@ -1,5 +1,6 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
+const {genSalt, hash} = require('bcrypt')
 const {getEmployees, getEmployee, makeEmployee, updateEmployee, deleteEmployee, countEmployees} = require('./../../controllers/employeeController')
 const {getManager} = require('./../../controllers/managerController')
 const {getBranch} = require('./../../controllers/branchController')
@@ -233,6 +234,9 @@ const mes9 = async (bot, chat_id, _id, text, lang) => {
     branch = await getBranch({manager: employee.manager, branch: employee.branch})
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
+    const salt = await genSalt(), password = await hash(employee.number, salt)
+
+    employee.password = password
     employee.step = 5
     employee.status = 'active'
     await employee.save()

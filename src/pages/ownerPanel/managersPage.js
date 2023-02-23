@@ -87,15 +87,11 @@ const oms3 = async (bot, chat_id, _id, lang) => {
 }
 
 const oms4 = async (bot, chat_id, _id, text, lang) => {
-  let clause, kbb, manager
+  let clause, kbb
 
-  manager = await getManager({_id})
+  await updateManager({_id}, {name: text, step: 9})
 
-  const username = `${text}_MAN_${manager.number}`, salt = await genSalt(), password = await hash(username, salt)
-
-  await updateManager({_id}, {name: text, username, password, step: 9})
-
-  manager = await getManager({_id})
+  const manager = await getManager({_id})
 
   const message = report(manager, 'MANAGER', lang)
 
@@ -133,9 +129,9 @@ const oms6 = async (bot, chat_id, _id, text, lang) => {
 
   manager = await getManager({_id})
 
-  const username = `${manager.name}_MAN_${text}`, salt = await genSalt(), password = await hash(username, salt)
+  const salt = await genSalt(), password = await hash(manager.number, salt)
 
-  await updateManager({_id}, {username, password, number: text, step: 9})
+  await updateManager({_id}, {password, number: text, step: 9})
 
   manager = await getManager({_id})
 
@@ -173,9 +169,7 @@ const oms7 = async (bot, chat_id, _id, lang) => {
 const oms8 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
-  const salt = await genSalt(), password = await hash(text, salt)
-
-  await updateManager({_id}, {username: text, password, step: 9})
+  await updateManager({_id}, {username: text, step: 9})
 
   const manager = await getManager({_id}), message = report(manager, 'MANAGER', lang)
 
@@ -408,10 +402,9 @@ const oms18 = async (bot, chat_id, _id, text, lang) => {
   kbb = (lang === kb.language.uz) ? keyboard.owner.managers.uz : keyboard.owner.managers.ru
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
-    const username = `${manager.name}_MAN_${manager.number}`, salt = await genSalt(),
-      password = await hash(username, salt)
+    const salt = await genSalt(), password = await hash(manager.number, salt)
 
-    data = {branch: '', username, password, step: 6, status: 'active'}
+    data = {branch: '', password, step: 6, status: 'active'}
 
     if (branch) {
       if (branch.total_employees > 0) {
@@ -428,7 +421,7 @@ const oms18 = async (bot, chat_id, _id, text, lang) => {
 
       await updateBranch({_id: branch._id}, {manager: manager.telegram_id, status: 'provided'})
 
-      data = {username, password, total_employees: branch.total_employees, step: 6, status: 'occupied'}
+      data = {password, total_employees: branch.total_employees, step: 6, status: 'occupied'}
     }
 
     await updateManager({_id: manager._id}, data)
@@ -490,12 +483,10 @@ const ownerManager = async (bot, chat_id, text, lang) => {
 
     if (owner.step === 10) {
       if (text === kb.options.back.uz || text === kb.options.back.ru) {
-        console.log("Kevotti")
         await updateOwner({telegram_id: chat_id}, {step: 5})
         await oms0(bot, chat_id, lang)
       }
       if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
-        console.log("Kevotti_back")
         await oms2(bot, chat_id, text, lang, 'back')
       }
     }
