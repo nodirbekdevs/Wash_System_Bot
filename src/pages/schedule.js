@@ -5,12 +5,12 @@ const {join} = require('node:path')
 const {updateManyEmployees} = require('./../controllers/employeeController')
 const {getWashes} = require('./../controllers/washController')
 const {getBranches} = require('./../controllers/branchController')
-const {getOwners, getOwner} = require('./../controllers/ownerController')
+const {getOwner} = require('./../controllers/ownerController')
 const {getManager} = require('./../controllers/managerController')
-const {get_washed_time, date_name} = require('./../helpers/utils')
+const {get_washed_time, date_name, date} = require('./../helpers/utils')
 
 const schedule = (bot) => {
-  cron.schedule('18 02 * * *', async () => {
+  cron.schedule('18 01 * * *', async () => {
     await updateManyEmployees({status: 'active'}, {status: 'inactive'})
 
     const branches = await getBranches({
@@ -31,7 +31,7 @@ const schedule = (bot) => {
         const path = join(__dirname, `./../../uploads/reports/branches/${branch.name}`)
 
         const washes = await getWashes({
-          manager: branch.manager, branch: branch.name, status: 'washed', created_at: {
+          branch: branch.name, status: 'washed', created_at: {
             $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
             $lt: new Date(new Date().setHours(23, 59, 59))
           }
@@ -60,7 +60,8 @@ const schedule = (bot) => {
 
           for (let j = 0; j < washes.length; j++) {
             const wash = washes[j].toJSON(), manager = await getManager({telegram_id: wash.manager}),
-              washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at)
+              washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at),
+              washed_at = date(wash.created_at)
 
             delete wash.washed_time
             delete wash._id
@@ -75,6 +76,7 @@ const schedule = (bot) => {
 
             wash.manager = manager.name
             wash.washed_at = washed_time
+            wash.created_at = washed_at
 
             total += wash.benefit
 
@@ -89,10 +91,7 @@ const schedule = (bot) => {
 
           excel.writeFile(new_workbook, name)
 
-          const file_options = {
-            filename: document,
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          }
+          const file_options = {filename: name, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
 
           const message = owner.lang === kb.language.uz
             ? `Bugungi avtomobil yuvishlardan ${total} foyda ko'rildi`

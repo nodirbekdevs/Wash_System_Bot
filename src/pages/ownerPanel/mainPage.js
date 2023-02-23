@@ -19,4 +19,4 @@ const ownerMainPage = async (bot, chat_id, text, lang) => {
   if (text === kb.start || (text === kb.main.uz || text === kb.main.ru)) await omp(bot, chat_id, lang)
 }
 
-module.exports = {ownerMainPage}
+module.exports = {ownerMainPage, omp}

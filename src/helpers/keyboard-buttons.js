@@ -125,11 +125,11 @@ module.exports = {
 
     reports: {
       uz: {
-        one_day: 'Отчет за 1 день',
+        one_day: 'Bugungi hisobot',
         other_days: "Boshqa kunlar oralig'idagi hisobotlar"
       },
       ru: {
-        one_day: 'Bugungi hisobot',
+        one_day: 'Отчет за 1 день',
         other_days: "Прочие ежедневные отчеты."
       }
     }

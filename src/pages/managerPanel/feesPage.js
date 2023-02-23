@@ -1,9 +1,7 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
-const {getFees, getFee, makeFee, updateFee, deleteFee, countFees} = require('./../../controllers/feeController')
 const {getManager} = require('./../../controllers/managerController')
-const {getOwner} = require('./../../controllers/ownerController')
-const {date, bio, car_pagination, fee_pagination} = require('./../../helpers/utils')
+const {fee_pagination} = require('./../../helpers/utils')
 
 const mfs0 = async (bot, chat_id, lang) => {
   let message, kbb

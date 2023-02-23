@@ -1,7 +1,7 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
-const {getAllFeedback, getFeedback, updateFeedback, countAllFeedback} = require('./../../controllers/feedbackController')
-const {report, date} = require('./../../helpers/utils')
+const {getFeedback, updateFeedback, countAllFeedback} = require('./../../controllers/feedbackController')
+const {report, date, feedback_seen_pagination, feedback_done_pagination} = require('./../../helpers/utils')
 const {getEmployee} = require('./../../controllers/employeeController')
 const {getClient} = require('./../../controllers/clientController')
 
@@ -16,7 +16,13 @@ const ofs0 = async (bot, chat_id, lang) => {
     kbb = keyboard.owner.feedback.ru
   }
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+  await bot.sendMessage(chat_id, message, {
+    reply_markup: {
+      resize_keyboard: true,
+      keyboard: kbb,
+      one_time_keyboard: true
+    }
+  })
 }
 
 const ofs1 = async (bot, chat_id, lang) => {
@@ -32,60 +38,120 @@ const ofs1 = async (bot, chat_id, lang) => {
 }
 
 const ofs2 = async (bot, chat_id, lang) => {
-  let message, kbb
+  const query = {branch_owner: chat_id, is_read: false, status: 'active'}
 
-  const allFeedback = await getAllFeedback({branch_owner: chat_id, is_read: false, status: 'active'})
+  const report = await feedback_seen_pagination(1, 6, query, lang)
 
-  for (let i = 0; i < allFeedback.length; i++) {
-    const feedback = allFeedback[i], created_at = date(feedback.created_at)
+  // for (let i = 0; i < allFeedback.length; i++) {
+  //   const feedback = allFeedback[i], created_at = date(feedback.created_at)
+  //
+  //   const author = feedback.is_employee
+  //     ? await getEmployee({telegram_id: feedback.author})
+  //     : await getClient({telegram_id: feedback.author})
+  //
+  //   const data = {
+  //     author: author.name, branch: feedback.branch, type: feedback.is_employee, mark: feedback.mark,
+  //     reason: feedback.reason, status: feedback.status, created_at
+  //   }
+  //
+  //   const send_text = (lang === kb.language.uz) ? "Muommoni ko'rish boshlandi" : "Видение проблемы началось"
+  //
+  //   let clause = report(data, 'FEEDBACK', lang)
+  //
+  //   await bot.sendMessage(chat_id, clause, {
+  //     reply_markup: {
+  //       inline_keyboard: [[{text: send_text, callback_data: JSON.stringify({phrase: 'seen', id: feedback._id})}]]
+  //     }
+  //   })
+  //
+  //   clause = ""
+  //
+  //   await updateFeedback({_id: feedback._id}, {is_read: true})
+  // }
 
-    const author = feedback.is_employee
-      ? await getEmployee({telegram_id: feedback.author})
-      : await getClient({telegram_id: feedback.author})
+  if (report.kw === 'YES') {
+    await bot.sendMessage(chat_id, report.text, {reply_markup: report.kbs.reply_markup})
 
-    const data = {
-      author: author.name,
-      branch: feedback.branch,
-      type: feedback.is_employee,
-      mark: feedback.mark,
-      reason: feedback.reason,
-      status: feedback.status,
-      created_at
-    }
+    const message = lang === kb.language.uz ? "Hozirgacha yozilgan yangi izohlar" : "Добавлены новые комментарии"
 
-    const send_text = (lang === kb.language.uz) ? "Muommoni ko'rish boshlandi" : "Видение проблемы началось"
-
-    let clause = report(data, 'FEEDBACK', lang)
-
-    await bot.sendMessage(chat_id, clause, {
-      reply_markup: {
-        inline_keyboard: [[{text: send_text, callback_data: JSON.stringify({phrase: 'seen', id: feedback._id})}]]
-      }
-    })
-
-    clause = ""
-
-    await updateFeedback({_id: feedback._id}, {is_read: true})
+    await bot.sendMessage(chat_id, message)
+  } else if (report.kw === 'NO') {
+    await bot.sendMessage(chat_id, report.text, report.kbs)
   }
-
-  if (lang === kb.language.uz) {
-    message = "Hozirgacha yozigan yangi izohlar"
-    kbb = keyboard.owner.feedback.uz
-  } else if (lang === kb.language.ru) {
-    message = "Добавлены новые комментарии"
-    kbb = keyboard.owner.feedback.ru
-  }
-
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ofs3 = async (bot, chat_id, lang) => {
-  let message, kbb
+  const query = {branch_owner: chat_id, is_read: true, status: 'seen'}
 
-  const allFeedback = await getAllFeedback({branch_owner: chat_id, is_read: true, status: 'seen'})
+  const report = await feedback_done_pagination(1, 6, query, lang)
 
-  for (let i = 0; i < allFeedback.length; i++) {
-    const feedback = allFeedback[i], created_at = date(feedback.created_at)
+  // for (let i = 0; i < allFeedback.length; i++) {
+  //   const feedback = allFeedback[i], created_at = date(feedback.created_at)
+  //
+  //   const author = feedback.is_employee
+  //     ? await getEmployee({telegram_id: feedback.author})
+  //     : await getClient({telegram_id: feedback.author})
+  //
+  //   const data = {
+  //     author: author.name, branch: feedback.branch, type: feedback.is_employee, mark: feedback.mark,
+  //     reason: feedback.reason, status: feedback.status, created_at
+  //   }
+  //
+  //   const send_text = (lang === kb.language.uz) ? "Muommoni ko'rish boshlandi" : "Видение проблемы началось"
+  //
+  //   let clause = report(data, 'FEEDBACK', lang)
+  //
+  //   await bot.sendMessage(chat_id, clause, {
+  //     reply_markup: {
+  //       inline_keyboard: [[{text: send_text, callback_data: JSON.stringify({phrase: 'seen', id: feedback._id})}]]
+  //     }
+  //   })
+  //
+  //   clause = ""
+  //
+  //   await updateFeedback({_id: feedback._id}, {is_read: true})
+  // }
+
+  if (report.kw === 'YES') {
+    await bot.sendMessage(chat_id, report.text, {reply_markup: report.kbs.reply_markup})
+
+    const message = lang === kb.language.uz ? "Hozirgacha bajarilayotgan izohlar" : "Комментарии пока в обработке"
+
+    await bot.sendMessage(chat_id, message)
+  } else if (report.kw === 'NO') {
+    await bot.sendMessage(chat_id, report.text, report.kbs)
+  }
+}
+
+const ofs4 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
+  let query
+
+  const phrase = data.split('#')
+
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'selfeedback') {
+    query = {branch_owner: chat_id, is_read: false, status: 'active'}
+
+    const report = await feedback_seen_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
+
+    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
+  }
+
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'dofeedback') {
+    query = {branch_owner: chat_id, is_read: true, status: 'seen'}
+
+    const report = await feedback_seen_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
+
+    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
+  }
+}
+
+const ofs5 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
+  let message, clause, back
+
+  if (data === 'se_feed') {
+    const feedback = await getFeedback({_id})
+
+    const created_at = date(feedback.created_at)
 
     const author = feedback.is_employee
       ? await getEmployee({telegram_id: feedback.author})
@@ -101,77 +167,145 @@ const ofs3 = async (bot, chat_id, lang) => {
       created_at
     }
 
-    const send_text = (lang === kb.language.uz) ? "Muommoni hal qilindi" : "Проблема решена"
+    message = report(data, 'FEEDBACK', lang)
 
-    let clause = report(data, 'FEEDBACK', lang)
+    if (lang === kb.language.uz) {
+      clause = "Muommoni ko'rish boshlandi"
+      back = kb.options.back.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Видение проблемы началось"
+      back = kb.options.back.ru
+    }
 
-    await bot.sendMessage(chat_id, clause, {
+    await bot.editMessageText(message, {
+      chat_id, message_id, parse_mode: 'HTML',
       reply_markup: {
-        inline_keyboard: [[{text: send_text, callback_data: JSON.stringify({phrase: 'done', id: feedback._id})}]]
+        inline_keyboard: [
+          [{text: clause, callback_data: JSON.stringify({phrase: "seen", id: feedback._id})}],
+          [{text: back, callback_data: JSON.stringify({phrase: "fsb", id: ''})}],
+        ]
       }
     })
-
-    clause = ""
   }
 
-  if (lang === kb.language.uz) {
-    message = "Yechimini kutayotgan izohlar"
-    kbb = keyboard.owner.feedback.uz
-  } else if (lang === kb.language.ru) {
-    message = "Комментарии ожидают решения"
-    kbb = keyboard.owner.feedback.ru
-  }
+  if (data === 'do_feed') {
+    const feedback = await getFeedback({_id})
 
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    const created_at = date(feedback.created_at)
+
+    const author = feedback.is_employee
+      ? await getEmployee({telegram_id: feedback.author})
+      : await getClient({telegram_id: feedback.author})
+
+    const data = {
+      author: author.name,
+      branch: feedback.branch,
+      type: feedback.is_employee,
+      mark: feedback.mark,
+      reason: feedback.reason,
+      status: feedback.status,
+      created_at
+    }
+
+    message = report(data, 'FEEDBACK', lang)
+
+    if (lang === kb.language.uz) {
+      clause = "Muommoni hal qilindi"
+      back = kb.options.back.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Проблема решена"
+      back = kb.options.back.ru
+    }
+
+    await bot.editMessageText(message, {
+      chat_id, message_id, parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{text: clause, callback_data: JSON.stringify({phrase: "done", id: feedback._id})}],
+          [{text: back, callback_data: JSON.stringify({phrase: "fdb", id: ''})}],
+        ]
+      }
+    })
+  }
 }
 
-const ofs4 = async (bot, chat_id, message_id, text, _id, lang) => {
+const ofs6 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   let message, clause
 
-  const feedback = await getFeedback({_id})
+  if (data === 'seen') {
+    const feedback = await getFeedback({_id})
 
-  const author = feedback.is_employee
-    ? await getEmployee({telegram_id: feedback.author})
-    : await getClient({telegram_id: feedback.author})
+    const author = feedback.is_employee
+      ? await getEmployee({telegram_id: feedback.author})
+      : await getClient({telegram_id: feedback.author})
 
-  const data = {name: author.name, feedback: feedback.reason},
-    kbb = (lang === kb.language.uz) ? keyboard.owner.feedback.uz : keyboard.owner.feedback.ru
-
-  await bot.deleteMessage(chat_id, message_id)
-
-  if (text === 'seen') {
-    message = (lang === kb.language.uz)
-      ? "Bu izoh ustida ishlar boshlangan"
-      : "Этот комментарий находится в обработке"
+    const data2 = {name: author.name, feedback: feedback.reason}
 
     if (feedback.status === 'active') {
-      await updateFeedback({_id: feedback._id}, {status: 'seen'})
-
-      message = report(data, 'FEEDBACK_SEEN', author.lang)
+      await updateFeedback({_id: feedback._id}, {is_read: true, status: 'seen'})
+      message = report(data2, 'FEEDBACK_SEEN', author.lang)
 
       clause = (lang === kb.language.uz) ? "Bu izoh ustida ishlar boshlandi" : "Начата работа над этим комментарием"
     }
+
+    await bot.sendMessage(feedback.author, message)
   }
 
-  if (text === 'done') {
-    message = (lang === kb.language.uz)
-      ? "Bu izoh ustida ishlar tugallangan. Muammo bartaraf etilgan."
-      : "Этот комментарий завершен. Проблема решена."
+  await bot.sendMessage(chat_id, clause)
 
-    if (feedback.status === 'seen') {
-      await updateFeedback({_id: feedback._id}, {status: 'done'})
+  const query = {branch_owner: chat_id, is_read: false, status: 'active'}
 
-      message = report(data, 'FEEDBACK_DONE', author.lang)
+  const information = await feedback_seen_pagination(1, 6, query, lang)
 
-      clause = (lang === kb.language.uz) ? "Izoh muvaffaqqiyatli bajarildi" : "Комментарий завершен успешно"
-    }
+  if (information.kw === 'YES') {
+    await bot.editMessageText(information.text, {
+      chat_id, message_id, parse_mode: 'HTML', reply_markup: information.kbs.reply_markup
+    })
+  } else if (information.kw === 'NO') {
+    await bot.deleteMessage(chat_id, message_id)
+
+    await bot.sendMessage(chat_id, information.text, {reply_markup: information.kbs.reply_markup})
   }
-
-  await bot.sendMessage(feedback.author, message)
-
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
+const ofs7 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
+  let message, clause
+
+  if (data === 'done') {
+    const feedback = await getFeedback({_id})
+
+    const author = feedback.is_employee
+      ? await getEmployee({telegram_id: feedback.author})
+      : await getClient({telegram_id: feedback.author})
+
+    const data2 = {name: author.name, feedback: feedback.reason}
+
+    if (feedback.status === 'active') {
+      await updateFeedback({_id: feedback._id}, {status: 'done'})
+      message = report(data2, 'FEEDBACK_DONE', author.lang)
+
+      clause = (lang === kb.language.uz) ? "Muommoni hal qilindi" : "Проблема решена"
+    }
+
+    await bot.sendMessage(feedback.author, message)
+  }
+
+  await bot.sendMessage(chat_id, clause)
+
+  const query = {branch_owner: chat_id, is_read: false, status: 'active'}
+
+  const information = await feedback_seen_pagination(1, 6, query, lang)
+
+  if (information.kw === 'YES') {
+    await bot.editMessageText(information.text, {
+      chat_id, message_id, parse_mode: 'HTML', reply_markup: information.kbs.reply_markup
+    })
+  } else if (information.kw === 'NO') {
+    await bot.deleteMessage(chat_id, message_id)
+
+    await bot.sendMessage(chat_id, information.text, {reply_markup: information.kbs.reply_markup})
+  }
+}
 
 const ownerFeedback = async (bot, chat_id, text, lang) => {
   try {
@@ -184,4 +318,4 @@ const ownerFeedback = async (bot, chat_id, text, lang) => {
   }
 }
 
-module.exports = {ownerFeedback, ofs4}
+module.exports = {ownerFeedback, ofs4, ofs5, ofs6, ofs7}

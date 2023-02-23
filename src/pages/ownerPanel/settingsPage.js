@@ -16,13 +16,9 @@ const ost0 = async (bot, owner, lang) => {
     kbb = keyboard.owner.settings.ru
   }
 
-  console.log(owner)
-
   await updateOwner({telegram_id: owner.telegram_id}, {step: 6})
 
   const clause = report(owner, "OWNER", lang)
-
-  console.log(clause)
 
   await bot.sendMessage(owner.telegram_id, clause)
 

@@ -4,8 +4,10 @@ const {getCars, getCarPagination} = require('./../controllers/carController')
 const {getOwners, getOwnerPagination, getOwner} = require('./../controllers/ownerController')
 const {getWashes, getWashPagination} = require('./../controllers/washController')
 const {getFees, getFeePagination} = require('./../controllers/feeController')
-const {getEmployees, getEmployeePagination} = require('./../controllers/employeeController')
+const {getEmployees, getEmployeePagination, getEmployee} = require('./../controllers/employeeController')
+const {getAllFeedback, getFeedbackPagination} = require('./../controllers/feedbackController')
 const {getManager} = require('./../controllers/managerController')
+const {getClient} = require('./../controllers/clientController')
 
 const universal_keyboard = (data, lang) => {
   let kbb = [], arr = [], text
@@ -41,6 +43,30 @@ const universal_keyboard = (data, lang) => {
   return kbb
 }
 
+const branch_report_keyboard = (data, lang) => {
+  let kbb = [], arr = [], text
+
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i]
+
+    if (item.status !== 'inactive') {
+      arr.push({text: item.name})
+
+      if (arr.length % 2 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
+    }
+  }
+
+  kbb.push(arr)
+
+  if (lang === kb.language.uz) kbb.push([kb.main.uz])
+  else if (lang === kb.language.ru) kbb.push([kb.main.ru])
+
+  return kbb
+}
+
 const car_keyboard = (data, lang) => {
   let kbb = [], arr = []
 
@@ -69,11 +95,21 @@ const date = (day) => {
   const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(),
     minutes = day.getMinutes()
 
-  return `${year}-${month}-${date}. ${hour}:${minutes}`
+  return `${year}-${month+1}-${date}. ${hour}:${minutes}`
 }
 
 const date_name = () => {
-  const day = new Date(), year = day.getFullYear(), month = day.getMonth(), date = day.getDate()
+  let year, month, date
+
+  const day = new Date()
+
+  year = day.getFullYear(), month = day.getMonth(), date = day.getDate()
+
+  if (month === 9) {
+    month += 1
+  } else if (month < 10 && month !== 9) {
+    month = `0${month+1}`
+  }
 
   return `${date}-${month}-${year}`
 }
@@ -597,54 +633,65 @@ const washing_pagination = async (page, limit, query, lang) => {
 }
 
 const employee_pagination = async (page, limit, query, lang) => {
-  let offset = limit * (page - 1), text, clause
+  let offset = limit * (page - 1), text, clause, kbs
 
   const employees = await getEmployeePagination(query, offset, limit), all_employees = await getEmployees(query)
 
+  if (employees.length > 0) {
+    text = (lang === kb.language.uz)
+      ? `<b>Hozirgi: ${offset + 1}-${employees.length + offset}, Jami:${all_employees.length}</b>\n\n`
+      : `<b>Текущий: ${offset + 1}-${employees.length + offset}, Общий:${all_employees.length}</b>\n\n`
 
-  text = (lang === kb.language.uz)
-    ? `<b>Hozirgi: ${offset + 1}-${employees.length + offset}, Jami:${all_employees.length}</b>\n\n`
-    : `<b>Текущий: ${offset + 1}-${employees.length + offset}, Общий:${all_employees.length}</b>\n\n`
+    let kbb = [], arr = []
 
-  let kbb = [], arr = []
+    for (let i = 0; i < employees.length; i++) {
+      const employee = employees[i]
 
-  for (let i = 0; i < employees.length; i++) {
-    const employee = employees[i]
+      const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'emp', id: employee._id})}
 
-    const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'emp', id: employee._id})}
+      arr.push(obj)
 
-    arr.push(obj)
+      if (arr.length % 6 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
 
-    if (arr.length % 6 === 0) {
-      kbb.push(arr)
-      arr = []
+      if (employees.is_idler) {
+        clause = (lang === kb.language.uz) ? "Ishlayapti" : "Работает"
+      } else if (!employee.is_idler) {
+        clause = (lang === kb.language.uz) ? "Ishlamayapti" : "Не работает"
+      }
+
+      text += `<b>${i + 1}.</b> ${employee.name} - ${employee.number} - ${employee.total_washes} - ${clause}\n`
     }
 
-    if (employees.is_idler) {
-      clause = (lang === kb.language.uz) ? "Ishlayapti" : "Работает"
-    } else if (!employee.is_idler) {
-      clause = (lang === kb.language.uz) ? "Ishlamayapti" : "Не работает"
-    }
+    kbb.push(arr)
 
-    text += `<b>${i + 1}.</b> ${employee.name} - ${employee.number} - ${employee.total_washes} - ${clause}\n`
+    const inline_keyboard = [
+      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#employee#${page - 1}` : 'none', id: ''})},
+      {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+      {
+        text: ` ➡️`,
+        callback_data: JSON.stringify({
+          phrase: employees.length + offset !== all_employees.length ? `right#employee#${page + 1}` : 'none', id: ''
+        })
+      }
+    ]
+
+    kbb.push(inline_keyboard)
+
+    kbs = {reply_markup: {inline_keyboard: kbb}}
+  } else if (employees.length <= 0) {
+    if (lang === kb.language.uz) {
+      text = "Hozircha hodimlar qo'shimagan yoki hali ishga kelmagan"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.employees.uz}}
+    } else if (lang === kb.language.ru) {
+      text = 'Нет сотрудников, которые были добавлены или начаты еще'
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.employees.ru}}
+    }
   }
 
-  kbb.push(arr)
-
-  const inline_keyboard = [
-    {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#employee#${page - 1}` : 'none', id: ''})},
-    {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
-    {
-      text: ` ➡️`,
-      callback_data: JSON.stringify({
-        phrase: employees.length + offset !== all_employees.length ? `right#employee#${page + 1}` : 'none', id: ''
-      })
-    }
-  ]
-
-  kbb.push(inline_keyboard)
-
-  return {text, kbb}
+  return {text, kbs}
 }
 
 const fee_pagination = async (page, limit, query, kw, lang) => {
@@ -698,6 +745,130 @@ const fee_pagination = async (page, limit, query, kw, lang) => {
   }
 
   return {text, kbs}
+}
+
+const feedback_seen_pagination = async (page, limit, query, lang) => {
+  let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, kw
+
+  const selected_feedback = await getFeedbackPagination(query, offset, limit), all_feedback = await getAllFeedback(query)
+
+  if (selected_feedback.length > 0) {
+    text = (lang === kb.language.uz)
+      ? `<b>Hozirgi: ${offset + 1}-${selected_feedback.length + offset}, Jami:${all_feedback.length}</b>\n\n`
+      : `<b>Текущий: ${offset + 1}-${selected_feedback.length + offset}, Общий:${all_feedback.length}</b>\n\n`
+
+    for (let i = 0; i < selected_feedback.length; i++) {
+      const feedback = selected_feedback[i]
+
+      const author = feedback.is_employee
+        ? await getEmployee({telegram_id: feedback.author})
+        : await getClient({telegram_id: feedback.author})
+
+      const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'se_feed', id: feedback._id})}
+
+      arr.push(obj)
+
+      if (arr.length % 6 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
+
+      text += `<b>${i + 1}.</b> ${author.name} - ${feedback.branch} - ${feedback.mark}}\n`
+    }
+
+    kbb.push(arr)
+
+    const inline_keyboard = [
+      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#selfeedback#${page - 1}` : 'none', id: ''})},
+      {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+      {
+        text: ` ➡️`,
+        callback_data: JSON.stringify({
+          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#selfeedback#${page + 1}` : 'none', id: ''
+        })
+      }
+    ]
+
+    kbb.push(inline_keyboard)
+
+    kw = 'YES'
+
+    kbs = {reply_markup: {inline_keyboard: kbb}}
+  } else if (selected_feedback.length <= 0) {
+    kw = 'NO'
+
+    if (lang === kb.language.uz) {
+      text = "Hali izohlar mavjud emas"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.feedback.uz}}
+    } else if (lang === kb.language.ru) {
+      text = "Пока нет комментариев"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.feedback.ru}}
+    }
+  }
+
+  return {text, kbs, kw}
+}
+
+const feedback_done_pagination = async (page, limit, query, lang) => {
+  let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, kw
+
+  const selected_feedback = await getFeedbackPagination(query, offset, limit), all_feedback = await getAllFeedback(query)
+
+  if (selected_feedback.length > 0) {
+    text = (lang === kb.language.uz)
+      ? `<b>Hozirgi: ${offset + 1}-${selected_feedback.length + offset}, Jami:${all_feedback.length}</b>\n\n`
+      : `<b>Текущий: ${offset + 1}-${selected_feedback.length + offset}, Общий:${all_feedback.length}</b>\n\n`
+
+    for (let i = 0; i < selected_feedback.length; i++) {
+      const feedback = selected_feedback[i]
+
+      const author = feedback.is_employee
+        ? await getEmployee({telegram_id: feedback.author})
+        : await getClient({telegram_id: feedback.author})
+
+      const obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'do_feed', id: feedback._id})}
+
+      arr.push(obj)
+
+      if (arr.length % 6 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
+
+      text += `<b>${i + 1}.</b> ${author.name} - ${feedback.branch} - ${feedback.mark}}\n`
+    }
+
+    kbb.push(arr)
+
+    const inline_keyboard = [
+      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#dofeedback#${page - 1}` : 'none', id: ''})},
+      {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+      {
+        text: ` ➡️`,
+        callback_data: JSON.stringify({
+          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#dofeedback#${page + 1}` : 'none', id: ''
+        })
+      }
+    ]
+
+    kbb.push(inline_keyboard)
+
+    kw = 'YES'
+
+    kbs = {reply_markup: {inline_keyboard: kbb}}
+  } else if (selected_feedback.length <= 0) {
+    kw = 'NO'
+
+    if (lang === kb.language.uz) {
+      text = "Hali bajarilayotgan izohlar mavjud emas"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.feedback.uz}}
+    } else if (lang === kb.language.ru) {
+      text = "В настоящее время комментарии отсутствуют"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.feedback.ru}}
+    }
+  }
+
+  return {text, kbs, kw}
 }
 
 const car_pagination = async (page, limit, author) => {
@@ -880,12 +1051,15 @@ const car_attendance = (cars, list, lang, type) => {
 
 module.exports = {
   universal_keyboard,
+  branch_report_keyboard,
   employee_attendance,
   car_pagination,
   fee_pagination,
   car_keyboard,
   washing_pagination,
   get_washed_time,
+  feedback_seen_pagination,
+  feedback_done_pagination,
   report,
   date,
   wash_pagination,

@@ -15,8 +15,6 @@ const employeePanel = async (bot, message, employee) => {
   const chat_id = message.chat.id, lang = employee.lang, manager = await getManager({telegram_id: employee.manager}),
   owner = await getOwner({telegram_id: manager.owner})
 
-  console.log("Kevotti")
-
   if (message.location) {
     text = message.location
   } else if (message.photo) {
@@ -26,7 +24,7 @@ const employeePanel = async (bot, message, employee) => {
   }
 
   try {
-    if (owner.is_paid) {
+    if (owner.is_paid && !employee.is_idler) {
       await employeeMainPage(bot, chat_id, text, lang)
       await employeeSettings(bot, employee, text, lang)
       await employeeFeedback(bot, chat_id, text, lang)
@@ -37,6 +35,12 @@ const employeePanel = async (bot, message, employee) => {
       const message = employee.lang === kb.language.uz
         ? "Xo'jayinigiz bu oy uchun ro'yxatdan o'tmaganligi sababli platformani ishlata olmaysiz"
         : "Вы не можете использовать платформу, потому что ваш хост не зарегистрирован в этом месяце."
+
+
+    } else if (employee.is_idler) {
+      const message = employee.lang === kb.language.uz
+        ? "Siz avval ishingizni tugating, keyin platformani ishlaa olasiz"
+        : "Вы можете сначала закончить свою работу, а затем запустить платформу"
 
       await bot.sendMessage(employee.telegram_id, message)
     }

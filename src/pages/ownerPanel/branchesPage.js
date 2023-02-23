@@ -204,7 +204,11 @@ const obs8 = async (bot, chat_id, _id, text, lang) => {
     }
 
     if (branch.manager) {
-      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {branch: '', status: 'active', total_employees: 0})
+      await updateManager({telegram_id: branch.manager, owner: branch.owner, branch: branch.name}, {
+        branch: '',
+        total_employees: 0,
+        status: 'active'
+      })
     }
 
     await updateManager({_id: manager._id}, {
@@ -553,8 +557,10 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
         if (branch) {
           if (text === kb.options.back.uz || text === kb.options.back.ru) {
             await updateOwner({telegram_id: chat_id}, {step: 8})
-            const data = branch.manager ? {step: 5, status: 'provided'} : {step: 5, status: 'active'}
-            await updateBranch({owner: chat_id, status: 'process'}, data)
+            const data = branch.manager
+              ? {situation: '', step: 5, status: 'provided'}
+              : {situation: '', step: 5, status: 'active'}
+            await updateBranch({owner: chat_id, situation: 'edit'}, data)
             await obs1(bot, chat_id, lang)
           } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
             if (branch.step === 6) {

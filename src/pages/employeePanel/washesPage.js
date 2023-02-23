@@ -1,6 +1,6 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
-const {getWashes, getWash, makeWash, updateWash, deleteWash, countWashes} = require('./../../controllers/washController')
+const {getWash} = require('./../../controllers/washController')
 const {getEmployee} = require('./../../controllers/employeeController')
 
 const {wash_pagination, employee_wash_pagination} = require('./../../helpers/utils')

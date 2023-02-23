@@ -8,6 +8,14 @@ const getAllFeedback = async (query) => {
   }
 }
 
+const getFeedbackPagination = async (query, offset, limit) => {
+  try {
+    return await Feedback.find(query).skip(offset).limit(limit)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 const getFeedback = async (query) => {
   try {
     return await Feedback.findOne(query)
@@ -98,4 +106,4 @@ const countAllFeedback = async (query) => {
 //   }
 // }
 
-module.exports = {getAllFeedback, getFeedback, makeFeedback, updateFeedback, deleteFeedback, countAllFeedback}
+module.exports = {getAllFeedback, getFeedbackPagination, getFeedback, makeFeedback, updateFeedback, deleteFeedback, countAllFeedback}

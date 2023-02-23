@@ -4,11 +4,10 @@ const {getWashes, getWash, makeWash, updateWash, deleteWash, countWashes} = requ
 const {getManager} = require('./../../controllers/managerController')
 const {getFees, getFee} = require('./../../controllers/feeController')
 const {getEmployees, getEmployee, updateEmployee} = require('./../../controllers/employeeController')
-const {getCars, getCar} = require('./../../controllers/carController')
+const {getCar} = require('./../../controllers/carController')
 const {getClient} = require('./../../controllers/clientController')
 const {getBranch} = require('./../../controllers/branchController')
-const {report, wash_pagination, washing_pagination, universal_keyboard, date, car_keyboard} = require('./../../helpers/utils')
-const {mmp} = require('./mainPage')
+const {report, wash_pagination, universal_keyboard, date, car_keyboard} = require('./../../helpers/utils')
 
 let wash_id
 
@@ -35,7 +34,7 @@ const mws0 = async (bot, chat_id, lang) => {
 const mws1 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     query = {
-      manager: manager.telegram_id, branch: manager.branch, status: 'washed',
+      branch: manager.branch, status: 'washed',
       created_at: {
         $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date().setHours(23, 59, 59))
@@ -264,7 +263,7 @@ const mws9 = async (bot, chat_id, _id, lang) => {
 const mws10 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
     query = {
-      manager: manager.telegram_id, branch: manager.branch, step: 5, status: 'washing',
+      branch: manager.branch, step: 5, status: 'washing',
       created_at: {
         $gte: new Date(new Date().setHours(0o0, 0o0, 0o0)),
         $lt: new Date(new Date().setHours(23, 59, 59))

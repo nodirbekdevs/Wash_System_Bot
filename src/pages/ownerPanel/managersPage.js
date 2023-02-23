@@ -1,12 +1,10 @@
-const Geo = require('node-geocoder')
-const config = require('./../../helpers/config')
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {genSalt, hash} = require('bcrypt')
 const {getBranches, getBranch, updateBranch} = require('./../../controllers/branchController')
 const {getManagers, getManager, makeManager, updateManager, deleteManager, countManagers} = require('./../../controllers/managerController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
-const {getEmployees, updateManyEmployees} = require('./../../controllers/employeeController')
+const {updateManyEmployees} = require('./../../controllers/employeeController')
 const {updateManyFees} = require('./../../controllers/feeController')
 const {universal_keyboard, report} = require('./../../helpers/utils')
 
@@ -239,7 +237,7 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
     }
 
     if (branch.manager) {
-      await updateManager({telegram_id: branch.manager, owner: branch.owner}, {branch: '', status: 'active'})
+      await updateManager({telegram_id: branch.manager, owner: branch.owner}, {branch: '', total_employees: 0, status: 'active'})
     }
 
     if (manager.total_employees > 0) {
@@ -261,7 +259,6 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
   manager.branch = branch.name
   manager.total_employees = branch.total_employees
   manager.step = 9
-
 
   await manager.save()
 

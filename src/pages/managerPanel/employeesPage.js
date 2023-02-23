@@ -33,7 +33,7 @@ const mes1 = async (bot, chat_id, lang) => {
 
   const report = await employee_pagination(1, 6, query, lang)
 
-  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}})
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
 
 const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
@@ -47,7 +47,7 @@ const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     const report = await employee_pagination(parseInt(data.split('#')[2]), 6, query, lang)
 
     await bot.editMessageText(report.text, {
-      chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
+      chat_id, message_id, parse_mode: 'HTML', reply_markup: report.kbs.reply_markup
     })
   }
 
@@ -121,7 +121,7 @@ const mes3 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   const report = await employee_pagination(1, 6, query, lang)
 
   await bot.editMessageText(report.text, {
-    chat_id, message_id, parse_mode: 'HTML', reply_markup: {inline_keyboard: report.kbb}
+    chat_id, message_id, parse_mode: 'HTML', reply_markup: report.kbs.reply_markup
   })
 }
 

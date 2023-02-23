@@ -1,7 +1,7 @@
 const keyboard = require('./../../helpers/keyboard')
 const kb = require('./../../helpers/keyboard-buttons')
 const {getEmployee, updateEmployee} = require('../../controllers/employeeController')
-const {bio} = require('./../../helpers/utils')
+const {report} = require('./../../helpers/utils')
 
 let type
 
@@ -29,7 +29,7 @@ const ess2 = async (bot, chat_id, text, lang) => {
 
   await updateEmployee({telegram_id: chat_id}, {name: text, step: 6})
 
-  const employee = await getEmployee({telegram_id: chat_id}), message = bio(employee, 'EMPLOYEE_SETTINGS', lang)
+  const employee = await getEmployee({telegram_id: chat_id}), message = report(employee, 'EMPLOYEE_SETTINGS', lang)
 
   if (lang === kb.language.uz) {
     clause = "Ismingiz muvaffaqiyatli o'zgartirildi"
@@ -59,7 +59,7 @@ const ess4 = async (bot, chat_id, text, lang) => {
 
   await updateEmployee({telegram_id: chat_id}, {number: text, step: 6})
 
-  const employee = await getEmployee({telegram_id: chat_id}), message = bio(employee, 'EMPLOYEE_SETTINGS', lang)
+  const employee = await getEmployee({telegram_id: chat_id}), message = report(employee, 'EMPLOYEE_SETTINGS', lang)
 
   if (lang === kb.language.uz) {
     clause = "Raqamingiz muvaffaqiyatli o'zgartirildi"
@@ -87,7 +87,7 @@ const ess6 = async (bot, chat_id, text, lang) => {
 
   await updateEmployee({telegram_id: chat_id}, {lang: text, step: 6})
 
-  const employee = await getEmployee({telegram_id: chat_id}), report = bio(employee, 'EMPLOYEE_SETTINGS', lang)
+  const employee = await getEmployee({telegram_id: chat_id}), report = report(employee, 'EMPLOYEE_SETTINGS', lang)
 
   if (lang === kb.language.uz) {
     message = "Platformadagi tilingiz muvaffaqiyatli o'zgartirildi"
