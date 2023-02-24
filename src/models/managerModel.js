@@ -10,6 +10,7 @@ const Manager = model('Manager', new Schema({
   password: {type: String, default: ''},
   number: {type: String, default: ''},
   total_employees: {type: Number, default: 0},
+  situation: {type: String, enum: ['', 'edit'], default: ''},
   lang: {type: String, default: ''},
   step: {type: Number, default: 0},
   status: {type: String, enum: ['process', 'active', 'inactive', 'occupied'], default: 'process'},

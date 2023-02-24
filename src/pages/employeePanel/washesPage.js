@@ -2,6 +2,7 @@ const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {getWash} = require('./../../controllers/washController')
 const {getEmployee} = require('./../../controllers/employeeController')
+const {date, report} = require('./../../helpers/utils')
 
 const {wash_pagination, employee_wash_pagination} = require('./../../helpers/utils')
 
@@ -28,7 +29,7 @@ const ews1 = async (bot, chat_id, lang) => {
 
   const report = await wash_pagination(1, 6, query, 'EMPLOYEE', lang)
 
-  await bot.sendMessage(chat_id, report.text, report.kbs)
+  await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
 
 

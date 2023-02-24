@@ -125,7 +125,7 @@ module.exports = {
 
     reports: {
       uz: {
-        one_day: 'Bugungi hisobot',
+        one_day: '1 kunlik hisobot',
         other_days: "Boshqa kunlar oralig'idagi hisobotlar"
       },
       ru: {
@@ -192,16 +192,16 @@ module.exports = {
       }
     },
 
-    fees: {
-      uz: {
-        all: "Barcha tariflar",
-        edit: "Ta'rifni o'zgartirish"
-      },
-      ru: {
-        all: "Все тарифы",
-        edit: "Изменение тарифа"
-      }
-    },
+    // fees: {
+    //   uz: {
+    //     all: "Barcha tariflar",
+    //     edit: "Ta'rifni o'zgartirish"
+    //   },
+    //   ru: {
+    //     all: "Все тарифы",
+    //     edit: "Изменение тарифа"
+    //   }
+    // },
 
     branch: {
       uz: 'Filial',
@@ -219,7 +219,7 @@ module.exports = {
         branch: "🏢  Filial",
       },
       ru: {
-        settings: "⚙️Sozlamalar",
+        settings: "⚙️Настройки",
         washes: "🚿  Мойки",
         feedback: "✍️Комментарии",
         fees: "🚘  Тарифы",
@@ -266,51 +266,6 @@ module.exports = {
   client: {},
 
   options: {
-
-    back: {
-      uz: '🔙 Orqaga',
-      ru: '🔙 Назад',
-    },
-
-    confirmation: {
-      uz: "Tasdiqlash",
-      ru: "Подтверждение"
-    },
-
-    not_to_confirmation: {
-      uz: "Tasdiqlamaslik",
-      ru: "Не подтверждать"
-    },
-
-    skipping: {
-      uz: "O'tkazib yuborish",
-      ru: "Пропустить"
-    },
-
-    washed: {
-      uz: "Mashina yuvildi",
-      ru: "Автомобиль был вымыт"
-    },
-
-    dismissal: {
-      uz: "Bo'shatish",
-      ru: "Увольнять"
-    },
-
-    feedback: {
-      uz: {
-        good: "Yaxshi 👍",
-        bad: "Yomon 👎"
-      },
-
-      ru: {
-        good: "Отлично 👍",
-        bad: "Плохо 👎"
-      }
-    },
-
-
-
     owner: {
       branch: {
         settings: {
@@ -368,167 +323,51 @@ module.exports = {
       }
     },
 
-
-
-
-
-
-
-
-
-    send: {
-      uz: '➡️Yuborish',
-      ru: '➡️Отправить'
+    back: {
+      uz: '🔙 Orqaga',
+      ru: '🔙 Назад',
     },
 
-    condition: {
+    confirmation: {
+      uz: "Tasdiqlash",
+      ru: "Подтверждение"
+    },
+
+    not_to_confirmation: {
+      uz: "Tasdiqlamaslik",
+      ru: "Не подтверждать"
+    },
+
+    skipping: {
+      uz: "O'tkazib yuborish",
+      ru: "Пропустить"
+    },
+
+    washed: {
+      uz: "Mashina yuvildi",
+      ru: "Автомобиль был вымыт"
+    },
+
+    dismissal: {
+      uz: "Bo'shatish",
+      ru: "Увольнять"
+    },
+
+    feedback: {
       uz: {
-        true: "✅ To'g'ri",
-        false: "❎ Noto'g'ri"
+        good: "Yaxshi 👍",
+        bad: "Yomon 👎"
       },
 
       ru: {
-        true: "✅ Правильно",
-        false: "❎ Неправильно"
+        good: "Отлично 👍",
+        bad: "Плохо 👎"
       }
-    },
-
-    allow: {
-      uz: {
-        yes: '🆗 Ha',
-        no: '❌ Yo`q'
-      },
-
-      ru: {
-        yes: '🆗 Да',
-        no: "❌ Нет"
-      }
-    },
-
-    product: {
-      uz: {
-        add_basket: "Savatga qo'shish",
-        add: "Qo'shish",
-        remove: "Chiqarish"
-      },
-
-      ru: {
-        add_basket: "Добавить в корзину",
-        add: "Добавить",
-        remove: "Выпускать"
-      }
-    },
-
-    order: {
-      uz: {
-        clear: "Savatni tozalash",
-        order: "Buyurtma berish",
-        edit: "Buyurtmani o'zgartirish"
-      },
-
-      ru: {
-        clear: "Очистить корзину",
-        order: "Разместить заказ",
-        edit: "Изменить заказ"
-      }
-    },
-
-
-
-    situation: {
-      uz: {
-        increase: "Qo'shish",
-        decrease: "Ayirish",
-        destroy: "Bekor qilish"
-      },
-
-      ru: {
-        increase: "Добавлять",
-        decrease: "Вычесть",
-        destroy: "Отмена"
-      }
-    },
-
-    setting_key_words: {
-      uz: {
-        name: "O'zgartirmoqchi bo'lgan ismingizni kiriting",
-        number: "O'zgartirmoqchi bo'lgan raqamingizni kiriting",
-        type: "O'zgartirmoqchi bo'lgan tipingizni kiriting"
-      },
-
-      ru: {
-        name: "Введите имя, которое хотите изменить",
-        number: "Введите номер, которое хотите изменить",
-        type: "Введите номер, которое хотите изменить"
-      }
-    },
-
-    change: {
-      uz: "✏️O'zgartirish",
-      ru: "✏️Изменить"
-    },
-
-    currency: {
-      uzs: ":uz: UZS",
-      rub: ":rus: RUB",
-      usd: ":us: USD",
-      euro: "EURO"
-    },
-
-
-
-
-
-    accepted: {
-      uz: "Qabul qildim",
-      ru: "Принял"
-    },
-
-    day: {
-      uz: "Kun",
-      ru: "День"
-    },
-
-    time: {
-      uz: "Vaqti",
-      ru: "Час"
-    },
-
-    time_values: {
-      6: "06:00",
-      7: "07:00",
-      8: "08:00",
-      9: "09:00",
-      10: "10:00",
-      11: "11:00",
-      12: "12:00",
-      13: "13:00",
-      14: "14:00",
-      15: "15:00",
-      16: "16:00",
-      17: "17:00",
-    },
-
-    basket: {
-      uz: '🧺 Savat',
-      ru: '🧺 Корзина'
     },
 
     confirmation_advertising: {
       yes: "Reklamani tasdiqlash",
       no: "Reklamani tasdiqlamaslik",
     },
-
-    task: {
-      baker: 'Nonvoy',
-      dough_maker: 'Xamirchi',
-      supplier: 'Yetkazib beruvchi'
-    },
-
-    send_advertise: "Reklamani jo'natish",
-
-    choose_employee: "Yetkazib_beruvchini_tanlash",
-
-    delivered: 'Yetkazib berildi'
   }
 }

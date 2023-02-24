@@ -17,11 +17,7 @@ const ofs0 = async (bot, chat_id, lang) => {
   }
 
   await bot.sendMessage(chat_id, message, {
-    reply_markup: {
-      resize_keyboard: true,
-      keyboard: kbb,
-      one_time_keyboard: true
-    }
+    reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}
   })
 }
 
@@ -32,9 +28,10 @@ const ofs1 = async (bot, chat_id, lang) => {
 
   const data = {number, process, active, inactive, seen, done}
 
-  const message = report(data, 'FEEDBACK_ALL', lang)
+  const message = report(data, 'FEEDBACK_ALL', lang), kbb = (lang === kb.language.uz)
+    ? keyboard.owner.feedback.uz : keyboard.owner.feedback.ru
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
 }
 
 const ofs2 = async (bot, chat_id, lang) => {
@@ -70,7 +67,7 @@ const ofs2 = async (bot, chat_id, lang) => {
   // }
 
   if (report.kw === 'YES') {
-    await bot.sendMessage(chat_id, report.text, {reply_markup: report.kbs.reply_markup})
+    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 
     const message = lang === kb.language.uz ? "Hozirgacha yozilgan yangi izohlar" : "Добавлены новые комментарии"
 
@@ -113,7 +110,7 @@ const ofs3 = async (bot, chat_id, lang) => {
   // }
 
   if (report.kw === 'YES') {
-    await bot.sendMessage(chat_id, report.text, {reply_markup: report.kbs.reply_markup})
+    await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 
     const message = lang === kb.language.uz ? "Hozirgacha bajarilayotgan izohlar" : "Комментарии пока в обработке"
 
@@ -139,7 +136,7 @@ const ofs4 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'dofeedback') {
     query = {branch_owner: chat_id, is_read: true, status: 'seen'}
 
-    const report = await feedback_seen_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
+    const report = await feedback_done_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
 
     await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
   }
@@ -249,13 +246,14 @@ const ofs6 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     }
 
     await bot.sendMessage(feedback.author, message)
-  }
 
-  await bot.sendMessage(chat_id, clause)
+    await bot.sendMessage(chat_id, clause)
+  }
 
   const query = {branch_owner: chat_id, is_read: false, status: 'active'}
 
   const information = await feedback_seen_pagination(1, 6, query, lang)
+
 
   if (information.kw === 'YES') {
     await bot.editMessageText(information.text, {
@@ -280,7 +278,7 @@ const ofs7 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 
     const data2 = {name: author.name, feedback: feedback.reason}
 
-    if (feedback.status === 'active') {
+    if (feedback.status === 'seen') {
       await updateFeedback({_id: feedback._id}, {status: 'done'})
       message = report(data2, 'FEEDBACK_DONE', author.lang)
 
@@ -288,13 +286,13 @@ const ofs7 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
     }
 
     await bot.sendMessage(feedback.author, message)
+
+    await bot.sendMessage(chat_id, clause)
   }
 
-  await bot.sendMessage(chat_id, clause)
+  const query = {branch_owner: chat_id, is_read: true, status: 'seen'}
 
-  const query = {branch_owner: chat_id, is_read: false, status: 'active'}
-
-  const information = await feedback_seen_pagination(1, 6, query, lang)
+  const information = await feedback_done_pagination(1, 6, query, lang)
 
   if (information.kw === 'YES') {
     await bot.editMessageText(information.text, {

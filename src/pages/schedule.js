@@ -5,12 +5,12 @@ const {join} = require('node:path')
 const {updateManyEmployees} = require('./../controllers/employeeController')
 const {getWashes} = require('./../controllers/washController')
 const {getBranches} = require('./../controllers/branchController')
-const {getOwner} = require('./../controllers/ownerController')
+const {getOwners, getOwner} = require('./../controllers/ownerController')
 const {getManager} = require('./../controllers/managerController')
 const {get_washed_time, date_name, date} = require('./../helpers/utils')
 
 const schedule = (bot) => {
-  cron.schedule('18 01 * * *', async () => {
+  cron.schedule('05 16 * * *', async () => {
     await updateManyEmployees({status: 'active'}, {status: 'inactive'})
 
     const branches = await getBranches({
@@ -109,32 +109,32 @@ const schedule = (bot) => {
     }
   });
 
-  // cron.schedule('* * 01 * *', async () => {
-  //   let message
-  //
-  //   const owners = await getOwners({})
-  //
-  //   for (let i = 0; i < owners.length; i++) {
-  //     const owner = owners[i]
-  //
-  //     if (owner.balance >= 200000) {
-  //       owner.balance -= 200000
-  //       owner.is_paid = true
-  //       message = owner.lang === kb.language.uz
-  //         ? "Bu oy uchun pul to'landi. Bu oy platformani ishlatishingiz mumkun"
-  //         : "Оплачено за этот месяц. В этом месяце вы можете использовать платформу"
-  //     } else if (owner.balance < 200000) {
-  //       owner.is_paid = false
-  //       message = owner.lang === kb.language.uz
-  //         ? "Bu oy uchun pul to'lanmadi. Platformani ishlatish uchun admin bilan bog'laning"
-  //         : "Не оплачен в этом месяце. Свяжитесь с администратором, чтобы использовать платформу"
-  //     }
-  //
-  //     await owner.save()
-  //
-  //     await bot.sendMessage(owner.telegram_id, message)
-  //   }
-  // })
+  cron.schedule('06 16 24 * *', async () => {
+    let message
+
+    const owners = await getOwners({status: 'active'})
+
+    for (let i = 0; i < owners.length; i++) {
+      const owner = owners[i]
+
+      if (owner.balance >= 200000) {
+        owner.balance -= 200000
+        owner.is_paid = true
+        message = owner.lang === kb.language.uz
+          ? "Bu oy uchun pul to'landi. Bu oy platformani ishlatishingiz mumkun"
+          : "Оплачено за этот месяц. В этом месяце вы можете использовать платформу"
+      } else if (owner.balance < 200000) {
+        owner.is_paid = false
+        message = owner.lang === kb.language.uz
+          ? "Bu oy uchun pul to'lanmadi. Platformani ishlatish uchun admin bilan bog'laning"
+          : "Не оплачен в этом месяце. Свяжитесь с администратором, чтобы использовать платформу"
+      }
+
+      await owner.save()
+
+      await bot.sendMessage(owner.telegram_id, message)
+    }
+  })
 }
 
 module.exports = {schedule}

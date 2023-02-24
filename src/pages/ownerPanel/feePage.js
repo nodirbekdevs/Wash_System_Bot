@@ -4,7 +4,7 @@ const {getFees, getFee, makeFee, updateFee, deleteFee, countFees} = require('./.
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManager} = require('./../../controllers/managerController')
 const {getCars, getCar, updateCar} = require('./../../controllers/carController')
-const {universal_keyboard, car_attendance, report, date} = require('./../../helpers/utils')
+const {universal_keyboard, car_attendance, report, date, parse_number} = require('./../../helpers/utils')
 const {getBranches, getBranch} = require('./../../controllers/branchController')
 
 let type, fee_id
@@ -224,26 +224,38 @@ const ofs9 = async (bot, chat_id, _id, lang) => {
 const ofs10 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
-  await updateFee({_id}, {cash: parseInt(text), step: 8})
+  const parse = parse_number(text)
 
-  const fee = await getFee({_id})
+  if (parse !== 'NaN') {
+    await updateFee({_id}, {cash: parseInt(text), step: 8})
 
-  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
+    const fee = await getFee({_id})
 
-  const message = report(data, 'FEE_SETTINGS', lang)
+    const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price,}
 
-  if (lang === kb.language.uz) {
-    clause = "Tarif kassa narxi muvaffaqiyatli o'zgartirildi"
-    kbb = keyboard.options.owner.fee.settings.uz
-  } else if (lang === kb.language.ru) {
-    clause = "Расчетная цена тарифа успешно изменено"
-    kbb = keyboard.options.owner.fee.settings.ru
-  }
+    const message = report(data, 'FEE_SETTINGS', lang)
 
-  if (fee.image !== '') {
-    await bot.sendPhoto(chat_id, fee.image, {caption: message})
-  } else {
-    await bot.sendMessage(chat_id, message)
+    if (lang === kb.language.uz) {
+      clause = "Tarif kassa narxi muvaffaqiyatli o'zgartirildi"
+      kbb = keyboard.options.owner.fee.settings.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Расчетная цена тарифа успешно изменено"
+      kbb = keyboard.options.owner.fee.settings.ru
+    }
+
+    if (fee.image !== '') {
+      await bot.sendPhoto(chat_id, fee.image, {caption: message})
+    } else {
+      await bot.sendMessage(chat_id, message)
+    }
+  } else if (parse === 'NaN') {
+    if (lang === kb.language.uz) {
+      clause = "Iltimos to'g'ri raqam yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Пожалуйста, пришлите правильный номер"
+      kbb = keyboard.options.back.ru
+    }
   }
 
   await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -268,26 +280,38 @@ const ofs11 = async (bot, chat_id, _id, lang) => {
 const ofs12 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
-  await updateFee({_id}, {price: parseInt(text), step: 8})
+  const parse = parse_number(text)
 
-  const fee = await getFee({_id})
+  if (parse !== 'NaN') {
+    await updateFee({_id}, {price: parseInt(text), step: 8})
 
-  const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price}
+    const fee = await getFee({_id})
 
-  const message = report(data, 'FEE_SETTINGS', lang)
+    const data = {name: fee.name, description: fee.description, cars: fee.cars, cash: fee.cash, price: fee.price}
 
-  if (lang === kb.language.uz) {
-    clause = "Tarif narxi muvaffaqiyatli o'zgartirildi"
-    kbb = keyboard.options.owner.fee.settings.uz
-  } else if (lang === kb.language.ru) {
-    clause = "Цена тарифа успешно изменено"
-    kbb = keyboard.options.owner.fee.settings.ru
-  }
+    const message = report(data, 'FEE_SETTINGS', lang)
 
-  if (fee.image !== '') {
-    await bot.sendPhoto(chat_id, fee.image, {caption: message})
-  } else {
-    await bot.sendMessage(chat_id, message)
+    if (lang === kb.language.uz) {
+      clause = "Tarif narxi muvaffaqiyatli o'zgartirildi"
+      kbb = keyboard.options.owner.fee.settings.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Цена тарифа успешно изменено"
+      kbb = keyboard.options.owner.fee.settings.ru
+    }
+
+    if (fee.image !== '') {
+      await bot.sendPhoto(chat_id, fee.image, {caption: message})
+    } else {
+      await bot.sendMessage(chat_id, message)
+    }
+  } else if (parse === 'NaN') {
+    if (lang === kb.language.uz) {
+      clause = "Iltimos to'g'ri raqam yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Пожалуйста, пришлите правильный номер"
+      kbb = keyboard.options.back.ru
+    }
   }
 
   await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -491,16 +515,17 @@ const ofs20 = async (bot, chat_id, query_id, message_id, phrase, _id, lang) => {
 }
 
 const ofs21 = async (bot, chat_id, _id, text, lang) => {
-  let message, kbb
+  let message
 
-  await updateFee({_id}, {cash: parseInt(text), step: 5})
+  const kbb = (lang === kb.language.uz) ? keyboard.options.back.uz : keyboard.options.back.ru,
+    parse = parse_number(text)
 
-  if (lang === kb.language.uz) {
-    message = 'Tarif narxini kiriting'
-    kbb = keyboard.options.back.uz
-  } else if (lang === kb.language.ru) {
-    message = 'Введите цену тарифа'
-    kbb = keyboard.options.back.ru
+  if (parse !== 'NaN') {
+    await updateFee({_id}, {cash: parseInt(text), step: 5})
+
+    message = lang === kb.language.uz ? 'Tarif narxini kiriting' : 'Введите цену тарифа'
+  } else if (parse === 'NaN') {
+    message = (lang === kb.language.uz) ? "Iltimos to'g'ri raqam yuboring" : "Пожалуйста, пришлите правильный номер"
   }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -509,31 +534,36 @@ const ofs21 = async (bot, chat_id, _id, text, lang) => {
 const ofs22 = async (bot, chat_id, _id, text, lang) => {
   let message, kbb
 
-  await updateFee({_id}, {price: parseInt(text), step: 6})
+  const parse = parse_number(text)
 
-  const fee = await getFee({_id}), manager = await getManager({telegram_id: fee.manager, owner: chat_id}),
-    owner = await getOwner({telegram_id: chat_id}), started_at = date(fee.created_at)
+  if (parse !== 'NaN') {
+    await updateFee({_id}, {price: parseInt(text), step: 6})
 
-  const data = {
-    owner: owner.name,
-    manager: manager.name,
-    branch: fee.branch,
-    name: fee.name,
-    description: fee.description,
-    cars: fee.cars,
-    cash: fee.cash,
-    price: fee.price,
-    created_at: started_at
-  }
+    const fee = await getFee({_id}), manager = await getManager({telegram_id: fee.manager, owner: chat_id}),
+      owner = await getOwner({telegram_id: chat_id}), started_at = date(fee.created_at)
 
-  message = report(data, 'FEE', lang)
+    const data = {
+      owner: owner.name, manager: manager.name, branch: fee.branch, name: fee.name, description: fee.description,
+      cars: fee.cars, cash: fee.cash, price: fee.price, created_at: started_at
+    }
 
-  if (lang === kb.language.uz) {
-    message += '\nTasdiqlaysizmi'
-    kbb = keyboard.options.confirmation.uz
-  } else if (lang === kb.language.ru) {
-    message = '\n Вы можете подтвердить?'
-    kbb = keyboard.options.confirmation.ru
+    message = report(data, 'FEE', lang)
+
+    if (lang === kb.language.uz) {
+      message += '\nTasdiqlaysizmi'
+      kbb = keyboard.options.confirmation.uz
+    } else if (lang === kb.language.ru) {
+      message = '\n Вы можете подтвердить?'
+      kbb = keyboard.options.confirmation.ru
+    }
+  } else if (parse === 'NaN') {
+    if (lang === kb.language.uz) {
+      message = "Iltimos to'g'ri raqam yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = "Пожалуйста, пришлите правильный номер"
+      kbb = keyboard.options.back.ru
+    }
   }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -637,16 +667,21 @@ const ownerFee = async (bot, chat_id, text, lang) => {
 
               type = text
             } else if (fee.step === 9) {
-              if (type === kb.options.owner.fee.settings.uz.name || type === kb.options.owner.fee.settings.ru.name)
-                await ofs4(bot, chat_id, fee._id, text, lang)
-              if (type === kb.options.owner.fee.settings.uz.description || type === kb.options.owner.fee.settings.ru.description)
-                await ofs6(bot, chat_id, fee._id, text, lang)
-              if (type === kb.options.owner.fee.settings.uz.image || type === kb.options.owner.fee.settings.ru.image)
-                await ofs8(bot, chat_id, fee._id, text, lang)
-              if (type === kb.options.owner.fee.settings.uz.cash || type === kb.options.owner.fee.settings.ru.cash)
-                await ofs10(bot, chat_id, fee._id, text, lang)
-              if (type === kb.options.owner.fee.settings.uz.price || type === kb.options.owner.fee.settings.ru.price)
-                await ofs12(bot, chat_id, fee._id, text, lang)
+              if (text === kb.options.back.uz || text === kb.options.back.ru) {
+                await updateFee({_id: fee._id}, {step: 8})
+                await ofs2(bot, chat_id, fee.name, lang, 'back')
+              } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+                if (type === kb.options.owner.fee.settings.uz.name || type === kb.options.owner.fee.settings.ru.name)
+                  await ofs4(bot, chat_id, fee._id, text, lang)
+                if (type === kb.options.owner.fee.settings.uz.description || type === kb.options.owner.fee.settings.ru.description)
+                  await ofs6(bot, chat_id, fee._id, text, lang)
+                if (type === kb.options.owner.fee.settings.uz.image || type === kb.options.owner.fee.settings.ru.image)
+                  await ofs8(bot, chat_id, fee._id, text, lang)
+                if (type === kb.options.owner.fee.settings.uz.cash || type === kb.options.owner.fee.settings.ru.cash)
+                  await ofs10(bot, chat_id, fee._id, text, lang)
+                if (type === kb.options.owner.fee.settings.uz.price || type === kb.options.owner.fee.settings.ru.price)
+                  await ofs12(bot, chat_id, fee._id, text, lang)
+              }
             }
           }
         }

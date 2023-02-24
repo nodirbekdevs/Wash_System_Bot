@@ -38,8 +38,8 @@ const mfs2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 }
 
 const managerFees = async (bot, chat_id, text, lang) => {
-  if (text === kb.manager.pages.uz.fees || text === kb.manager.pages.ru.fees) await mfs0(bot, chat_id, lang)
-  if (text === kb.manager.fees.uz.all || text === kb.manager.fees.ru.all) await mfs1(bot, chat_id, lang)
+  if (text === kb.manager.pages.uz.fees || text === kb.manager.pages.ru.fees) await mfs1(bot, chat_id, lang)
+  // if (text === kb.manager.fees.uz.all || text === kb.manager.fees.ru.all) await mfs1(bot, chat_id, lang)
 }
 
 module.exports = {managerFees, mfs2}

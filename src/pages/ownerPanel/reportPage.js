@@ -8,7 +8,7 @@ const {getWashes} = require('./../../controllers/washController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManager} = require('./../../controllers/managerController')
 const {getBranches, getBranch, updateBranch} = require('./../../controllers/branchController')
-const {branch_report_keyboard, get_washed_time, date_name, date} = require('./../../helpers/utils')
+const {branch_report_keyboard, get_washed_time, date_name, date, date_is_valid} = require('./../../helpers/utils')
 // const {} = require('./../../../uploads/reports/branches')
 
 let type
@@ -78,7 +78,7 @@ const ors1 = async (bot, chat_id, text, lang) => {
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ors2 = async (bot, chat_id, _id, text, lang) => {
+const ors2 = async (bot, chat_id, lang) => {
   await updateOwner({telegram_id: chat_id}, {step: 16})
 
   let message, kbb
@@ -97,72 +97,20 @@ const ors2 = async (bot, chat_id, _id, text, lang) => {
 const ors3 = async (bot, chat_id, _id, text, lang) => {
   let file_options, message, total = 0, file, kbb
 
-  const branch = await getBranch({_id})
+  const date = date_is_valid(text)
 
-  await updateOwner({telegram_id: chat_id}, {step: 15})
+  if (date) {
+    const branch = await getBranch({_id}), name = text.split('-')
 
-  file = join(__dirname, `./../../../uploads/reports/branches/${branch.name}/${text}_${branch.name}_daily.xlsx`)
+    await updateOwner({telegram_id: chat_id}, {step: 15})
 
-  if (existsSync(file)) {
+    file = join(__dirname, `./../../../uploads/reports/branches/${branch.name}/${name[2]}-${name[1]}-${name[0]}_${branch.name}_daily.xlsx`)
 
-    const sheet = excel.readFile(file, {cellDates: true}), wb = sheet.Sheets[0], data = excel.utils.sheet_to_json(wb)
+    if (existsSync(file)) {
 
-    for (let i = 0; i < data.length; i++) total += data[i].benefit
+      const sheet = excel.readFile(file, {cellDates: true}), wb = sheet.Sheets[0], data = excel.utils.sheet_to_json(wb)
 
-    file_options = {filename: file, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
-
-    if (lang === kb.language.uz) {
-      message = `Qidirilgan sanada avtomobil yuvishlardan ${total} foyda ko'rilgan`
-      kbb = keyboard.owner.reports.uz
-    } else if (lang === kb.language.ru) {
-      message = `${total} прибыли от автомоек на дату поиска`
-      kbb = keyboard.owner.reports.ru
-    }
-
-    await bot.sendDocument(chat_id, file, {}, file_options)
-
-    await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  } else if (!existsSync(file)) {
-    const washes = await getWashes({
-      manager: {$gt: 0}, branch: branch.name, status: 'washed', created_at: {
-        $gte: new Date(new Date(text).setHours(0o0, 0o0, 0o0)),
-        $lt: new Date(new Date(text).setHours(23, 59, 59))
-      }
-    })
-
-    if (washes.length > 0) {
-      let daily_washes = []
-
-      for (let i = 0; i < washes.length; i++) {
-        const wash = washes[i].toJSON(), manager = await getManager({telegram_id: wash.manager}),
-          washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at),
-          washed_at = date(wash.created_at)
-
-        delete wash._id
-        delete wash.washed_time
-        delete wash.date
-        delete wash.time
-        delete wash.step
-        delete wash.status
-        delete wash.__v
-
-        if (wash.client === 0) delete wash.client
-
-        wash.manager = manager.name
-        wash.washed_at = washed_time
-        wash.created_at = washed_at
-
-        total += wash.benefit
-
-        daily_washes.push(wash)
-      }
-
-      const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes),
-        filename = date_name()
-
-      excel.utils.book_append_sheet(new_workbook, data, filename)
-
-      excel.writeFile(new_workbook, file)
+      for (let i = 0; i < data.length; i++) total += data[i].benefit
 
       file_options = {filename: file, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
 
@@ -175,19 +123,89 @@ const ors3 = async (bot, chat_id, _id, text, lang) => {
       }
 
       await bot.sendDocument(chat_id, file, {}, file_options)
+    } else if (!existsSync(file)) {
+      const washes = await getWashes({
+        manager: {$gt: 0}, branch: branch.name, status: 'washed', created_at: {
+          $gte: new Date(new Date(text).setHours(0o0, 0o0, 0o0)),
+          $lt: new Date(new Date(text).setHours(23, 59, 59))
+        }
+      })
 
-      await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-    } else if (washes.length <= 0) {
-      const text = lang === kb.language.uz
-        ? "Bu vaqtdagi yuvigan avtomobillar avtomobillar hisoboti topilmadi"
-        : "В настоящее время отчет об автомойке не найден"
+      if (washes.length > 0) {
 
-      await bot.sendMessage(chat_id, text)
+        let daily_washes = []
+
+        for (let i = 0; i < washes.length; i++) {
+          const wash = washes[i].toJSON(), manager = await getManager({telegram_id: wash.manager}),
+            washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at),
+            washed_at = date(wash.created_at)
+
+          delete wash._id
+          delete wash.washed_time
+          delete wash.date
+          delete wash.time
+          delete wash.step
+          delete wash.status
+          delete wash.__v
+
+          if (wash.client === 0) delete wash.client
+
+          wash.manager = manager.name
+          wash.washed_at = washed_time
+          wash.created_at = washed_at
+
+          total += wash.benefit
+
+          daily_washes.push(wash)
+        }
+
+        const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes),
+          filename = date_name()
+
+        file = join(__dirname, `./../../../uploads/reports/branches/${branch.name}/${name[2]}-${name[1]}-${name[0]}_${branch.name}_searched.xlsx`)
+
+        excel.utils.book_append_sheet(new_workbook, data, filename)
+
+        excel.writeFile(new_workbook, file)
+
+        file_options = {
+          filename: file,
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+
+        if (lang === kb.language.uz) {
+          message = `Qidirilgan sanada avtomobil yuvishlardan ${total} foyda ko'rilgan`
+          kbb = keyboard.owner.reports.uz
+        } else if (lang === kb.language.ru) {
+          message = `${total} прибыли от автомоек на дату поиска`
+          kbb = keyboard.owner.reports.ru
+        }
+
+        await bot.sendDocument(chat_id, file, {}, file_options)
+      } else if (washes.length <= 0) {
+        if (lang === kb.language.uz) {
+          message = "Bu vaqtda avtomobil yuvilmagan shuning uchun hisobot yo'q"
+          kbb = keyboard.owner.reports.uz
+        } else if (lang === kb.language.ru) {
+          message = "Машину пока не мыли, так что нет отчета."
+          kbb = keyboard.owner.reports.ru
+        }
+      }
+    }
+  } else if (!date) {
+    if (lang === kb.language.uz) {
+      message = "Iltimos YIL-OY-KUN shu ko'rinishda yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = "Пожалуйста, отправьте ГОД-МЕСЯЦ-ДЕНЬ в этом формате"
+      kbb = keyboard.options.back.ru
     }
   }
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ors4 = async (bot, chat_id, _id, text, lang) => {
+const ors4 = async (bot, chat_id, lang) => {
   await updateOwner({telegram_id: chat_id}, {step: 16})
 
   let message, kbb
@@ -204,96 +222,130 @@ const ors4 = async (bot, chat_id, _id, text, lang) => {
 }
 
 const ors5 = async (bot, chat_id, _id, text, lang) => {
-  let message, total = 0
+  let message, total = 0, kbb
 
-  const branch = await getBranch({_id})
+  const reverse = text.split('#')
 
-  await updateOwner({telegram_id: chat_id}, {step: 15})
+  if (reverse.length === 2) {
+    const start = date_is_valid(reverse[0]), end = date_is_valid(reverse[1])
 
-  const reverse = text.split('#'), from = reverse[0].split('-'), to = reverse[1].split('-'),
-    from_date = `${from[2]}-${from[1]}-${from[0]}`, to_date = `${to[2]}-${to[1]}-${to[0]}`,
-    searched_date = `${from_date}_${to_date}`,
-    file = join(__dirname, `./../../../uploads/reports/branches/${branch.name}/${searched_date}_${branch.name}_searched.xlsx`)
+    if (start && end) {
+      const branch = await getBranch({_id})
 
-  if (existsSync(file)) {
+      await updateOwner({telegram_id: chat_id}, {step: 15})
 
-    const sheet = excel.readFile(file, {cellDates: true}), wb = sheet.Sheets[0], data = excel.utils.sheet_to_json(wb)
+      const from = reverse[0].split('-'), to = reverse[1].split('-'),
+        from_date = `${from[2]}-${from[1]}-${from[0]}`, to_date = `${to[2]}-${to[1]}-${to[0]}`,
+        searched_date = `${from_date}_${to_date}`,
+        file = join(__dirname, `./../../../uploads/reports/branches/${branch.name}/${searched_date}_${branch.name}_searched.xlsx`)
 
-    for (let i = 0; i < data.length; i++) total += data[i].toJSON.benefit
+      if (existsSync(file)) {
 
-    const file_options = {
-      filename: file,
-      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        const sheet = excel.readFile(file, {cellDates: true}), wb = sheet.Sheets[0],
+          data = excel.utils.sheet_to_json(wb)
+
+        for (let i = 0; i < data.length; i++) total += data[i].toJSON.benefit
+
+        const file_options = {
+          filename: file,
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+
+        if (lang === kb.language.uz) {
+          message = `Qidirilgan sanalr oralig'ida avtomobil yuvishlardan ${total} foyda ko'rilgan`
+          kbb = keyboard.owner.reports.uz
+        } else if (lang === kb.language.ru) {
+          message = `${total} прибыли от автомоек в указанном диапазоне дат`
+          kbb = keyboard.owner.reports.ru
+        }
+
+        await bot.sendDocument(chat_id, file, {}, file_options)
+      } else if (!existsSync(file)) {
+        const washes = await getWashes({
+          manager: {$gt: 0}, branch: branch.name, status: 'washed', created_at: {
+            $gte: new Date(new Date(reverse[0]).setHours(0o0, 0o0, 0o0)),
+            $lt: new Date(new Date(reverse[1]).setHours(23, 59, 59))
+          }
+        })
+
+        if (washes.length > 0) {
+          let daily_washes = []
+
+          for (let i = 0; i < washes.length; i++) {
+            const wash = washes[i].toJSON(), manager = await getManager({telegram_id: wash.manager}),
+              washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at),
+              washed_at = date(wash.created_at)
+
+            delete wash._id
+            delete wash.washed_time
+            delete wash.date
+            delete wash.time
+            delete wash.step
+            delete wash.status
+            delete wash.__v
+
+            if (wash.client === 0) delete wash.client
+
+            wash.manager = manager.name
+            wash.washed_at = washed_time
+            wash.created_at = washed_at
+
+            total += wash.benefit
+
+            daily_washes.push(wash)
+          }
+
+          const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes)
+
+          excel.utils.book_append_sheet(new_workbook, data, searched_date)
+
+          excel.writeFile(new_workbook, file)
+
+          const file_options = {
+            filename: file,
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          }
+
+          if (lang === kb.language.uz) {
+            message = `Qidirilgan sanalr oralig'ida avtomobil yuvishlardan ${total} foyda ko'rilgan`
+            kbb = keyboard.owner.reports.uz
+          } else if (lang === kb.language.ru) {
+            message = `${total} прибыли от автомоек в указанном диапазоне дат`
+            kbb = keyboard.owner.reports.ru
+          }
+
+          await bot.sendDocument(chat_id, file, {}, file_options)
+        } else if (washes.length <= 0) {
+          if (lang === kb.language.uz) {
+            message = "Bu vaqt oralig'ida mashina yuvilmagan shuning uchun hisobot yo'q"
+            kbb = keyboard.owner.reports.uz
+          } else if (lang === kb.language.ru) {
+            message = "Машину пока не мыли, так что нет отчета."
+            kbb = keyboard.owner.reports.ru
+          }
+        }
+      }
+    } else if (!start || !end) {
+      if (lang === kb.language.uz) {
+        message = "Iltimos YIL-OY-KUN#YIL-OY-KUN shu ko'rinishda yuboring"
+        kbb = keyboard.options.back.uz
+      } else if (lang === kb.language.ru) {
+        message = 'Пожалуйста, отправьте как ГОД-МЕСЯЦ-ДЕНЬ#ГОД-МЕСЯЦ-ДЕНЬ'
+        kbb = keyboard.options.back.ru
+      }
     }
-
-    message = lang === kb.language.uz
-      ? `Qidirilgan sanalr oralig'ida avtomobil yuvishlardan ${total} foyda ko'rilgan`
-      : `${total} прибыли от автомоек в указанном диапазоне дат`
-
-    await bot.sendDocument(chat_id, file, {}, file_options)
-
-    await bot.sendMessage(chat_id, message, {})
-  } else if (!existsSync(file)) {
-    const washes = await getWashes({
-      manager: {$gt: 0}, branch: branch.name, status: 'washed', created_at: {
-        $gte: new Date(new Date(reverse[0]).setHours(0o0, 0o0, 0o0)),
-        $lt: new Date(new Date(reverse[1]).setHours(23, 59, 59))
-      }
-    })
-
-    if (washes.length > 0) {
-      let daily_washes = []
-
-      for (let i = 0; i < washes.length; i++) {
-        const wash = washes[i].toJSON(), manager = await getManager({telegram_id: wash.manager}),
-          washed_time = get_washed_time(wash.washed_time.started_at, wash.washed_time.washed_at),
-          washed_at = date(wash.created_at)
-
-        delete wash._id
-        delete wash.washed_time
-        delete wash.date
-        delete wash.time
-        delete wash.step
-        delete wash.status
-        delete wash.__v
-
-        if (wash.client === 0) delete wash.client
-
-        wash.manager = manager.name
-        wash.washed_at = washed_time
-        wash.created_at = washed_at
-
-        total += wash.benefit
-
-        daily_washes.push(wash)
-      }
-
-      const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes)
-
-      excel.utils.book_append_sheet(new_workbook, data, searched_date)
-
-      excel.writeFile(new_workbook, file)
-
-      const file_options = {
-        filename: file,
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      }
-
-      message = lang === kb.language.uz
-        ? `Qidirilgan sanalr oralig'ida avtomobil yuvishlardan ${total} foyda ko'rilgan`
-        : `${total} прибыли от автомоек в указанном диапазоне дат`
-
-      await bot.sendDocument(chat_id, file, {}, file_options)
-
-      await bot.sendMessage(chat_id, message, {})
-    } else if (washes.length <= 0) {
-      const text = lang === kb.language.uz
-        ? "Bu vaqtdagi yuvigan avtomobillar avtomobillar hisoboti topilmadi"
-        : "В настоящее время отчет об автомойке не найден"
-
-      await bot.sendMessage(chat_id, text)
+  } else if (reverse.length !== 2) {
+    if (lang === kb.language.uz) {
+      message = "Iltimos YIL-OY-KUN#YIL-OY-KUN shu ko'rinishda yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = 'Пожалуйста, отправьте как ГОД-МЕСЯЦ-ДЕНЬ#ГОД-МЕСЯЦ-ДЕНЬ'
+      kbb = keyboard.options.back.ru
     }
   }
+
+
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ors6 = async (bot, chat_id, lang) => {
@@ -308,11 +360,9 @@ const ors7 = async (bot, chat_id, lang) => {
   await updateOwner({telegram_id: chat_id}, {step: 15})
 
   if (lang === kb.language.uz) {
-    message = "Qaysi vaqtdagi hisobotlarni ko'rmoqchisiz\n"
     message = "1 kunikmi yoki ko'proq kunlik hisobotlarni ko'rmoqchimisiz"
     kbb = keyboard.owner.reports.uz
   } else if (lang === kb.language.ru) {
-    message = "Хотите ли вы видеть отчеты за 1 день или более"
     message = "Хотите ли вы видеть отчеты за 1 день или более"
     kbb = keyboard.owner.reports.ru
   }
@@ -326,7 +376,7 @@ const ors8 = async (bot, chat_id, lang) => {
 }
 
 const ownerReports = async (bot, chat_id, text, lang) => {
-  const owner = await getOwner({telegram_id: chat_id}), branch = await getBranch({owner: chat_id, status: 'process'})
+  const owner = await getOwner({telegram_id: chat_id}), branch = await getBranch({owner: chat_id, situation: 'report'})
 
   try {
     if (text === kb.owner.pages.uz.reports || text === kb.owner.pages.ru.reports) await ors0(bot, chat_id, lang)
@@ -339,15 +389,20 @@ const ownerReports = async (bot, chat_id, text, lang) => {
 
       if (owner.step === 15) {
         if (text === kb.options.back.uz || text === kb.options.back.ru) await ors6(bot, chat_id, lang)
-        if (text === kb.owner.reports.uz.one_day || text === kb.owner.reports.ru.one_day) await ors2(bot, chat_id, branch._id, text, lang)
-        if (text === kb.owner.reports.uz.other_days || text === kb.owner.reports.ru.other_days) await ors4(bot, chat_id, branch._id, text, lang)
-        type = text
+
+        if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+          if (text === kb.owner.reports.uz.one_day || text === kb.owner.reports.ru.one_day) await ors2(bot, chat_id, lang)
+          if (text === kb.owner.reports.uz.other_days || text === kb.owner.reports.ru.other_days) await ors4(bot, chat_id, lang)
+          type = text
+        }
       }
 
       if (owner.step === 16) {
         if (text === kb.options.back.uz || text === kb.options.back.ru) await ors7(bot, chat_id, lang)
-        if (type === kb.owner.reports.uz.one_day || type === kb.owner.reports.ru.one_day) await ors3(bot, chat_id, branch._id, text, lang)
-        if (type === kb.owner.reports.uz.other_days || type === kb.owner.reports.ru.other_days) await ors5(bot, chat_id, branch._id, text, lang)
+        else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+          if (type === kb.owner.reports.uz.one_day || type === kb.owner.reports.ru.one_day) await ors3(bot, chat_id, branch._id, text, lang)
+          if (type === kb.owner.reports.uz.other_days || type === kb.owner.reports.ru.other_days) await ors5(bot, chat_id, branch._id, text, lang)
+        }
       }
     }
   } catch (e) {

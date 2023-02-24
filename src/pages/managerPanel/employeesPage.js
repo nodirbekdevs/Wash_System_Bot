@@ -4,7 +4,7 @@ const {genSalt, hash} = require('bcrypt')
 const {getEmployees, getEmployee, makeEmployee, updateEmployee, deleteEmployee, countEmployees} = require('./../../controllers/employeeController')
 const {getManager} = require('./../../controllers/managerController')
 const {getBranch} = require('./../../controllers/branchController')
-const {report, date, employee_pagination, employee_attendance} = require('./../../helpers/utils')
+const {report, date, employee_pagination, employee_attendance, parse_number} = require('./../../helpers/utils')
 
 let employee_id
 
@@ -157,16 +157,17 @@ const mes4 = async (bot, chat_id, lang) => {
 }
 
 const mes5 = async (bot, chat_id, _id, text, lang) => {
-  let message, kbb
+  let message
 
-  await updateEmployee({_id}, {telegram_id: parseInt(text), step: 1})
+  const parse = parse_number(text),
+    kbb = (lang === kb.language.uz) ? keyboard.options.back.uz : keyboard.options.back.ru
 
-  if (lang === kb.language.uz) {
-    message = "Xodimni ismini kiriting."
-    kbb = keyboard.options.back.uz
-  } else if (lang === kb.language.ru) {
-    message = "Введите имя сотрудника."
-    kbb = keyboard.options.back.ru
+  if (parse !== 'NaN') {
+    await updateEmployee({_id}, {telegram_id: parseInt(text), step: 1})
+
+    message = (lang === kb.language.uz) ? "Xodimni ismini kiriting." : "Введите имя сотрудника."
+  } else if (parse === 'NaN') {
+    message = (lang === kb.language.uz) ? "Iltimos to'g'ri raqam yuboring" : "Пожалуйста, пришлите правильный номер"
   }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
@@ -189,12 +190,25 @@ const mes6 = async (bot, chat_id, _id, text, lang) => {
 }
 
 const mes7 = async (bot, chat_id, _id, text, lang) => {
-  await updateEmployee({_id}, {number: text, step: 3})
+  let message, kbb
 
-  const kbb = keyboard.language, message = (lang === kb.language.uz)
-    ? "Xodimni platformada ishlatadigan tilni kiriting."
-    : "Введите язык, который сотрудник использует на платформе."
+  const parse = parse_number(text)
 
+  if (parse !== 'NaN') {
+    await updateEmployee({_id}, {number: text, step: 3})
+
+    message = (lang === kb.language.uz) ? "Xodimni platformada ishlatadigan tilni kiriting." : "Введите язык, который сотрудник использует на платформе."
+
+    kbb = keyboard.language
+  } else if (parse === 'NaN') {
+    if (lang === kb.language.uz) {
+      message = "Iltimos to'g'ri raqam yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      message = "Пожалуйста, пришлите правильный номер"
+      kbb = keyboard.options.back.ru
+    }
+  }
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -259,7 +273,8 @@ const mes9 = async (bot, chat_id, _id, text, lang) => {
 
 const mes10 = async (bot, chat_id, lang) => {
   const manager = await getManager({telegram_id: chat_id}),
-    employees = await getEmployees({manager: manager.telegram_id, branch: manager.branch, status: {$in: ["active", "inactive"]}
+    employees = await getEmployees({
+      manager: manager.telegram_id, branch: manager.branch, status: {$in: ["active", "inactive"]}
     })
 
   const report = employee_attendance(employees, lang)

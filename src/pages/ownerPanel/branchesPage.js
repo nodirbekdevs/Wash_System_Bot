@@ -238,6 +238,7 @@ const obs6 = async (bot, chat_id, _id, text, lang) => {
   await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
+
 const obs7 = async (bot, chat_id, _id, lang) => {
   let message, kbb
 
@@ -658,14 +659,19 @@ const ownerBranch = async (bot, chat_id, text, lang) => {
 
               type = text
             } else if (branch.step === 7) {
-              if (type === kb.options.owner.branch.settings.uz.name || type === kb.options.owner.branch.settings.ru.name)
-                await obs4(bot, chat_id, branch._id, text, lang)
-              if (type === kb.options.owner.branch.settings.uz.image || type === kb.options.owner.branch.settings.ru.image)
-                await obs6(bot, chat_id, branch._id, text, lang)
-              if (type === kb.options.owner.branch.settings.uz.manager || type === kb.options.owner.branch.settings.ru.manager)
-                await obs8(bot, chat_id, branch._id, text, lang)
-              if (type === kb.options.owner.branch.settings.uz.location || type === kb.options.owner.branch.settings.ru.location)
-                await obs10(bot, chat_id, branch._id, text, lang)
+              if (text === kb.options.back.uz || text === kb.options.back.ru) {
+                await obs2(bot, chat_id, branch.name, lang, 'back')
+              } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+                if (type === kb.options.owner.branch.settings.uz.name || type === kb.options.owner.branch.settings.ru.name)
+                  await obs4(bot, chat_id, branch._id, text, lang)
+                if (type === kb.options.owner.branch.settings.uz.image || type === kb.options.owner.branch.settings.ru.image)
+                  await obs6(bot, chat_id, branch._id, text, lang)
+                if (type === kb.options.owner.branch.settings.uz.manager || type === kb.options.owner.branch.settings.ru.manager)
+                  await obs8(bot, chat_id, branch._id, text, lang)
+                if (type === kb.options.owner.branch.settings.uz.location || type === kb.options.owner.branch.settings.ru.location)
+                  await obs10(bot, chat_id, branch._id, text, lang)
+              }
+
             }
           }
         }

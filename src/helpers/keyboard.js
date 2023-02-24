@@ -176,16 +176,16 @@ module.exports = {
       ]
     },
 
-    fees: {
-      uz: [
-        [kb.manager.fees.uz.all, kb.manager.fees.uz.edit],
-        [kb.main.uz]
-      ],
-      ru: [
-        [kb.manager.fees.ru.all, kb.manager.fees.ru.edit],
-        [kb.main.ru]
-      ]
-    }
+    // fees: {
+    //   uz: [
+    //     [kb.manager.fees.uz.all, kb.manager.fees.uz.edit],
+    //     [kb.main.uz]
+    //   ],
+    //   ru: [
+    //     [kb.manager.fees.ru.all, kb.manager.fees.ru.edit],
+    //     [kb.main.ru]
+    //   ]
+    // }
   },
 
   employee: {
@@ -292,29 +292,6 @@ module.exports = {
       ru: [[kb.options.confirmation.ru, kb.options.not_to_confirmation.ru]]
     },
 
-
-    allow: {
-      uz: [
-        [kb.options.allow.uz.yes, kb.options.allow.uz.no]
-      ],
-
-      ru: [
-        [kb.options.allow.ru.yes, kb.options.allow.ru.no]
-      ]
-    },
-
-    order: {
-      uz: [
-        [kb.options.order.uz.order, kb.options.order.uz.clear],
-        [kb.options.order.uz.edit, kb.main.uz]
-      ],
-
-      ru: [
-        [kb.options.order.ru.order, kb.options.order.ru.clear],
-        [kb.options.order.ru.edit, kb.main.ru]
-      ]
-    },
-
     feedback: {
       uz: [
         [kb.options.feedback.uz.good, kb.options.feedback.uz.bad],
@@ -327,50 +304,13 @@ module.exports = {
       ]
     },
 
-    situation: {
-      uz: [
-        [kb.options.situation.uz.increase, kb.options.situation.uz.decrease, kb.options.situation.uz.destroy],
-        [kb.options.back.uz]
-      ],
-
-      ru: [
-        [kb.options.situation.ru.increase, kb.options.situation.ru.decrease, kb.options.situation.ru.destroy],
-        [kb.options.back.ru]
-      ]
-    },
-
-    condition: {
-      uz: [
-        [kb.options.condition.uz.true],
-        [kb.options.condition.uz.false]
-      ],
-
-      ru: [
-        [kb.options.condition.ru.true],
-        [kb.options.condition.ru.false]
-      ]
-    },
-
     back: {
       uz: [[kb.options.back.uz]],
       ru: [[kb.options.back.ru]],
     },
 
-
-    confirmation_admin: [
-      [kb.options.confirmation.uz, kb.options.not_to_confirmation.uz]
-    ],
     confirmation_advertising: [
       [kb.options.confirmation_advertising.yes, kb.options.confirmation_advertising.no]
     ],
-
-    task: [
-      [kb.options.task.baker, kb.options.task.dough_maker],
-      [kb.options.back.uz, kb.options.task.supplier]
-    ],
-
-    back_employee: [[kb.options.back.ru]],
-
-    delivered: [[kb.options.delivered]]
   }
 }

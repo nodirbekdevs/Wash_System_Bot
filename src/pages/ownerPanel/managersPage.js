@@ -6,7 +6,7 @@ const {getManagers, getManager, makeManager, updateManager, deleteManager, count
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {updateManyEmployees} = require('./../../controllers/employeeController')
 const {updateManyFees} = require('./../../controllers/feeController')
-const {universal_keyboard, report} = require('./../../helpers/utils')
+const {universal_keyboard, report, parse_number} = require('./../../helpers/utils')
 
 let type, manager_id
 
@@ -48,13 +48,11 @@ const oms2 = async (bot, chat_id, text, lang, kw) => {
   if (manager) {
     await updateOwner({telegram_id: chat_id}, {step: 11})
 
-    console.log(manager)
-
     message = report(manager, 'MANAGER', lang)
 
     kbb = (lang === kb.language.uz) ? keyboard.options.owner.manager.settings.uz : keyboard.options.owner.manager.settings.ru
 
-    await updateManager({_id: manager._id}, {step: 9, status: 'process'})
+    await updateManager({_id: manager._id}, {step: 8, situation: 'edit'})
 
     await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
   } else if (!manager && !kw) {
@@ -81,7 +79,7 @@ const oms3 = async (bot, chat_id, _id, lang) => {
     kbb = keyboard.options.back.ru
   }
 
-  await updateManager({_id}, {step: 10})
+  await updateManager({_id}, {step: 9})
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -89,7 +87,7 @@ const oms3 = async (bot, chat_id, _id, lang) => {
 const oms4 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
-  await updateManager({_id}, {name: text, step: 9})
+  await updateManager({_id}, {name: text, step: 8})
 
   const manager = await getManager({_id})
 
@@ -119,35 +117,45 @@ const oms5 = async (bot, chat_id, _id, lang) => {
     kbb = keyboard.options.back.uz
   }
 
-  await updateManager({_id}, {step: 10})
+  await updateManager({_id}, {step: 9})
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const oms6 = async (bot, chat_id, _id, text, lang) => {
-  let clause, kbb, manager
+  let clause, kbb
 
-  manager = await getManager({_id})
+  const parse = parse_number(text)
 
-  const salt = await genSalt(), password = await hash(manager.number, salt)
+  if (parse !== 'NaN') {
+    const salt = await genSalt(), password = await hash(text, salt)
 
-  await updateManager({_id}, {password, number: text, step: 9})
+    await updateManager({_id}, {password, number: text, step: 8})
 
-  manager = await getManager({_id})
+    const manager = await getManager({_id})
 
-  const message = report(manager, 'MANAGER', lang)
+    const message = report(manager, 'MANAGER', lang)
 
-  if (lang === kb.language.uz) {
-    clause = "Menejer telefon raqami muvaffaqiyatli o'zgartirildi"
-    kbb = keyboard.options.owner.manager.settings.uz
-  } else if (lang === kb.language.ru) {
-    clause = "Номер телефон менеджера успешно изменено"
-    kbb = keyboard.options.owner.manager.settings.ru
+    if (lang === kb.language.uz) {
+      clause = "Menejer telefon raqami muvaffaqiyatli o'zgartirildi"
+      kbb = keyboard.options.owner.manager.settings.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Номер телефон менеджера успешно изменено"
+      kbb = keyboard.options.owner.manager.settings.ru
+    }
+
+    await bot.sendMessage(chat_id, message)
+  } else if (parse === 'NaN') {
+    if (lang === kb.language.uz) {
+      clause = "Iltimos to'g'ri raqam yuboring"
+      kbb = keyboard.options.back.uz
+    } else if (lang === kb.language.ru) {
+      clause = "Пожалуйста, пришлите правильный номер"
+      kbb = keyboard.options.back.ru
+    }
   }
 
   await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-
-  await bot.sendMessage(chat_id, message)
 }
 
 const oms7 = async (bot, chat_id, _id, lang) => {
@@ -161,7 +169,7 @@ const oms7 = async (bot, chat_id, _id, lang) => {
     kbb = keyboard.options.back.uz
   }
 
-  await updateBranch({_id}, {step: 10})
+  await updateBranch({_id}, {step: 9})
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -169,7 +177,7 @@ const oms7 = async (bot, chat_id, _id, lang) => {
 const oms8 = async (bot, chat_id, _id, text, lang) => {
   let clause, kbb
 
-  await updateManager({_id}, {username: text, step: 9})
+  await updateManager({_id}, {username: text, step: 8})
 
   const manager = await getManager({_id}), message = report(manager, 'MANAGER', lang)
 
@@ -192,7 +200,7 @@ const oms9 = async (bot, chat_id, _id, lang) => {
   const branches = await getBranches({owner: chat_id})
 
   if (branches.length > 0) {
-    await updateManager({_id}, {step: 10})
+    await updateManager({_id}, {step: 9})
 
     kbb = universal_keyboard(branches, lang)
 
@@ -231,7 +239,11 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
     }
 
     if (branch.manager) {
-      await updateManager({telegram_id: branch.manager, owner: branch.owner}, {branch: '', total_employees: 0, status: 'active'})
+      await updateManager({telegram_id: branch.manager, owner: branch.owner}, {
+        branch: '',
+        total_employees: 0,
+        status: 'active'
+      })
     }
 
     if (manager.total_employees > 0) {
@@ -248,13 +260,7 @@ const oms10 = async (bot, chat_id, _id, text, lang) => {
     await updateBranch({_id: branch._id}, {manager: manager.telegram_id, status: 'provided'})
   }
 
-  await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees})
-
-  manager.branch = branch.name
-  manager.total_employees = branch.total_employees
-  manager.step = 9
-
-  await manager.save()
+  await updateManager({_id: manager._id}, {branch: branch.name, total_employees: branch.total_employees, step: 8})
 
   const message = report(manager, 'MANAGER', lang)
 
@@ -290,17 +296,19 @@ const oms11 = async (bot, chat_id, lang) => {
 }
 
 const oms12 = async (bot, chat_id, _id, text, lang) => {
-  let message, kbb
+  let message
 
-  await updateManager({_id}, {telegram_id: parseInt(text), step: 1})
+  const kbb = lang === kb.language.uz ? keyboard.options.back.uz : keyboard.options.back.ru,
+    parse = parse_number(text)
 
-  if (lang === kb.language.uz) {
-    message = 'Menejer ismini kiriting'
-    kbb = keyboard.options.back.uz
-  } else if (lang === kb.language.ru) {
-    message = 'Введите имя менеджера'
-    kbb = keyboard.options.back.ru
+  if (parse !== 'NaN') {
+    await updateManager({_id}, {telegram_id: parseInt(text), step: 1})
+
+    message = (lang === kb.language.uz) ? 'Menejer ismini kiriting' : 'Введите имя менеджера'
+  } else if (parse === 'NaN') {
+    message = (lang === kb.language.uz) ? "Iltimos to'g'ri raqam yuboring" : "Пожалуйста, пришлите правильный номер"
   }
+
 
   await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
@@ -322,35 +330,41 @@ const oms13 = async (bot, chat_id, _id, text, lang) => {
 }
 
 const oms14 = async (bot, chat_id, _id, text, lang) => {
-  let message, obj, kbb
+  let message, obj, kbb = lang === kb.language.uz ? keyboard.options.back.uz : keyboard.options.back.ru
 
-  await updateManager({_id}, {number: text, step: 3})
 
-  const branches = await getBranches({owner: chat_id, status: 'active'})
+  const parse = parse_number(text)
 
-  if (branches.length > 0) {
-    kbb = universal_keyboard(branches, lang)
+  if (parse !== 'NaN') {
+    await updateManager({_id}, {number: text, step: 3})
 
-    if (lang === kb.language.uz) {
-      message = 'Menejerga filial tanlang'
-      obj = [kb.options.skipping.uz]
-      kbb.splice(-1, 0, obj)
-    } else if (lang === kb.language.ru) {
-      message = "Выберите филиал к менеджеру"
-      obj = [kb.options.skipping.ru]
-      kbb.splice(-1, 0, obj)
+    const branches = await getBranches({owner: chat_id, status: 'active'})
+
+    if (branches.length > 0) {
+      kbb = universal_keyboard(branches, lang)
+
+      if (lang === kb.language.uz) {
+        message = 'Menejerga filial tanlang'
+        obj = [kb.options.skipping.uz]
+        kbb.splice(-1, 0, obj)
+      } else if (lang === kb.language.ru) {
+        message = "Выберите филиал к менеджеру"
+        obj = [kb.options.skipping.ru]
+        kbb.splice(-1, 0, obj)
+      }
+
+      await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
+    } else if (branches <= 0) {
+      await oms15(bot, chat_id, _id, lang)
     }
+  } else if (parse === 'NaN') {
+    message = (lang === kb.language.uz) ? "Iltimos to'g'ri raqam yuboring" : "Пожалуйста, пришлите правильный номер"
 
     await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
-  } else if (branches <= 0) {
-    await oms15(bot, chat_id, _id, lang)
   }
 }
 
 const oms15 = async (bot, chat_id, _id, lang) => {
-
-  console.log("Kevotti1")
-
   await updateManager({_id}, {step: 4})
 
   const message = (lang === kb.language.uz) ? 'Menejerni platformadagi tilini kiriting' : 'Введите язык платформы менеджера',
@@ -360,11 +374,7 @@ const oms15 = async (bot, chat_id, _id, lang) => {
 }
 
 const oms16 = async (bot, chat_id, _id, text, lang) => {
-  console.log("Kevotti2")
-
   await updateManager({_id}, {branch: text, step: 4})
-
-  console.log(lang)
 
   const message = (lang === kb.language.uz) ? 'Menejerni platformadagi tilini kiriting' : 'Введите язык платформы менеджера'
 
@@ -377,8 +387,6 @@ const oms17 = async (bot, chat_id, _id, text, lang) => {
   await updateManager({_id}, {lang: text, step: 5})
 
   const manager = await getManager({_id})
-
-  console.log(manager.branch)
 
   message = report(manager, 'MANAGER', lang)
 
@@ -399,7 +407,7 @@ const oms18 = async (bot, chat_id, _id, text, lang) => {
   manager = await getManager({_id})
 
   const branch = await getBranch({owner: manager.owner, name: manager.branch}),
-  kbb = (lang === kb.language.uz) ? keyboard.owner.managers.uz : keyboard.owner.managers.ru
+    kbb = (lang === kb.language.uz) ? keyboard.owner.managers.uz : keyboard.owner.managers.ru
 
   if (text === kb.options.confirmation.uz || text === kb.options.confirmation.ru) {
     const salt = await genSalt(), password = await hash(manager.number, salt)
@@ -447,6 +455,11 @@ const oms18 = async (bot, chat_id, _id, text, lang) => {
 
 const oms19 = async (bot, chat_id, _id, lang) => {
   await deleteManager({_id})
+
+  const message = (lang === kb.language.uz) ? "Menejer qo'shilmadi" : "Менеджер не добавлено"
+
+  await bot.sendMessage(chat_id, message)
+
   await oms0(bot, chat_id, lang)
 }
 
@@ -492,15 +505,15 @@ const ownerManager = async (bot, chat_id, text, lang) => {
     }
 
     if (owner.step === 11) {
-      const manager = await getManager({owner: owner.telegram_id, status: 'process'})
+      const manager = await getManager({owner: owner.telegram_id, situation: 'edit'})
 
       if (text === kb.options.back.uz || text === kb.options.back.ru) {
         const data = manager.branch ? {step: 6, status: 'occupied'} : {step: 6, status: 'active'}
-        await updateManager({owner: owner.telegram_id, step: 9, status: 'process'}, data)
+        await updateManager({owner: owner.telegram_id, step: 8, status: 'process'}, data)
         await updateOwner({telegram_id: chat_id}, {step: 10})
         await oms1(bot, chat_id, lang)
       } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
-        if (manager.step === 9) {
+        if (manager.step === 8) {
           if (text === kb.options.owner.manager.settings.uz.name || text === kb.options.owner.manager.settings.ru.name)
             await oms3(bot, chat_id, manager._id, lang)
           if (text === kb.options.owner.manager.settings.uz.number || text === kb.options.owner.manager.settings.ru.number)
@@ -511,20 +524,22 @@ const ownerManager = async (bot, chat_id, text, lang) => {
             await oms9(bot, chat_id, manager._id, lang)
 
           type = text
-        } else if (manager.step === 10) {
-          if (type === kb.options.owner.manager.settings.uz.name || type === kb.options.owner.manager.settings.ru.name)
-            await oms4(bot, chat_id, manager._id, text, lang)
-          if (type === kb.options.owner.manager.settings.uz.number || type === kb.options.owner.manager.settings.ru.number)
-            await oms6(bot, chat_id, manager._id, text, lang)
-          if (type === kb.options.owner.manager.settings.uz.username || type === kb.options.owner.manager.settings.ru.username)
-            await oms8(bot, chat_id, manager._id, text, lang)
-          if (type === kb.options.owner.manager.settings.uz.branch || type === kb.options.owner.manager.settings.ru.branch)
-            await oms10(bot, chat_id, manager._id, text, lang)
+        } else if (manager.step === 9) {
+          if (text === kb.options.back.uz || text === kb.options.back.ru) {
+            await oms2(bot, chat_id, manager.name, lang, 'back')
+          } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+            if (type === kb.options.owner.manager.settings.uz.name || type === kb.options.owner.manager.settings.ru.name)
+              await oms4(bot, chat_id, manager._id, text, lang)
+            if (type === kb.options.owner.manager.settings.uz.number || type === kb.options.owner.manager.settings.ru.number)
+              await oms6(bot, chat_id, manager._id, text, lang)
+            if (type === kb.options.owner.manager.settings.uz.username || type === kb.options.owner.manager.settings.ru.username)
+              await oms8(bot, chat_id, manager._id, text, lang)
+            if (type === kb.options.owner.manager.settings.uz.branch || type === kb.options.owner.manager.settings.ru.branch)
+              await oms10(bot, chat_id, manager._id, text, lang)
+          }
         }
       }
     }
-
-
   } catch
     (e) {
     console.log(e)

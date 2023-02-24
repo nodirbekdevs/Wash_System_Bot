@@ -2,7 +2,7 @@ const keyboard = require('./../../helpers/keyboard')
 const kb = require('./../../helpers/keyboard-buttons')
 const {genSalt, hash} = require('bcrypt')
 const {getOwner, updateOwner} = require('../../controllers/ownerController')
-const {report} = require('./../../helpers/utils')
+const {report, parse_number} = require('./../../helpers/utils')
 
 let type
 
@@ -27,13 +27,19 @@ const ost0 = async (bot, owner, lang) => {
 }
 
 const ost1 = async (bot, chat_id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan ismingizni kiriting"
-    : "Введите имя, которое хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan ismingizni kiriting"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите имя, которое хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateOwner({telegram_id: chat_id}, {step: 7})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ost2 = async (bot, chat_id, text, lang) => {
@@ -57,56 +63,78 @@ const ost2 = async (bot, chat_id, text, lang) => {
 }
 
 const ost3 = async (bot, chat_id, lang) => {
-  const message = (lang === kb.language.uz)
-    ? "O'zgartirmoqchi bo'lgan raqamingizni kiriting"
-    : "Введите номер, который хотите изменить"
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "O'zgartirmoqchi bo'lgan raqamingizni kiriting"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Введите номер, который хотите изменить"
+    kbb = keyboard.options.back.ru
+  }
 
   await updateOwner({telegram_id: chat_id}, {step: 7})
 
-  await bot.sendMessage(chat_id, message)
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
 const ost4 = async (bot, chat_id, text, lang) => {
   let clause, kbb
 
-  const salt = await genSalt(), password = await hash(text, salt)
+  const parse = parse_number(text)
 
-  await updateOwner({telegram_id: chat_id}, {password, number: text, step: 6})
+  if (parse !== 'NaN') {
+    const salt = await genSalt(), password = await hash(text, salt)
 
-  const owner = await getOwner({telegram_id: chat_id}), message = report(owner, 'OWNER', lang)
+    await updateOwner({telegram_id: chat_id}, {password, number: text, step: 6})
 
-  if (lang === kb.language.uz) {
-    clause = "Raqamingiz muvaffaqiyatli o'zgartirildi"
-    kbb = keyboard.owner.settings.uz
-  } else if (lang === kb.language.ru) {
-    clause = "Ваш номер успешно изменен"
-    kbb = keyboard.owner.settings.ru
+    const owner = await getOwner({telegram_id: chat_id}), message = report(owner, 'OWNER', lang)
+
+    if (lang === kb.language.uz) {
+      clause = "Raqamingiz muvaffaqiyatli o'zgartirildi"
+      kbb = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.settings.uz, one_time_keyboard: true}}
+    } else if (lang === kb.language.ru) {
+      clause = "Ваш номер успешно изменен"
+      kbb = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.settings.ru, one_time_keyboard: true}}
+    }
+
+    await bot.sendMessage(chat_id, message)
+  } else if (parse === 'NaN') {
+    clause = (lang === kb.language.uz) ? "Iltimos to'g'ri raqam yuboring" : "Пожалуйста, пришлите правильный номер"
+
+    kbb = {}
   }
 
-  await bot.sendMessage(chat_id, message)
-
-  await bot.sendMessage(chat_id, clause, {reply_markup: {resize_keyboard: true, keyboard: kbb, one_time_keyboard: true}})
+  await bot.sendMessage(chat_id, clause, kbb)
 }
 
 const ost5 = async (bot, chat_id, lang) => {
+  let message, kbb
+
+  if (lang === kb.language.uz) {
+    message = "Qaysi tilni tanlaysiz"
+    kbb = keyboard.options.back.uz
+  } else if (lang === kb.language.ru) {
+    message = "Какой язык вы выбираете"
+    kbb = keyboard.options.back.ru
+  }
+
   await updateOwner({telegram_id: chat_id}, {step: 7})
 
-  const message = (lang === kb.language.uz) ? "Qaysi tilni tanlaysiz" : "Какой язык вы выбираете"
-
-  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: keyboard.language}})
+  await bot.sendMessage(chat_id, message, {reply_markup: {resize_keyboard: true, keyboard: kbb}})
 }
 
-const ost6 = async (bot, chat_id, text, lang) => {
+const ost6 = async (bot, chat_id, text) => {
   let message, kbb
 
   await updateOwner({telegram_id: chat_id}, {lang: text, step: 6})
 
-  const owner = await getOwner({telegram_id: chat_id}), report = report(owner, 'OWNER', lang)
+  const owner = await getOwner({telegram_id: chat_id}), report = report(owner, 'OWNER', owner.lang)
 
-  if (lang === kb.language.uz) {
+  if (owner.lang === kb.language.uz) {
     message = "Platformadagi tilingiz muvaffaqiyatli o'zgartirildi"
     kbb = keyboard.owner.settings.uz
-  } else if (lang === kb.language.ru) {
+  } else if (owner. lang === kb.language.ru) {
     message = "Язык вашей платформы успешно изменен"
     kbb = keyboard.owner.settings.ru
   }
@@ -127,9 +155,13 @@ const ownerSettings = async (bot, owner, text, lang) => {
       if (text === kb.owner.settings.uz.language || text === kb.owner.settings.ru.language) await ost5(bot, owner.telegram_id, lang)
       type = text
     } else if (owner.step === 7) {
-      if (type === kb.owner.settings.uz.name || type === kb.owner.settings.ru.name) await ost2(bot, owner.telegram_id, text, lang)
-      if (type === kb.owner.settings.uz.number || type === kb.owner.settings.ru.number) await ost4(bot, owner.telegram_id, text, lang)
-      if (type === kb.owner.settings.uz.language || type === kb.owner.settings.ru.language) await ost6(bot, owner.telegram_id, text, lang)
+      if (text === kb.options.back.uz || text === kb.options.back.ru) {
+        await ost0(bot, owner, lang)
+      } else if (text !== kb.options.back.uz || text !== kb.options.back.ru) {
+        if (type === kb.owner.settings.uz.name || type === kb.owner.settings.ru.name) await ost2(bot, owner.telegram_id, text, lang)
+        if (type === kb.owner.settings.uz.number || type === kb.owner.settings.ru.number) await ost4(bot, owner.telegram_id, text, lang)
+        if (type === kb.owner.settings.uz.language || type === kb.owner.settings.ru.language) await ost6(bot, owner.telegram_id, text)
+      }
     }
   } catch (e) {
     console.log(e)
