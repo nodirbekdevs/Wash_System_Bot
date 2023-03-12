@@ -479,7 +479,79 @@ const employee_pagination = async (page, limit, query, lang) => {
 
   return {text, kbs}
 }
-const employee_wash_pagination = async (page, limit, query, kw, lang) => {
+const owner_employee_pagination = async (page, limit, query, type, lang) => {
+  let offset = limit * (page - 1), text, clause, kbs, extra
+
+  const employees = await getEmployeePagination(query, offset, limit), all_employees = await getEmployees(query)
+
+  if (employees.length > 0) {
+    text = (lang === kb.language.uz)
+      ? `<b>Hozirgi: ${offset + 1}-${employees.length + offset}, Jami:${all_employees.length}</b>\n\n`
+      : `<b>Текущий: ${offset + 1}-${employees.length + offset}, Общий:${all_employees.length}</b>\n\n`
+
+    let kbb = [], arr = [], obj
+
+    for (let i = 0; i < employees.length; i++) {
+      const employee = employees[i]
+
+      if (type === 'ALL') {
+        obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'e_all', id: employee._id})}
+      } else if (type === 'ACTIVE') {
+        obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'e_act', id: employee._id})}
+      } else if (type === 'INACTIVE') {
+        obj = {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'e_inact', id: employee._id})}
+      }
+
+      arr.push(obj)
+
+      if (arr.length % 6 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
+
+      if (employee.is_idler) {
+        clause = (lang === kb.language.uz) ? "Ishlayapti" : "Работает"
+      } else if (!employee.is_idler) {
+        clause = (lang === kb.language.uz) ? "Ishlamayapti" : "Не работает"
+      }
+
+      text += `<b>${i + 1}.</b> ${employee.name} - ${employee.number} - ${employee.total_washes} - ${clause}\n`
+    }
+
+    if (arr.length !== 0) kbb.push(arr)
+
+    if (type === 'ALL') extra = 'all_e'
+    if (type === 'ACTIVE') extra = 'act_e'
+    if (type === 'INACTIVE') extra = 'inact_e'
+
+
+    const inline_keyboard = [
+      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#${extra}#${page - 1}` : 'none', id: ''})},
+      {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+      {
+        text: ` ➡️`,
+        callback_data: JSON.stringify({
+          phrase: employees.length + offset !== all_employees.length ? `right#${extra}#${page + 1}` : 'none', id: ''
+        })
+      }
+    ]
+
+    kbb.push(inline_keyboard)
+
+    kbs = {reply_markup: {inline_keyboard: kbb}}
+  } else if (employees.length <= 0) {
+    if (lang === kb.language.uz) {
+      text = "Hozircha hodimlar qo'shimagan yoki hali ishga kelmagan"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.employees.uz}}
+    } else if (lang === kb.language.ru) {
+      text = 'Нет сотрудников, которые были добавлены или начаты еще'
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.employees.ru}}
+    }
+  }
+
+  return {text, kbs}
+}
+const employee_wash_pagination = async (page, limit, query, lang) => {
   let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, wash
 
   const washes = await getWashPagination(query, offset, limit), all_washes = await getWashes(query)
@@ -526,14 +598,10 @@ const employee_wash_pagination = async (page, limit, query, kw, lang) => {
   } else {
     if (lang === kb.language.uz) {
       text = 'Hali yuvishlar mavjud emas'
-      kbs = kw === 'MANAGER'
-        ? {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.washes.uz}}
-        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.uz}}
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.uz}}
     } else if (lang === kb.language.ru) {
       text = "Автомоек пока нет"
-      kbs = kw === 'MANAGER'
-        ? {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.washes.ru}}
-        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.ru}}
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.ru}}
     }
   }
 
@@ -774,10 +842,10 @@ const get_washed_time = (start, end) => {
 
   const hour = time.getHours(), minute = time.getMinutes(), second = time.getSeconds()
 
-  return `${hour - 6}:${minute}:${second}`
+  return `${hour - 6}:${minute > 10 ? minute : `0${minute}`}:${second > 10 ? second : `0${second}`}`
 }
 const wash_pagination = async (page, limit, query, kw, lang) => {
-  let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, wash
+  let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, wash, total = 0
 
   const washes = await getWashPagination(query, offset, limit), all_washes = await getWashes(query)
 
@@ -794,6 +862,8 @@ const wash_pagination = async (page, limit, query, kw, lang) => {
         : {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'washing', id: wash._id})}
 
       arr.push(obj)
+
+      total += wash.benefit
 
       if (arr.length % 6 === 0) {
         kbb.push(arr)
@@ -833,16 +903,16 @@ const wash_pagination = async (page, limit, query, kw, lang) => {
       text = 'Hali yuvishlar mavjud emas'
       kbs = kw === 'MANAGER'
         ? {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.washes.uz}}
-        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.uz}}
+        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.washes.uz}}
     } else if (lang === kb.language.ru) {
       text = "Автомоек пока нет"
       kbs = kw === 'MANAGER'
         ? {reply_markup: {resize_keyboard: true, keyboard: keyboard.manager.washes.ru}}
-        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.employee.washes.ru}}
+        : {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.washes.ru}}
     }
   }
 
-  return {text, kbs}
+  return {text, kbs, total}
 }
 const washing_pagination = async (page, limit, query, lang) => {
   let offset = limit * (page - 1), text, kbb = [], arr = []
@@ -895,11 +965,67 @@ const washing_pagination = async (page, limit, query, lang) => {
 
   return {text, kbb}
 }
+const owner_wash_pagination = async (page, limit, query, lang) => {
+  let offset = limit * (page - 1), text, kbb = [], arr = [], kbs
+
+  const washes = await getWashPagination(query, offset, limit), all_washes = await getWashes(query)
+
+  if (washes.length > 0 && all_washes.length > 0) {
+    text = (lang === kb.language.uz)
+      ? `<b>Hozirgi: ${offset + 1}-${washes.length + offset}, Jami:${all_washes.length}</b>\n\n`
+      : `<b>Текущий: ${offset + 1}-${washes.length + offset}, Общий:${all_washes.length}</b>\n\n`
+
+    for (let i = 0; i < washes.length; i++) {
+      const wash = washes[i]
+
+      const obj = wash.status === 'washed'
+        ? {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'wash', id: wash._id})}
+        : {text: `${i + 1}`, callback_data: JSON.stringify({phrase: 'washing', id: wash._id})}
+
+      arr.push(obj)
+
+      if (arr.length % 6 === 0) {
+        kbb.push(arr)
+        arr = []
+      }
+
+      text += `<b>${i + 1}.</b> ${wash.employee} - ${wash.car} - ${wash.car_number}\n`
+    }
+
+    kbb.push(arr)
+
+    const inline_keyboard = [
+      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#wash#${page - 1}` : 'none', id: ''})},
+      {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
+      {
+        text: ` ➡️`,
+        callback_data: JSON.stringify({
+          phrase: washes.length + offset !== all_washes.length ? `right#wash#${page + 1}` : 'none', id: ''
+        })
+      }
+    ]
+
+    kbb.push(inline_keyboard)
+
+    kbs = {reply_markup: {inline_keyboard: kbb}}
+  } else {
+    if (lang === kb.language.uz) {
+      text = 'Hali yuvishlar mavjud emas'
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.washes.uz}}
+    } else if (lang === kb.language.ru) {
+      text = "Автомоек пока нет"
+      kbs = {reply_markup: {resize_keyboard: true, keyboard: keyboard.owner.washes.ru}}
+    }
+  }
+
+  return {text, kbs}
+}
 
 const feedback_seen_pagination = async (page, limit, query, lang) => {
   let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, kw
 
-  const selected_feedback = await getFeedbackPagination(query, offset, limit), all_feedback = await getAllFeedback(query)
+  const selected_feedback = await getFeedbackPagination(query, offset, limit),
+    all_feedback = await getAllFeedback(query)
 
   if (selected_feedback.length > 0) {
     text = (lang === kb.language.uz)
@@ -928,12 +1054,16 @@ const feedback_seen_pagination = async (page, limit, query, lang) => {
     kbb.push(arr)
 
     const inline_keyboard = [
-      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#selfeedback#${page - 1}` : 'none', id: ''})},
+      {
+        text: `⬅️`,
+        callback_data: JSON.stringify({phrase: page !== 1 ? `left#selfeedback#${page - 1}` : 'none', id: ''})
+      },
       {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
       {
         text: ` ➡️`,
         callback_data: JSON.stringify({
-          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#selfeedback#${page + 1}` : 'none', id: ''
+          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#selfeedback#${page + 1}` : 'none',
+          id: ''
         })
       }
     ]
@@ -960,7 +1090,8 @@ const feedback_seen_pagination = async (page, limit, query, lang) => {
 const feedback_done_pagination = async (page, limit, query, lang) => {
   let offset = limit * (page - 1), text, kbb = [], arr = [], kbs, kw
 
-  const selected_feedback = await getFeedbackPagination(query, offset, limit), all_feedback = await getAllFeedback(query)
+  const selected_feedback = await getFeedbackPagination(query, offset, limit),
+    all_feedback = await getAllFeedback(query)
 
   if (selected_feedback.length > 0) {
     text = (lang === kb.language.uz)
@@ -989,12 +1120,16 @@ const feedback_done_pagination = async (page, limit, query, lang) => {
     kbb.push(arr)
 
     const inline_keyboard = [
-      {text: `⬅️`, callback_data: JSON.stringify({phrase: page !== 1 ? `left#dofeedback#${page - 1}` : 'none', id: ''})},
+      {
+        text: `⬅️`,
+        callback_data: JSON.stringify({phrase: page !== 1 ? `left#dofeedback#${page - 1}` : 'none', id: ''})
+      },
       {text: `❌`, callback_data: JSON.stringify({phrase: `delete`, id: ''})},
       {
         text: ` ➡️`,
         callback_data: JSON.stringify({
-          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#dofeedback#${page + 1}` : 'none', id: ''
+          phrase: selected_feedback.length + offset !== all_feedback.length ? `right#dofeedback#${page + 1}` : 'none',
+          id: ''
         })
       }
     ]
@@ -1023,7 +1158,7 @@ const date = (day) => {
   const year = day.getFullYear(), month = day.getMonth(), date = day.getDate(), hour = day.getHours(),
     minutes = day.getMinutes()
 
-  return `${year}-${month+1}-${date}. ${hour}:${minutes}`
+  return `${year}-${month + 1}-${date}. ${hour}:${minutes}`
 }
 const date_name = () => {
   let year, month, date
@@ -1035,7 +1170,7 @@ const date_name = () => {
   if (month === 9) {
     month += 1
   } else if (month < 10 && month !== 9) {
-    month = `0${month+1}`
+    month = `0${month + 1}`
   }
 
   return `${date}-${month}-${year}`
@@ -1053,6 +1188,7 @@ module.exports = {
   owner_pagination,
   universal_keyboard,
   employee_pagination,
+  owner_employee_pagination,
   employee_wash_pagination,
   employee_attendance,
   branch_report_keyboard,
@@ -1063,6 +1199,7 @@ module.exports = {
   get_washed_time,
   wash_pagination,
   washing_pagination,
+  owner_wash_pagination,
   feedback_seen_pagination,
   feedback_done_pagination,
   date,

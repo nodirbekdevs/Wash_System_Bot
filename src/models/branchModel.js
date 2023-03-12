@@ -11,7 +11,7 @@ const Branch = model('Branch', new Schema({
     latitude: {type: String, default: ''},
     longitude: {type: String, default: ''}
   },
-  situation: {type: String, enum: ['', 'edit', 'report'], default: ''},
+  situation: {type: String, enum: ['', 'edit', 'report', 'wash', 'employee'], default: ''},
   total_fees: {type: Number, default: 0},
   total_employees: {type: Number, default: 0},
   total_washes: {type: Number, default: 0},

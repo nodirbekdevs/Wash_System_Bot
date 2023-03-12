@@ -47,12 +47,14 @@ module.exports = {
       uz: [
         [kb.owner.pages.uz.settings, kb.owner.pages.uz.feedback],
         [kb.owner.pages.uz.managers, kb.owner.pages.uz.branches],
-        [kb.owner.pages.uz.fees, kb.owner.pages.uz.reports]
+        [kb.owner.pages.uz.fees, kb.owner.pages.uz.reports],
+        [kb.owner.pages.uz.washes, kb.owner.pages.uz.employees]
       ],
       ru: [
         [kb.owner.pages.ru.settings, kb.owner.pages.ru.feedback],
         [kb.owner.pages.ru.managers, kb.owner.pages.ru.branches],
-        [kb.owner.pages.ru.fees, kb.owner.pages.ru.reports]
+        [kb.owner.pages.ru.fees, kb.owner.pages.ru.reports],
+        [kb.owner.pages.ru.washes, kb.owner.pages.ru.employees]
       ]
     },
 
@@ -121,6 +123,30 @@ module.exports = {
       ru: [
         [kb.owner.reports.ru.one_day, kb.owner.reports.ru.other_days],
         [kb.options.back.ru]
+      ]
+    },
+
+    washes: {
+      uz: [
+        [kb.owner.washes.uz.washed, kb.owner.washes.uz.washing],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.owner.washes.ru.washed, kb.owner.washes.ru.washing],
+        [kb.main.ru]
+      ]
+    },
+
+    employees: {
+      uz: [
+        [kb.owner.employees.uz.all, kb.owner.employees.uz.working],
+        [kb.owner.employees.uz.do_not_work],
+        [kb.main.uz]
+      ],
+      ru: [
+        [kb.owner.employees.ru.all, kb.owner.employees.ru.working],
+        [kb.owner.employees.ru.do_not_work],
+        [kb.main.ru]
       ]
     }
   },

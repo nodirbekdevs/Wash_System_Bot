@@ -1,13 +1,15 @@
 const {mongo} = require('./config'), {connect} = require('mongoose')
 
+const connection = () => {
+  connect(mongo.mongo_url, mongo.options)
+    .then(() => {
+      console.log('To MongoDb has connected ...')
+    })
+    .catch((err) => {
+      console.log(`To MongoDb has not connected and problem has kept ${err}`)
+    })
+}
 
-const db = connect(mongo.mongo_url, mongo.options)
-  .then(() => {
-    console.log('To MongoDb has connected ...')
-  })
-  .catch((err) => {
-    console.log(`To MongoDb has not connected and problem has kept ${err}`)
-  })
 
 // const { Sequelize } = require('sequelize');
 //
@@ -22,4 +24,4 @@ const db = connect(mongo.mongo_url, mongo.options)
 //
 // db.authenticate().then(() => console.log("Database connection created")).catch(e => console.log(e))
 
-module.exports = db
+module.exports = connection

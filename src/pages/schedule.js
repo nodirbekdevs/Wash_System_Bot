@@ -7,10 +7,11 @@ const {getWashes} = require('./../controllers/washController')
 const {getBranches} = require('./../controllers/branchController')
 const {getOwners, getOwner} = require('./../controllers/ownerController')
 const {getManager} = require('./../controllers/managerController')
+const {getClient} = require('./../controllers/clientController')
 const {get_washed_time, date_name, date} = require('./../helpers/utils')
 
 const schedule = (bot) => {
-  cron.schedule('05 16 * * *', async () => {
+  cron.schedule('07 22 * * *', async () => {
     await updateManyEmployees({status: 'active'}, {status: 'inactive'})
 
     const branches = await getBranches({
@@ -72,7 +73,11 @@ const schedule = (bot) => {
             delete wash.created_at
             delete wash.__v
 
-            if (wash.client === 0) delete wash.client
+            if (wash.client === 0) {
+              delete wash.client
+            } else if (wash.client > 0) {
+              wash.client = (await getClient({telegram_id: wash.client})).name
+            }
 
             wash.manager = manager.name
             wash.washed_at = washed_time
@@ -86,6 +91,8 @@ const schedule = (bot) => {
           const filename = date_name(), name = `${path}/${filename}_${branch.name}_daily.xlsx`
 
           const new_workbook = excel.utils.book_new(), data = excel.utils.json_to_sheet(daily_washes)
+
+          daily_washes = []
 
           excel.utils.book_append_sheet(new_workbook, data, filename)
 

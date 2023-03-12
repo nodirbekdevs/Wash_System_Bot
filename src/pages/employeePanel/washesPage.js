@@ -4,7 +4,7 @@ const {getWash} = require('./../../controllers/washController')
 const {getEmployee} = require('./../../controllers/employeeController')
 const {date, report} = require('./../../helpers/utils')
 
-const {wash_pagination, employee_wash_pagination} = require('./../../helpers/utils')
+const {employee_wash_pagination} = require('./../../helpers/utils')
 
 const ews0 = async (bot, chat_id, lang) => {
   let message, kbb
@@ -27,7 +27,7 @@ const ews1 = async (bot, chat_id, lang) => {
 
   const query = {employee: employee.name, branch: employee.branch, status: 'washed'}
 
-  const report = await wash_pagination(1, 6, query, 'EMPLOYEE', lang)
+  const report = await employee_wash_pagination(1, 6, query, lang)
 
   await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
@@ -38,8 +38,8 @@ const ews2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 
   const query = {employee: employee.name, branch: employee.branch, status: 'washed'}
 
-  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'wash') {
-    const report = await wash_pagination(parseInt(data.split('#')[2]), 6, query, 'EMPLOYEE', lang)
+  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'wash' && phrase[2] === 'today') {
+    const report = await employee_wash_pagination(parseInt(data.split('#')[2]), 6, query, lang)
 
     const kbb = report.kbs.reply_markup
 
@@ -58,7 +58,7 @@ const ews3 = async (bot, chat_id, lang) => {
     }
   }
 
-  const report = await wash_pagination(1, 6, query, 'EMPLOYEE', lang)
+  const report = await employee_wash_pagination(1, 6, query, 'EMPLOYEE', lang)
 
   await bot.sendMessage(chat_id, report.text, {parse_mode: 'HTML', reply_markup: report.kbs.reply_markup})
 }
@@ -75,7 +75,7 @@ const ews4 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
   }
 
   if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'wash' && phrase[2] === 'today') {
-    const report = await wash_pagination(parseInt(data.split('#')[3]), 6, query, 'EMPLOYEE', lang)
+    const report = await employee_wash_pagination(parseInt(data.split('#')[3]), 6, query, lang)
 
     const kbb = report.kbs.reply_markup
 

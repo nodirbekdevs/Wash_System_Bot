@@ -52,7 +52,9 @@ module.exports = {
         managers: "👨‍💼  Menejerlar",
         fees: "🚘  Tariflar",
         feedback: "✍️Izohlar",
-        reports: "📊  Hisobotlar"
+        reports: "📊  Hisobotlar",
+        washes: '🚿  Yuvishlar',
+        employees: "🙍‍♂️Xodimlar"
       },
       ru: {
         settings: "⚙️Настройки",
@@ -60,7 +62,9 @@ module.exports = {
         managers: "👨‍💼  Менеджеры",
         fees: "🚘  Тарифы",
         feedback: "✍️Комментарии",
-        reports: "📊  Отчеты"
+        reports: "📊  Отчеты",
+        washes: "🚿  Мойки",
+        employees: "🙍‍♂️Сотрудники"
       }
     },
 
@@ -131,6 +135,30 @@ module.exports = {
       ru: {
         one_day: 'Отчет за 1 день',
         other_days: "Прочие ежедневные отчеты."
+      }
+    },
+
+    washes: {
+      uz: {
+        washed: 'Bugun yuvilgan mashinalar',
+        washing: 'Bugun yuvilayotgan mashinalar'
+      },
+      ru: {
+        washed: 'Машины помыли сегодня',
+        washing: 'Машины моют сегодня'
+      }
+    },
+
+    employees: {
+      uz: {
+        all: 'Barcha xodimlar',
+        working: 'Ishlayotgan xodimlar',
+        do_not_work: 'Ishlamayotgan xodimlar'
+      },
+      ru: {
+        all: 'Все сотрудники',
+        working: 'Работающие сотрудники',
+        do_not_work: 'Сотрудники, которые не работают'
       }
     }
   },

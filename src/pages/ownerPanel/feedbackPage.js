@@ -121,22 +121,22 @@ const ofs3 = async (bot, chat_id, lang) => {
 }
 
 const ofs4 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
-  let query
+  let query, report, kbb
 
-  const phrase = data.split('#')
-
-  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'selfeedback') {
+  if ((data[0] === 'left' || data[0] === 'right') && data[1] === 'selfeedback') {
     query = {branch_owner: chat_id, is_read: false, status: 'active'}
 
-    const report = await feedback_seen_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
-
-    await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
+    report = await feedback_seen_pagination(parseInt(data[2]), 6, query, lang)
   }
 
-  if ((phrase[0] === 'left' || phrase[0] === 'right') && phrase[1] === 'dofeedback') {
+  if ((data[0] === 'left' || data[0] === 'right') && data[1] === 'dofeedback') {
     query = {branch_owner: chat_id, is_read: true, status: 'seen'}
 
-    const report = await feedback_done_pagination(parseInt(phrase[2]), 6, query, lang), kbb = report.kbs.reply_markup
+    report = await feedback_done_pagination(parseInt(data[2]), 6, query, lang)
+  }
+
+  if (report) {
+    kbb = report.kbs.reply_markup
 
     await bot.editMessageText(report.text, {chat_id, message_id, parse_mode: 'HTML', reply_markup: kbb})
   }

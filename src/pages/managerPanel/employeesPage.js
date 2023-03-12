@@ -57,13 +57,13 @@ const mes2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 
     const started_at = date(employee.created_at)
 
-    const data = {
+    const employee_data = {
       manager: manager.name, branch: employee.branch, name: employee.name, number: employee.number,
       total_washes: employee.total_washes, is_idler: employee.is_idler, lang: employee.lang,
       status: employee.status, created_at: started_at
     }
 
-    message = report(data, 'EMPLOYEE', lang)
+    message = report(employee_data, 'EMPLOYEE', lang)
 
     if (lang === kb.language.uz) {
       clause = kb.options.dismissal.uz

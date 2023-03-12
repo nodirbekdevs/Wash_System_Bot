@@ -69,13 +69,13 @@ const mws2 = async (bot, chat_id, query_id, message_id, data, _id, lang) => {
 
     const started_at = date(wash.washed_time.started_at), ended_at = date(wash.washed_time.washed_at)
 
-    const data = {
+    const wash_data = {
       employee: wash.employee, branch: wash.branch, fee: wash.fee, car: wash.car, car_type: wash.car_type,
       car_number: wash.car_number, price: wash.price, cash: wash.cash, benefit: wash.price - wash.cash,
       washing_time_started: started_at, washing_time_ended: ended_at
     }
 
-    message = report(data, 'WASH', lang)
+    message = report(wash_data, 'WASH', lang)
 
     await bot.sendMessage(chat_id, message)
 
@@ -298,12 +298,12 @@ const mws12 = async (bot, chat_id, message_id, data, _id, lang) => {
 
   const day = date(wash.washed_time.started_at)
 
-  data = {
-    manager: manager.name, employee: wash.employee, branch: wash.branch, car_type: wash.car, car: wash.car_type,
+  const wash_data = {
+    manager: manager.name, employee: wash.employee, branch: wash.branch, fee: wash.fee, car_type: wash.car, car: wash.car_type,
     car_number: wash.car_number, cash: wash.cash, price: wash.price, benefit: wash.price - wash.cash, started_at: day
   }
 
-  const message = report(data, 'WASH_MAKING', lang)
+  const message = report(wash_data, 'WASH_MAKING', lang)
 
   if (lang === kb.language.uz) {
     clause = kb.options.washed.uz

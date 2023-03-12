@@ -1,9 +1,7 @@
 const kb = require('./../../helpers/keyboard-buttons')
 const keyboard = require('./../../helpers/keyboard')
 const {getCars, getCar, makeCar, updateCar, deleteCar, countCars} = require('./../../controllers/carController')
-const {getAdmin} = require('./../../controllers/adminController')
 const {car_pagination, date, report} = require('./../../helpers/utils')
-const {amp} = require('./mainPage')
 
 let car_id
 

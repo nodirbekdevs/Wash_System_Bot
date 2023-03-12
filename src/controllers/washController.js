@@ -2,7 +2,7 @@ const Wash = require('./../models/washModel')
 
 const getWashes = async (query) => {
   try {
-    return await Wash.find(query).sort({createdAt: -1})
+    return await Wash.find(query).sort({employee: 1})
   } catch (e) {
     console.log(e)
   }

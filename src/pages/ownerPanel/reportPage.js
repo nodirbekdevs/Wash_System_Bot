@@ -7,6 +7,7 @@ const {omp} = require('./mainPage')
 const {getWashes} = require('./../../controllers/washController')
 const {getOwner, updateOwner} = require('./../../controllers/ownerController')
 const {getManager} = require('./../../controllers/managerController')
+const {getClient} = require('./../../controllers/clientController')
 const {getBranches, getBranch, updateBranch} = require('./../../controllers/branchController')
 const {branch_report_keyboard, get_washed_time, date_name, date, date_is_valid} = require('./../../helpers/utils')
 // const {} = require('./../../../uploads/reports/branches')
@@ -18,10 +19,10 @@ const ors0 = async (bot, chat_id, lang) => {
 
   const branches = await getBranches({owner: chat_id, status: 'provided'})
 
-  message = (lang === kb.language.uz) ? "Hisobotlar sahifasi." : "Страница отчетов."
-
   if (branches.length > 0) {
     clause = (lang === kb.language.uz) ? "Qaysi filialni hisobotini ko'rmoqchisiz" : "Какой партнерский отчет вы хотите видеть?"
+
+    message = (lang === kb.language.uz) ? "Hisobotlar sahifasi." : "Страница отчетов."
 
     kbb = branch_report_keyboard(branches, lang)
 
@@ -55,11 +56,9 @@ const ors1 = async (bot, chat_id, text, lang) => {
     await updateBranch({_id: branch._id}, {situation: 'report'})
 
     if (lang === kb.language.uz) {
-      message = "Qaysi vaqtdagi hisobotlarni ko'rmoqchisiz\n"
       message = "1 kunikmi yoki ko'proq kunlik hisobotlarni ko'rmoqchimisiz"
       kbb = keyboard.owner.reports.uz
     } else if (lang === kb.language.ru) {
-      message = "Хотите ли вы видеть отчеты за 1 день или более"
       message = "Хотите ли вы видеть отчеты за 1 день или более"
       kbb = keyboard.owner.reports.ru
     }
@@ -97,9 +96,9 @@ const ors2 = async (bot, chat_id, lang) => {
 const ors3 = async (bot, chat_id, _id, text, lang) => {
   let file_options, message, total = 0, file, kbb
 
-  const date = date_is_valid(text)
+  const validation = date_is_valid(text)
 
-  if (date) {
+  if (validation) {
     const branch = await getBranch({_id}), name = text.split('-')
 
     await updateOwner({telegram_id: chat_id}, {step: 15})
@@ -148,7 +147,11 @@ const ors3 = async (bot, chat_id, _id, text, lang) => {
           delete wash.status
           delete wash.__v
 
-          if (wash.client === 0) delete wash.client
+          if (wash.client === 0) {
+            delete wash.client
+          } else if (wash.client > 0) {
+            wash.client = (await getClient({telegram_id: wash.client})).name
+          }
 
           wash.manager = manager.name
           wash.washed_at = washed_time
@@ -192,7 +195,7 @@ const ors3 = async (bot, chat_id, _id, text, lang) => {
         }
       }
     }
-  } else if (!date) {
+  } else if (!validation) {
     if (lang === kb.language.uz) {
       message = "Iltimos YIL-OY-KUN shu ko'rinishda yuboring"
       kbb = keyboard.options.back.uz
@@ -284,7 +287,11 @@ const ors5 = async (bot, chat_id, _id, text, lang) => {
             delete wash.status
             delete wash.__v
 
-            if (wash.client === 0) delete wash.client
+            if (wash.client === 0) {
+              delete wash.client
+            } else if (wash.client > 0) {
+              wash.client = (await getClient({telegram_id: wash.client})).name
+            }
 
             wash.manager = manager.name
             wash.washed_at = washed_time

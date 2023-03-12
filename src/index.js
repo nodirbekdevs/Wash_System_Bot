@@ -1,13 +1,15 @@
 const TelegramBot = require('node-telegram-bot-api')
 const config = require('./helpers/config')
-const db = require('./helpers/db')
+const connection = require('./helpers/db')
 const {adminPanel, adminPanelQuery, getAdmin} = require('./pages/adminPanel/adminPanel')
 const {ownerPanel, ownerPanelQuery, getOwner} = require('./pages/ownerPanel/ownerPanel')
 const {managerPanel, managerPanelQuery, getManager} = require('./pages/managerPanel/managerPanel')
 const {employeePanel, employeePanelQuery, getEmployee} = require('./pages/employeePanel/employeePanel')
 const {schedule} = require('./pages/schedule')
 
-const bot = new TelegramBot(config.TOKEN, {db, polling: true})
+const bot = new TelegramBot(config.TOKEN, {polling: true})
+
+connection()
 
 bot.setMyCommands(
   [
